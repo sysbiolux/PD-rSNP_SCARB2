@@ -1,7 +1,7 @@
 ---
 title: "Manuscript_1"
 author: Deborah Gérard^[University of Luxembourg - FSTM - DLSM - Systems Biology group - Epigenetics team]
-date: "06 February, 2024"
+date: "08 February, 2024"
 output: 
   html_document:
     keep_md: true
@@ -1225,10 +1225,10 @@ dev.off()
 
 ```r
 ########## FIGURE 3 ########## Save as a PDF
-pdf("/home/vagrant/Manuscript_1/FIGURE3/FIGURE3.pdf", width = 8.3, height = 11.7)
+pdf("/home/vagrant/Manuscript_1/FIGURE3/FIGURE3.pdf", width = 13, height = 15)
 
 # Create a A4 blank page
-pageCreate(width = 8.3, height = 11.7, default.units = "inches", showGuides = FALSE)
+pageCreate(width = 8.3, height = 11.7, default.units = "inches", showGuides = TRUE)
 
 # text Figure 3
 plotText(label = "Figure 3", fontsize = 14, x = 0.25, y = 0.25, just = "left", default.units = "inches",
@@ -1272,49 +1272,55 @@ Gluc_signal_ratio = Gluc_signal %>%
     mutate(Genes = gsub("(.*)-.*", "\\1", Sample))
 
 
+# Calculate statistics - T-test
+GLUC_stat = compare_means(value ~ Sample, data = Gluc_signal_ratio %>%
+    ungroup(), method = "t.test")
+
 # Plot for BAG3
 GLUC_BAG3 = ggbarplot(Gluc_signal_ratio %>%
-    filter(Sample %in% c("BAG3-WT", "BAG3-MUT", "miniCMV", "Neg_CTRL")), x = "Sample",
+    dplyr::filter(Sample %in% c("BAG3-WT", "BAG3-MUT", "miniCMV", "Neg_CTRL")), x = "Sample",
     y = "value", width = 0.25, add = c("mean_se", "jitter"), fill = "grey", xlab = "",
-    ylab = "Ratio Gluc/SEAP", position = position_dodge(0.9)) + ylim(0, 6) + theme(legend.position = "none",
+    ylab = "Ratio Gluc/SEAP", position = position_dodge(0.9)) + theme(legend.position = "none",
     axis.text.x = element_text(angle = 45, hjust = 1, size = 10, face = "bold"),
     axis.text.y = element_text(size = 10, face = "bold"), axis.title.y = element_text(size = 10,
-        face = "bold")) + scale_x_discrete(labels = c("BAG3-reference allele", "BAG3-PD associated allele",
-    "miniCMV", "Negative CTRL")) + scale_y_continuous(expand = c(0, 0), limits = c(0,
-    6)) + stat_compare_means(comparisons = list(c("BAG3-WT", "BAG3-MUT")), method = "t.test",
-    size = 4, label = "p.format") + stat_compare_means(comparisons = list(c("BAG3-WT",
-    "miniCMV")), method = "t.test", size = 4, label = "p.format")
+        face = "bold")) + scale_y_continuous(expand = c(0, 0), limits = c(0, 6)) +
+    scale_x_discrete(labels = c("BAG3\nother allele", "BAG3\neffect allele", "miniCMV",
+        "Negative CTRL")) + stat_pvalue_manual(GLUC_stat %>%
+    filter(group1 == "BAG3-WT", group2 == "BAG3-MUT"), label = "p = {p.format}",
+    y.position = 5.6)
 
 plotGG(plot = GLUC_BAG3, x = 0.5, y = 2.25, width = 2, height = 4.25, just = c("left",
     "top"), default.units = "inches")
 
+
 # Plot for IDUA
 GLUC_IDUA = ggbarplot(Gluc_signal_ratio %>%
-    filter(Sample %in% c("IDUA-WT", "IDUA-MUT", "miniCMV", "Neg_CTRL")), x = "Sample",
+    dplyr::filter(Sample %in% c("IDUA-WT", "IDUA-MUT", "miniCMV", "Neg_CTRL")), x = "Sample",
     y = "value", width = 0.25, add = c("mean_se", "jitter"), fill = "grey", xlab = "",
-    ylab = "Ratio Gluc/SEAP", position = position_dodge(0.9)) + ylim(0, 6) + theme(legend.position = "none",
+    ylab = "Ratio Gluc/SEAP", position = position_dodge(0.9)) + theme(legend.position = "none",
     axis.text.x = element_text(angle = 45, hjust = 1, size = 10, face = "bold"),
     axis.text.y = element_text(size = 10, face = "bold"), axis.title.y = element_text(size = 10,
-        face = "bold")) + scale_x_discrete(labels = c("IDUA-reference allele", "IDUA-PD associated allele",
+        face = "bold")) + scale_x_discrete(labels = c("IDUA\nother allele", "IDUA\neffect allele",
     "miniCMV", "Negative CTRL")) + scale_y_continuous(expand = c(0, 0), limits = c(0,
-    6)) + stat_compare_means(comparisons = list(c("IDUA-WT", "IDUA-MUT")), method = "t.test",
-    size = 4, label = "p.format")
+    6)) + stat_pvalue_manual(GLUC_stat %>%
+    filter(group1 == "IDUA-WT", group2 == "IDUA-MUT"), label = "p = {p.format}",
+    y.position = 4)
 
 plotGG(plot = GLUC_IDUA, x = 3, y = 2.25, width = 2, height = 4.25, just = c("left",
     "top"), default.units = "inches")
 
 # Plot for SCARB2
 GLUC_SCARB2 = ggbarplot(Gluc_signal_ratio %>%
-    filter(Sample %in% c("SCARB2-WT", "SCARB2-MUT", "miniCMV", "Neg_CTRL")), x = "Sample",
-    y = "value", width = 0.25, add = c("mean_se", "jitter"), fill = "grey", xlab = "",
-    ylab = "Ratio Gluc/SEAP", position = position_dodge(0.9)) + ylim(0, 6) + theme(legend.position = "none",
+    dplyr::filter(Sample %in% c("SCARB2-WT", "SCARB2-MUT", "miniCMV", "Neg_CTRL")),
+    x = "Sample", y = "value", width = 0.25, add = c("mean_se", "jitter"), fill = "grey",
+    xlab = "", ylab = "Ratio Gluc/SEAP", position = position_dodge(0.9)) + theme(legend.position = "none",
     axis.text.x = element_text(angle = 45, hjust = 1, size = 10, face = "bold"),
     axis.text.y = element_text(size = 10, face = "bold"), axis.title.y = element_text(size = 10,
-        face = "bold")) + scale_x_discrete(labels = c("SCARB2-reference allele",
-    "SCARB2-PD associated allele", "miniCMV", "Negative CTRL")) + scale_y_continuous(expand = c(0,
-    0), limits = c(0, 6)) + stat_compare_means(comparisons = list(c("SCARB2-WT",
-    "SCARB2-MUT")), method = "t.test", size = 4, label = "p.format") + stat_compare_means(comparisons = list(c("SCARB2-WT",
-    "miniCMV")), method = "t.test", size = 4, label = "p.format")
+        face = "bold")) + scale_x_discrete(labels = c("SCARB2\nother allele", "SCARB2\neffect allele",
+    "miniCMV", "Negative CTRL")) + scale_y_continuous(expand = c(0, 0), limits = c(0,
+    6)) + stat_pvalue_manual(GLUC_stat %>%
+    filter(group1 == "SCARB2-WT", group2 == "SCARB2-MUT"), label = "p = {p.format}",
+    y.position = 4)
 
 plotGG(plot = GLUC_SCARB2, x = 5.5, y = 2.25, width = 2, height = 4.25, just = c("left",
     "top"), default.units = "inches")
@@ -1897,8 +1903,18 @@ plotText(label = "B", fontsize = 12, x = 0.25, y = 8.5, just = "left", default.u
 IHEC.exp = read_delim("/home/vagrant/Documents/IHEC/RNA_seq/genes_tpm.csv", delim = ",",
     col_names = TRUE)
 
+# Genes of interest to be plotted
+goi_ens.filt = goi_ens %>%
+    as_tibble() %>%
+    dplyr::filter(ENSEMBL != "ENSG00000274577")
+
 IHEC.exp %>%
-    mutate(id_col = gsub("\\..*", "", id_col))
+    # Remove the dot and number in Ensembl IDS
+mutate(id_col = gsub("\\..*", "", id_col)) %>%
+    dplyr:::filter(id_col %in% goi_ens.filt$ENSEMBL) %>%
+    pivot_longer(cols = starts_with("IHEC"), names_to = "Sample", values_to = "TPM") %>%
+    mutate(Sample = gsub("", "", Sample))
+
 
 dev.off()
 ```
