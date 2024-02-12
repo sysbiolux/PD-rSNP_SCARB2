@@ -1,7 +1,7 @@
 ---
 title: "Manuscript_1"
 author: Deborah Gérard^[University of Luxembourg - FSTM - DLSM - Systems Biology group - Epigenetics team]
-date: "08 February, 2024"
+date: "12 February, 2024"
 output: 
   html_document:
     keep_md: true
@@ -1233,12 +1233,13 @@ pageCreate(width = 8.3, height = 11.7, default.units = "inches", showGuides = TR
 # text Figure 3
 plotText(label = "Figure 3", fontsize = 14, x = 0.25, y = 0.25, just = "left", default.units = "inches",
     fontface = "bold")
-# text A
+
+#### PANEL A - Scheme of transduction for knockdown and luciferase text A
 plotText(label = "A", fontsize = 12, x = 0.25, y = 0.5, just = "left", default.units = "inches",
     fontface = "bold")
 
 
-# Panel B text B
+#### PANEL B - luciferase barplots with statistics text B
 plotText(label = "B", fontsize = 12, x = 0.25, y = 2, just = "left", default.units = "inches",
     fontface = "bold")
 
@@ -1281,31 +1282,31 @@ GLUC_BAG3 = ggbarplot(Gluc_signal_ratio %>%
     dplyr::filter(Sample %in% c("BAG3-WT", "BAG3-MUT", "miniCMV", "Neg_CTRL")), x = "Sample",
     y = "value", width = 0.25, add = c("mean_se", "jitter"), fill = "grey", xlab = "",
     ylab = "Ratio Gluc/SEAP", position = position_dodge(0.9)) + theme(legend.position = "none",
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 10, face = "bold"),
-    axis.text.y = element_text(size = 10, face = "bold"), axis.title.y = element_text(size = 10,
-        face = "bold")) + scale_y_continuous(expand = c(0, 0), limits = c(0, 6)) +
-    scale_x_discrete(labels = c("BAG3\nother allele", "BAG3\neffect allele", "miniCMV",
-        "Negative CTRL")) + stat_pvalue_manual(GLUC_stat %>%
-    filter(group1 == "BAG3-WT", group2 == "BAG3-MUT"), label = "p = {p.format}",
-    y.position = 5.6)
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 9, face = "bold"), axis.text.y = element_text(size = 9,
+        face = "bold"), axis.title.y = element_text(size = 10, face = "bold")) +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 6)) + scale_x_discrete(labels = c("BAG3\nother allele",
+    "BAG3\neffect allele", "miniCMV", "Negative CTRL")) + stat_pvalue_manual(GLUC_stat %>%
+    dplyr::filter(group1 == "BAG3-WT", group2 == "BAG3-MUT"), label = "p = {p.format}",
+    y.position = 5.6, size = 3)
 
+# Place the plot
 plotGG(plot = GLUC_BAG3, x = 0.5, y = 2.25, width = 2, height = 4.25, just = c("left",
     "top"), default.units = "inches")
-
 
 # Plot for IDUA
 GLUC_IDUA = ggbarplot(Gluc_signal_ratio %>%
     dplyr::filter(Sample %in% c("IDUA-WT", "IDUA-MUT", "miniCMV", "Neg_CTRL")), x = "Sample",
     y = "value", width = 0.25, add = c("mean_se", "jitter"), fill = "grey", xlab = "",
     ylab = "Ratio Gluc/SEAP", position = position_dodge(0.9)) + theme(legend.position = "none",
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 10, face = "bold"),
-    axis.text.y = element_text(size = 10, face = "bold"), axis.title.y = element_text(size = 10,
-        face = "bold")) + scale_x_discrete(labels = c("IDUA\nother allele", "IDUA\neffect allele",
-    "miniCMV", "Negative CTRL")) + scale_y_continuous(expand = c(0, 0), limits = c(0,
-    6)) + stat_pvalue_manual(GLUC_stat %>%
-    filter(group1 == "IDUA-WT", group2 == "IDUA-MUT"), label = "p = {p.format}",
-    y.position = 4)
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 9, face = "bold"), axis.text.y = element_text(size = 9,
+        face = "bold"), axis.title.y = element_text(size = 10, face = "bold")) +
+    scale_x_discrete(labels = c("IDUA\nother allele", "IDUA\neffect allele", "miniCMV",
+        "Negative CTRL")) + scale_y_continuous(expand = c(0, 0), limits = c(0, 6)) +
+    stat_pvalue_manual(GLUC_stat %>%
+        dplyr::filter(group1 == "IDUA-WT", group2 == "IDUA-MUT"), label = "p = {p.format}",
+        y.position = 4, size = 3)
 
+# Place the plot
 plotGG(plot = GLUC_IDUA, x = 3, y = 2.25, width = 2, height = 4.25, just = c("left",
     "top"), default.units = "inches")
 
@@ -1314,94 +1315,138 @@ GLUC_SCARB2 = ggbarplot(Gluc_signal_ratio %>%
     dplyr::filter(Sample %in% c("SCARB2-WT", "SCARB2-MUT", "miniCMV", "Neg_CTRL")),
     x = "Sample", y = "value", width = 0.25, add = c("mean_se", "jitter"), fill = "grey",
     xlab = "", ylab = "Ratio Gluc/SEAP", position = position_dodge(0.9)) + theme(legend.position = "none",
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 10, face = "bold"),
-    axis.text.y = element_text(size = 10, face = "bold"), axis.title.y = element_text(size = 10,
-        face = "bold")) + scale_x_discrete(labels = c("SCARB2\nother allele", "SCARB2\neffect allele",
-    "miniCMV", "Negative CTRL")) + scale_y_continuous(expand = c(0, 0), limits = c(0,
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 9, face = "bold"), axis.text.y = element_text(size = 9,
+        face = "bold"), axis.title.y = element_text(size = 10, face = "bold")) +
+    scale_x_discrete(labels = c("SCARB2\nother allele", "SCARB2\neffect allele",
+        "miniCMV", "Negative CTRL")) + scale_y_continuous(expand = c(0, 0), limits = c(0,
     6)) + stat_pvalue_manual(GLUC_stat %>%
-    filter(group1 == "SCARB2-WT", group2 == "SCARB2-MUT"), label = "p = {p.format}",
-    y.position = 4)
+    dplyr::filter(group1 == "SCARB2-WT", group2 == "SCARB2-MUT"), label = "p = {p.format}",
+    y.position = 4, size = 3)
 
+# Place the plot
 plotGG(plot = GLUC_SCARB2, x = 5.5, y = 2.25, width = 2, height = 4.25, just = c("left",
     "top"), default.units = "inches")
 
-# Panel C
+#### PANEL C - knockdown barplots with statistics text C
 plotText(label = "C", fontsize = 12, x = 0.25, y = 6.75, just = "left", default.units = "inches",
     fontface = "bold")
 
-#### Knocdown ###
-KD.BAG3.LHX1.3days = tibble(Sple = c(rep("shBAG3", 6), rep("shLHX1", 6)), Rep = rep(1:3,
-    4), Gene = rep(c(rep("BAG3", 3), rep("LHX1", 3)), 2), Exp = c(0.446103385, 0.368235341,
-    0.833613184, 0.921655819, 0.698775049, 0.766628746, 0.972688658, 0.965902853,
-    0.88813445, 0.411253539, 0.359459217, 0.367190337))
+# Knockdown of LHX1 and quantification of LHX1 and BAG3 expression 3 days post
+# transduction
+KD.BAG3.LHX1.3days = tibble(Sple = rep("shLHX1", 6), Gene = c(rep("LHX1", 3), rep("BAG3",
+    3)), Exp = c(0.411253539, 0.359459217, 0.367190337, 0.972688658, 0.965902853,
+    0.88813445))
 
-###
-test = tibble(val = c(9.13605, 8.33795, 8.76415, 9.0961, 8.2879, 8.593), Sample = c(rep("shLHX1",
-    3), rep("shCTRL", 3)))
+# Stats
+KD.BAG3.LHX1.3days.stats = tibble(Sple = c(rep("shLHX1", 6), rep("shCTRL", 6)), Gene = rep(c(rep("LHX1",
+    3), rep("BAG3", 3)), 2), Exp = c(9.5167, 8.39675, 8.1855, 9.13605, 8.33795, 8.76415,
+    8.2348, 6.92065, 6.7401, 9.0961, 8.2879, 8.593))
 
-t_test(val ~ Sample, data = test, paired = TRUE)
-
-###
-
+stat_LHX1.KD = compare_means(Exp ~ Sple, data = KD.BAG3.LHX1.3days.stats, group.by = "Gene",
+    method = "t.test", paired = TRUE)
+# Plot
 pl.KD_BAG3_LHX1 = KD.BAG3.LHX1.3days %>%
-    filter(Sple != "shBAG3") %>%
     mutate(Gene = factor(Gene, levels = c("LHX1", "BAG3"))) %>%
     ggbarplot(., x = "Gene", y = "Exp", fill = c("Gene"), position = position_dodge(0.9),
         palette = c("#440154FF", "#287C8EFF"), add = c("mean_se", "jitter"), xlab = "",
-        ylab = "Relative expression to shSCRAMBLE") + ylim(0, 1.5) + geom_hline(yintercept = 1,
+        ylab = "Relative expression to shSCRAMBLE") + geom_hline(yintercept = 1,
     lty = "dashed", color = "black") + theme(axis.title.y = element_text(face = "bold",
     size = 10), axis.text.x = element_text(face = "bold", size = 10, angle = 90),
     axis.text.y = element_text(face = "bold", size = 10), legend.position = "none") +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 1.5)) + stat_compare_means(comparisons = list(c("SCARB2-WT",
-    "SCARB2-MUT")), method = "t.test", size = 4, label = "p.format")
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 1.8)) + stat_pvalue_manual(stat_LHX1.KD,
+    label = "p = {p.format}", x = "Gene", y.position = 0.5, size = 3, hide.ns = TRUE)
 
 plotGG(plot = pl.KD_BAG3_LHX1, x = 0.5, y = 7, width = 2, height = 4.25, just = c("left",
     "top"), default.units = "inches")
 
-KD.IDUA.ZBTB14.3days = tibble(Sple = c(rep("shIDUA", 6), rep("shZBTB14", 6)), Rep = rep(1:3,
-    4), Gene = rep(c(rep("IDUA", 3), rep("ZBTB14", 3)), 2), Exp = c(0.580734239,
-    0.722114742, 0.733236241, 0.743214215, 0.608719716, 0.676822765, 0.663813558,
-    1.259979272, 1.774054093, 0.334134302, 0.316834205, 0.294206291))
+# Knockdown of ZBTB14 and quantification of ZBTB14 and IDUA expression 3 days
+# post transduction
+KD.IDUA.ZBTB14.3days = tibble(Sple = rep("shZBTB14", 6), Gene = c(rep("ZBTB14", 3),
+    rep("IDUA", 3)), Exp = c(0.334134302, 0.316834205, 0.294206291, 0.663813558,
+    1.259979272, 1.774054093))
 
+# Stats
+KD.IDUA.ZBTB14.3days.stats = tibble(Sple = c(rep("shZBTB14", 6), rep("shCTRL", 6)),
+    Gene = rep(c(rep("ZBTB14", 3), rep("IDUA", 3)), 2), Exp = c(11.39125, 10.4813,
+        10.5062, 11.56275, 10.1455, 9.76485, 9.80975, 8.8231, 8.7411, 10.9716, 10.4789,
+        10.5919))
+
+stat_ZBTB14.KD = compare_means(Exp ~ Sple, data = KD.IDUA.ZBTB14.3days.stats, group.by = "Gene",
+    method = "t.test", paired = TRUE)
+
+# Plot
 pl.KD_IDUA_ZBTB14 = KD.IDUA.ZBTB14.3days %>%
-    filter(Sple != "shIDUA") %>%
     mutate(Gene = factor(Gene, levels = c("ZBTB14", "IDUA"))) %>%
     ggbarplot(., x = "Gene", y = "Exp", fill = c("Gene"), position = position_dodge(0.9),
-        palette = c("#440154FF", "#287C8EFF"), add = c("mean_se"), xlab = "", ylab = "Relative expression to shSCRAMBLE") +
-    geom_hline(yintercept = 1, lty = "dashed", color = "black") + theme(axis.title.y = element_text(face = "bold",
+        palette = c("#440154FF", "#287C8EFF"), add = c("mean_se", "jitter"), xlab = "",
+        ylab = "Relative expression to shSCRAMBLE") + geom_hline(yintercept = 1,
+    lty = "dashed", color = "black") + theme(axis.title.y = element_text(face = "bold",
     size = 10), axis.text.x = element_text(face = "bold", size = 10, angle = 90),
     axis.text.y = element_text(face = "bold", size = 10), legend.position = "none") +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 1.5))
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 1.8)) + stat_pvalue_manual(stat_ZBTB14.KD,
+    label = "p = {p.format}", x = "Gene", y.position = 0.5, size = 3, hide.ns = TRUE)
 
-plotGG(plot = pl.KD_IDUA_ZBTB14, x = 3, y = 7, width = 2, height = 4.25, just = c("left",
+plotGG(plot = pl.KD_IDUA_ZBTB14, x = 0.5, y = 7, width = 2, height = 4.25, just = c("left",
     "top"), default.units = "inches")
 
-KD.SCARB2.NR2C2 = tibble(Sple = c(rep("shSCARB2", 12), rep("shNR2C2", 12)), Rep = rep(1:3,
-    8), days = c(rep("3 days", 6), rep("6 days", 6), rep("3 days", 6), rep("6 days",
-    6)), Gene = rep(c(rep("SCARB2", 3), rep("NR2C2", 3)), 4), Exp = c(0.751138057,
-    0.592217899, 0.571232513, 1.135556902, 1.207647995, 0.955349154, 0.64510236,
-    0.470902406, 0.792207355, 1.084251922, 0.999307093, 0.915638481, 1.239922544,
-    1.130295504, 1.170885498, 0.345210918, 0.512864636, 0.548665969, 1.410640142,
-    1.425976296, 1.332143962, 0.662710186, 0.456029798, 0.787662775))
+# Knockdown of NR2C2 and quantification of NR2C2 and SCARB2 expression 3 days
+# post transduction
+KD.SCARB2.NR2C2.3days = tibble(Sple = rep("shNR2C2", 6), Gene = c(rep("NR2C2", 3),
+    rep("SCARB2", 3)), Exp = c(0.345210918, 0.512864636, 0.548665969, 1.239922544,
+    1.130295504, 1.170885498))
 
+# Stats
+KD.SCARB2.NR2C2.3days.stats = tibble(Sple = c(rep("shNR2C2", 6), rep("shCTRL", 6)),
+    Gene = rep(c(rep("NR2C2", 3), rep("SCARB2", 3)), 2), Exp = c(9.43575, 9.3043,
+        9.263, 5.6841, 5.92295, 5.9289, 7.9013, 8.34095, 8.397, 5.99435, 6.09965,
+        6.1565))
 
+stat_NR2C2.KD = compare_means(Exp ~ Sple, data = KD.SCARB2.NR2C2.3days.stats, group.by = "Gene",
+    method = "t.test", paired = TRUE)
 
-pl.KD_SCARB2_NR2C2 = KD.SCARB2.NR2C2 %>%
-    filter(Sple != "shSCARB2") %>%
+# Plot
+pl.KD_SCARB2_NR2C2 = KD.SCARB2.NR2C2.3days %>%
     mutate(Gene = factor(Gene, levels = c("NR2C2", "SCARB2"))) %>%
-    # filter(days == '3 days') %>% group_by(Sple, days, Gene) %>% mutate(AVG =
-    # mean(Exp), SEM = sd(Exp)/sqrt(3)) %>% distinct(Sple, .keep_all = TRUE)
-    # %>%
-ggbarplot(., x = "Gene", y = "Exp", fill = c("Sple"), facet.by = "days", position = position_dodge(0.9),
-    palette = c("#440154FF", "#287C8EFF"), add = c("mean_se"), xlab = "", ylab = "Relative expression to shSCRAMBLE") +
-    geom_hline(yintercept = 1, lty = "dashed", color = "black") + theme(axis.title.y = element_text(face = "bold",
+    ggbarplot(., x = "Gene", y = "Exp", fill = c("Gene"), position = position_dodge(0.9),
+        palette = c("#440154FF", "#287C8EFF"), add = c("mean_se", "jitter"), xlab = "",
+        ylab = "Relative expression to shSCRAMBLE") + geom_hline(yintercept = 1,
+    lty = "dashed", color = "black") + theme(axis.title.y = element_text(face = "bold",
     size = 10), axis.text.x = element_text(face = "bold", size = 10, angle = 90),
     axis.text.y = element_text(face = "bold", size = 10), legend.position = "none") +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 1.5)) +  scale_y_continuous(expand
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 1.5)) +  = c(0, 0),
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 1.5)) +  limits = c(0,
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 1.5)) +  1.5)) +
-plotGG(plot = pl.KD_SCARB2_NR2C2, x = 5.5, y = 7, width = 2, height = 4.25, just = c("left",
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 1.8)) + stat_pvalue_manual(stat_NR2C2.KD,
+    label = "p = {p.format}", x = "Gene", y.position = 1.5, size = 3, hide.ns = TRUE)
+
+plotGG(plot = pl.KD_SCARB2_NR2C2, x = 0.5, y = 7, width = 2, height = 4.25, just = c("left",
+    "top"), default.units = "inches")
+
+# Knockdown of NR2C2 and quantification of NR2C2 and SCARB2 expression 6 days
+# post transduction
+KD.SCARB2.NR2C2.6days = tibble(Sple = rep("shNR2C2", 6), Gene = c(rep("NR2C2", 3),
+    rep("SCARB2", 3)), Exp = c(0.662710186, 0.456029798, 0.787662775, 1.410640142,
+    1.425976296, 1.332143962))
+
+# Stats
+KD.SCARB2.NR2C2.6days.stats = tibble(Sple = c(rep("shNR2C2", 6), rep("shCTRL", 6)),
+    Gene = rep(c(rep("NR2C2", 3), rep("SCARB2", 3)), 2), Exp = c(8.34355, 9.0917,
+        8.32445, 5.3595, 5.19535, 6.5266, 7.75, 7.9589, 7.9801, 5.85585, 5.7073,
+        6.94035))
+
+stat_NR2C2.KD.6days = compare_means(Exp ~ Sple, data = KD.SCARB2.NR2C2.6days.stats,
+    group.by = "Gene", method = "t.test", paired = TRUE)
+
+# Plot
+pl.KD_SCARB2_NR2C2_6days = KD.SCARB2.NR2C2.6days %>%
+    mutate(Gene = factor(Gene, levels = c("NR2C2", "SCARB2"))) %>%
+    ggbarplot(., x = "Gene", y = "Exp", fill = c("Gene"), position = position_dodge(0.9),
+        palette = c("#440154FF", "#287C8EFF"), add = c("mean_se", "jitter"), xlab = "",
+        ylab = "Relative expression to shSCRAMBLE") + geom_hline(yintercept = 1,
+    lty = "dashed", color = "black") + theme(axis.title.y = element_text(face = "bold",
+    size = 10), axis.text.x = element_text(face = "bold", size = 10, angle = 90),
+    axis.text.y = element_text(face = "bold", size = 10), legend.position = "none") +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 1.8)) + stat_pvalue_manual(stat_NR2C2.KD.6days,
+    label = "p = {p.format}", x = "Gene", y.position = 1.5, size = 3, hide.ns = TRUE)
+
+plotGG(plot = pl.KD_SCARB2_NR2C2, x = 0.5, y = 7, width = 2, height = 4.25, just = c("left",
     "top"), default.units = "inches")
 
 dev.off()
