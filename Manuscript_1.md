@@ -1,7 +1,7 @@
 ---
 title: "Manuscript_1"
 author: Deborah Gérard^[University of Luxembourg - FSTM - DLSM - Systems Biology group - Epigenetics team]
-date: "12 February, 2024"
+date: "13 February, 2024"
 output: 
   html_document:
     keep_md: true
@@ -156,6 +156,9 @@ packageVersion("AllelicImbalance")  #1.36.0
 packageVersion("png")  #0.1.8
 packageVersion("AnnotationDbi")  #1.60.2
 packageVersion("dbplyr")  #2.3.4
+
+# Import all available fonts
+font_import()
 ```
 
 # FIGURES
@@ -1224,24 +1227,28 @@ dev.off()
 ### FIGURE 3
 
 ```r
-########## FIGURE 3 ########## Save as a PDF
-pdf("/home/vagrant/Manuscript_1/FIGURE3/FIGURE3.pdf", width = 13, height = 15)
+########## FIGURE 3 ########## Save as a PDF and as TIF
+pdf("/home/vagrant/Manuscript_1/FIGURE3/FIGURE3.pdf", paper = "a4", family = "Helvetica")
+
+# Save as TIFF, 300 dpi
+tiff("/home/vagrant/Manuscript_1/FIGURE3/FIGURE3.tiff", width = 8.27, height = 11.67,
+    units = "in", res = 300)
 
 # Create a A4 blank page
-pageCreate(width = 8.3, height = 11.7, default.units = "inches", showGuides = TRUE)
+pageCreate(width = 8.27, height = 11.67, default.units = "inches", showGuides = TRUE)
 
 # text Figure 3
-plotText(label = "Figure 3", fontsize = 14, x = 0.25, y = 0.25, just = "left", default.units = "inches",
-    fontface = "bold")
+plotText(label = "Figure 3", fontsize = 14, fontface = "bold", fontfamily = "Helvetica",
+    x = 0.25, y = 0.25, just = "left", default.units = "inches")
 
 #### PANEL A - Scheme of transduction for knockdown and luciferase text A
-plotText(label = "A", fontsize = 12, x = 0.25, y = 0.5, just = "left", default.units = "inches",
-    fontface = "bold")
+plotText(label = "A", fontsize = 12, fontface = "bold", fontfamily = "Helvetica",
+    x = 0.25, y = 0.5, just = "left", default.units = "inches")
 
 
 #### PANEL B - luciferase barplots with statistics text B
-plotText(label = "B", fontsize = 12, x = 0.25, y = 2, just = "left", default.units = "inches",
-    fontface = "bold")
+plotText(label = "B", fontsize = 12, fontface = "bold", fontfamily = "Helvetica",
+    x = 0.25, y = 2, just = "left", default.units = "inches")
 
 Gluc_signal = tibble(Sample = c("BAG3-WT", "BAG3-MUT", "IDUA-WT", "IDUA-MUT", "SCARB2-WT",
     "SCARB2-MUT", "miniCMV", "Neg_CTRL"), GLUC_n1_rep1 = c(319, 240, 154, 196, 379,
@@ -1282,10 +1289,11 @@ GLUC_BAG3 = ggbarplot(Gluc_signal_ratio %>%
     dplyr::filter(Sample %in% c("BAG3-WT", "BAG3-MUT", "miniCMV", "Neg_CTRL")), x = "Sample",
     y = "value", width = 0.25, add = c("mean_se", "jitter"), fill = "grey", xlab = "",
     ylab = "Ratio Gluc/SEAP", position = position_dodge(0.9)) + theme(legend.position = "none",
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 9, face = "bold"), axis.text.y = element_text(size = 9,
-        face = "bold"), axis.title.y = element_text(size = 10, face = "bold")) +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 6)) + scale_x_discrete(labels = c("BAG3\nother allele",
-    "BAG3\neffect allele", "miniCMV", "Negative CTRL")) + stat_pvalue_manual(GLUC_stat %>%
+    axis.text.x = element_text(angle = 90, hjust = 1, size = 9, face = "bold", family = "Helvetica"),
+    axis.text.y = element_text(size = 9, face = "bold"), axis.title.y = element_text(size = 10,
+        face = "bold")) + scale_y_continuous(expand = c(0, 0), limits = c(0, 6)) +
+    scale_x_discrete(labels = c("BAG3 other allele", "BAG3 effect allele", "Positive control",
+        "Negative control")) + stat_pvalue_manual(GLUC_stat %>%
     dplyr::filter(group1 == "BAG3-WT", group2 == "BAG3-MUT"), label = "p = {p.format}",
     y.position = 5.6, size = 3)
 
@@ -1298,13 +1306,13 @@ GLUC_IDUA = ggbarplot(Gluc_signal_ratio %>%
     dplyr::filter(Sample %in% c("IDUA-WT", "IDUA-MUT", "miniCMV", "Neg_CTRL")), x = "Sample",
     y = "value", width = 0.25, add = c("mean_se", "jitter"), fill = "grey", xlab = "",
     ylab = "Ratio Gluc/SEAP", position = position_dodge(0.9)) + theme(legend.position = "none",
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 9, face = "bold"), axis.text.y = element_text(size = 9,
+    axis.text.x = element_text(angle = 90, hjust = 1, size = 9, face = "bold"), axis.text.y = element_text(size = 9,
         face = "bold"), axis.title.y = element_text(size = 10, face = "bold")) +
-    scale_x_discrete(labels = c("IDUA\nother allele", "IDUA\neffect allele", "miniCMV",
-        "Negative CTRL")) + scale_y_continuous(expand = c(0, 0), limits = c(0, 6)) +
-    stat_pvalue_manual(GLUC_stat %>%
-        dplyr::filter(group1 == "IDUA-WT", group2 == "IDUA-MUT"), label = "p = {p.format}",
-        y.position = 4, size = 3)
+    scale_x_discrete(labels = c("IDUA other allele", "IDUA effect allele", "Positive control",
+        "Negative control")) + scale_y_continuous(expand = c(0, 0), limits = c(0,
+    6)) + stat_pvalue_manual(GLUC_stat %>%
+    dplyr::filter(group1 == "IDUA-WT", group2 == "IDUA-MUT"), label = "p = {p.format}",
+    y.position = 4, size = 3)
 
 # Place the plot
 plotGG(plot = GLUC_IDUA, x = 3, y = 2.25, width = 2, height = 4.25, just = c("left",
@@ -1315,10 +1323,10 @@ GLUC_SCARB2 = ggbarplot(Gluc_signal_ratio %>%
     dplyr::filter(Sample %in% c("SCARB2-WT", "SCARB2-MUT", "miniCMV", "Neg_CTRL")),
     x = "Sample", y = "value", width = 0.25, add = c("mean_se", "jitter"), fill = "grey",
     xlab = "", ylab = "Ratio Gluc/SEAP", position = position_dodge(0.9)) + theme(legend.position = "none",
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 9, face = "bold"), axis.text.y = element_text(size = 9,
+    axis.text.x = element_text(angle = 90, hjust = 1, size = 9, face = "bold"), axis.text.y = element_text(size = 9,
         face = "bold"), axis.title.y = element_text(size = 10, face = "bold")) +
-    scale_x_discrete(labels = c("SCARB2\nother allele", "SCARB2\neffect allele",
-        "miniCMV", "Negative CTRL")) + scale_y_continuous(expand = c(0, 0), limits = c(0,
+    scale_x_discrete(labels = c("SCARB2 other allele", "SCARB2 effect allele", "Positive control",
+        "Negative control")) + scale_y_continuous(expand = c(0, 0), limits = c(0,
     6)) + stat_pvalue_manual(GLUC_stat %>%
     dplyr::filter(group1 == "SCARB2-WT", group2 == "SCARB2-MUT"), label = "p = {p.format}",
     y.position = 4, size = 3)
@@ -1349,14 +1357,16 @@ pl.KD_BAG3_LHX1 = KD.BAG3.LHX1.3days %>%
     mutate(Gene = factor(Gene, levels = c("LHX1", "BAG3"))) %>%
     ggbarplot(., x = "Gene", y = "Exp", fill = c("Gene"), position = position_dodge(0.9),
         palette = c("#440154FF", "#287C8EFF"), add = c("mean_se", "jitter"), xlab = "",
-        ylab = "Relative expression to shSCRAMBLE") + geom_hline(yintercept = 1,
-    lty = "dashed", color = "black") + theme(axis.title.y = element_text(face = "bold",
-    size = 10), axis.text.x = element_text(face = "bold", size = 10, angle = 90),
-    axis.text.y = element_text(face = "bold", size = 10), legend.position = "none") +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 1.8)) + stat_pvalue_manual(stat_LHX1.KD,
-    label = "p = {p.format}", x = "Gene", y.position = 0.5, size = 3, hide.ns = TRUE)
+        ylab = "Relative expression to shSCRAMBLE", title = "shLHX1 - 3 days") +
+    geom_hline(yintercept = 1, lty = "dashed", color = "black") + theme(axis.title.y = element_text(face = "bold",
+    size = 10), axis.text.x = element_text(face = "bold.italic", size = 10, angle = 90,
+    family = "Helvetica"), axis.text.y = element_text(face = "bold", size = 10),
+    legend.position = "none", plot.title = element_text(face = "bold", size = 10,
+        hjust = 0.5)) + scale_y_continuous(expand = c(0, 0), limits = c(0, 1.8)) +
+    stat_pvalue_manual(stat_LHX1.KD, label = "p = {p.format}", x = "Gene", y.position = 0.5,
+        size = 3, hide.ns = TRUE)
 
-plotGG(plot = pl.KD_BAG3_LHX1, x = 0.5, y = 7, width = 2, height = 4.25, just = c("left",
+plotGG(plot = pl.KD_BAG3_LHX1, x = 0.5, y = 7, width = 1.75, height = 4.25, just = c("left",
     "top"), default.units = "inches")
 
 # Knockdown of ZBTB14 and quantification of ZBTB14 and IDUA expression 3 days
@@ -1379,14 +1389,16 @@ pl.KD_IDUA_ZBTB14 = KD.IDUA.ZBTB14.3days %>%
     mutate(Gene = factor(Gene, levels = c("ZBTB14", "IDUA"))) %>%
     ggbarplot(., x = "Gene", y = "Exp", fill = c("Gene"), position = position_dodge(0.9),
         palette = c("#440154FF", "#287C8EFF"), add = c("mean_se", "jitter"), xlab = "",
-        ylab = "Relative expression to shSCRAMBLE") + geom_hline(yintercept = 1,
-    lty = "dashed", color = "black") + theme(axis.title.y = element_text(face = "bold",
-    size = 10), axis.text.x = element_text(face = "bold", size = 10, angle = 90),
-    axis.text.y = element_text(face = "bold", size = 10), legend.position = "none") +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 1.8)) + stat_pvalue_manual(stat_ZBTB14.KD,
-    label = "p = {p.format}", x = "Gene", y.position = 0.5, size = 3, hide.ns = TRUE)
+        ylab = "Relative expression to shSCRAMBLE", title = "shZBTB14 - 3 days") +
+    geom_hline(yintercept = 1, lty = "dashed", color = "black") + theme(axis.title.y = element_text(face = "bold",
+    size = 10), axis.text.x = element_text(face = "bold.italic", size = 10, angle = 90,
+    family = "Helvetica"), axis.text.y = element_text(face = "bold", size = 10),
+    legend.position = "none", plot.title = element_text(face = "bold", size = 10,
+        hjust = 0.5)) + scale_y_continuous(expand = c(0, 0), limits = c(0, 1.8)) +
+    stat_pvalue_manual(stat_ZBTB14.KD, label = "p = {p.format}", x = "Gene", y.position = 0.5,
+        size = 3, hide.ns = TRUE)
 
-plotGG(plot = pl.KD_IDUA_ZBTB14, x = 0.5, y = 7, width = 2, height = 4.25, just = c("left",
+plotGG(plot = pl.KD_IDUA_ZBTB14, x = 2.375, y = 7, width = 1.75, height = 4.25, just = c("left",
     "top"), default.units = "inches")
 
 # Knockdown of NR2C2 and quantification of NR2C2 and SCARB2 expression 3 days
@@ -1409,14 +1421,16 @@ pl.KD_SCARB2_NR2C2 = KD.SCARB2.NR2C2.3days %>%
     mutate(Gene = factor(Gene, levels = c("NR2C2", "SCARB2"))) %>%
     ggbarplot(., x = "Gene", y = "Exp", fill = c("Gene"), position = position_dodge(0.9),
         palette = c("#440154FF", "#287C8EFF"), add = c("mean_se", "jitter"), xlab = "",
-        ylab = "Relative expression to shSCRAMBLE") + geom_hline(yintercept = 1,
-    lty = "dashed", color = "black") + theme(axis.title.y = element_text(face = "bold",
-    size = 10), axis.text.x = element_text(face = "bold", size = 10, angle = 90),
-    axis.text.y = element_text(face = "bold", size = 10), legend.position = "none") +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 1.8)) + stat_pvalue_manual(stat_NR2C2.KD,
-    label = "p = {p.format}", x = "Gene", y.position = 1.5, size = 3, hide.ns = TRUE)
+        ylab = "Relative expression to shSCRAMBLE", title = "shNR2C2 - 3 days") +
+    geom_hline(yintercept = 1, lty = "dashed", color = "black") + theme(axis.title.y = element_text(face = "bold",
+    size = 10), axis.text.x = element_text(face = "bold.italic", size = 10, angle = 90,
+    family = "Helvetica"), axis.text.y = element_text(face = "bold", size = 10),
+    legend.position = "none", plot.title = element_text(face = "bold", size = 10,
+        hjust = 0.5)) + scale_y_continuous(expand = c(0, 0), limits = c(0, 1.8)) +
+    stat_pvalue_manual(stat_NR2C2.KD, label = "p = {p.format}", x = "Gene", y.position = 1.5,
+        size = 3)
 
-plotGG(plot = pl.KD_SCARB2_NR2C2, x = 0.5, y = 7, width = 2, height = 4.25, just = c("left",
+plotGG(plot = pl.KD_SCARB2_NR2C2, x = 4.25, y = 7, width = 1.75, height = 4.25, just = c("left",
     "top"), default.units = "inches")
 
 # Knockdown of NR2C2 and quantification of NR2C2 and SCARB2 expression 6 days
@@ -1439,15 +1453,17 @@ pl.KD_SCARB2_NR2C2_6days = KD.SCARB2.NR2C2.6days %>%
     mutate(Gene = factor(Gene, levels = c("NR2C2", "SCARB2"))) %>%
     ggbarplot(., x = "Gene", y = "Exp", fill = c("Gene"), position = position_dodge(0.9),
         palette = c("#440154FF", "#287C8EFF"), add = c("mean_se", "jitter"), xlab = "",
-        ylab = "Relative expression to shSCRAMBLE") + geom_hline(yintercept = 1,
-    lty = "dashed", color = "black") + theme(axis.title.y = element_text(face = "bold",
-    size = 10), axis.text.x = element_text(face = "bold", size = 10, angle = 90),
-    axis.text.y = element_text(face = "bold", size = 10), legend.position = "none") +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 1.8)) + stat_pvalue_manual(stat_NR2C2.KD.6days,
-    label = "p = {p.format}", x = "Gene", y.position = 1.5, size = 3, hide.ns = TRUE)
+        ylab = "Relative expression to shSCRAMBLE", title = "shNR2C2 - 6 days") +
+    geom_hline(yintercept = 1, lty = "dashed", color = "black") + theme(axis.title.y = element_text(face = "bold",
+    size = 10), axis.text.x = element_text(face = "bold.italic", size = 10, angle = 90,
+    family = "Helvetica"), axis.text.y = element_text(face = "bold", size = 10),
+    legend.position = "none", plot.title = element_text(face = "bold", size = 10,
+        hjust = 0.5)) + scale_y_continuous(expand = c(0, 0), limits = c(0, 1.8)) +
+    stat_pvalue_manual(stat_NR2C2.KD.6days, label = "p = {p.format}", x = "Gene",
+        y.position = 1.5, size = 3, hide.ns = TRUE)
 
-plotGG(plot = pl.KD_SCARB2_NR2C2, x = 0.5, y = 7, width = 2, height = 4.25, just = c("left",
-    "top"), default.units = "inches")
+plotGG(plot = pl.KD_SCARB2_NR2C2_6days, x = 6.125, y = 7, width = 1.75, height = 4.25,
+    just = c("left", "top"), default.units = "inches")
 
 dev.off()
 ```
@@ -1455,32 +1471,45 @@ dev.off()
 ### FIGURE 4
 
 ```r
+########## FIGURE 4 ##########
+##############################
 # Save as a PDF
 pdf("/home/vagrant/Manuscript_1/FIGURE4/FIGURE4.pdf",
     width = 8.3, 
     height = 11.7)
 
+# Save as TIFF, 300 dpi
+tiff("/home/vagrant/Manuscript_1/FIGURE4/FIGURE4.tiff",
+     width = 8.27,
+     height = 11.67,
+     units = "in",
+     res = 300)
+
 # Create a A4 blank page
-pageCreate(width = 8.3, 
-           height = 11.7, 
+pageCreate(width = 8.27, 
+           height = 11.67, 
            default.units = "inches",
-           showGuides = FALSE)
+           showGuides = TRUE)
 
 plotText(label = "Figure 4", 
          fontsize = 14,
+         fontface = "bold",
+         fontfamily = "Helvetica",
          x = 0.25, 
          y = 0.25, 
          just = "left", 
-         default.units = "inches",
-         fontface = "bold")
+         default.units = "inches")
+
+#### PANEL A - Chromatin imbalance in TH REP1 mCHERRY cell line at rs1465922 
 # text A
 plotText(label = "A", 
          fontsize = 12,
+         fontface = "bold",
+         fontfamily = "Helvetica",
          x = 0.25, 
          y = 0.5, 
          just = "left", 
-         default.units = "inches",
-         fontface = "bold")
+         default.units = "inches")
 
 #FIG 4A
 AI_RNA = tibble(Samples = 
