@@ -1,7 +1,7 @@
 ---
 title: "Manuscript_1"
 author: Deborah Gérard^[University of Luxembourg - FSTM - DLSM - Systems Biology group - Epigenetics team]
-date: "25 March, 2024"
+date: "03 April, 2024"
 output: 
   html_document:
     keep_md: true
@@ -135,6 +135,7 @@ library("AnnotationDbi")
 library("scales")
 library("flowCore")
 library("ggcyto")
+library("ggmanh")
 
 # Check
 packageVersion("tidyverse")  #2.0.0
@@ -156,6 +157,7 @@ packageVersion("AllelicImbalance")  #1.36.0
 packageVersion("png")  #0.1.8
 packageVersion("AnnotationDbi")  #1.60.2
 packageVersion("dbplyr")  #2.3.4
+packageVersion("ggmanh")  #1.2.0
 
 # Import all available fonts
 font_import()
@@ -176,694 +178,430 @@ singularity shell --bind /scratch/users/dgerard:/scratch/users/dgerard $HOME/Sin
 ### FIGURE 1
 
 ```r
-########## FIGURE 1 ##########
-##############################
-# Save as a PDF
-pdf("/home/vagrant/Manuscript_1/FIGURE1/FIGURE1.pdf",
-    width = 8.3, 
-    height = 11.7)
+########## FIGURE 1 ########## Save as a PDF
+pdf("/home/vagrant/Manuscript_1/FIGURE1/FIGURE1.pdf", width = 8.3, height = 11.7)
 
 # Save as TIFF, 300 ppi
-tiff("/home/vagrant/Manuscript_1/FIGURE1/FIGURE1.tiff",
-     width = 8.27,
-     height = 11.67,
-     units = "in",
-     res = 300)
+tiff("/home/vagrant/Manuscript_1/FIGURE1/FIGURE1.tiff", width = 8.27, height = 11.67,
+    units = "in", res = 300, compression = "lzw")
 
 # Create a A4 blank page
-pageCreate(width = 8.27, 
-           height = 11.67, 
-           default.units = "inches",
-           showGuides = FALSE)
+pageCreate(width = 8.27, height = 11.67, default.units = "inches", showGuides = FALSE)
 
-#### PANEL A - 
-# text Figure 1
-plotText(label = "Figure 1", 
-         fontsize = 14,
-         fontfamily = "Helvetica",
-         x = 0.25, 
-         y = 0.25, 
-         just = "left", 
-         default.units = "inches",
-         fontface = "bold")
+#### PANEL A - text Figure 1
+plotText(label = "Figure 1", fontsize = 14, fontfamily = "Helvetica", x = 0.25, y = 0.25,
+    just = "left", default.units = "inches", fontface = "bold")
+
 # text A
-plotText(label = "A", 
-         fontsize = 12,
-         fontfamily = "Helvetica",
-         x = 0.25, 
-         y = 0.5, 
-         just = "left", 
-         default.units = "inches",
-         fontface = "bold")
+plotText(label = "A", fontsize = 12, fontfamily = "Helvetica", x = 0.25, y = 0.5,
+    just = "left", default.units = "inches", fontface = "bold")
 
-###################
-#### Figure 1A ####
-###################
-# Figure 1A generated in Biorender
-#fig1A = readPNG("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/Fig1A.png")
+################### Figure 1A #### Figure 1A generated in Biorender fig1A =
+################### readPNG('/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/Fig1A.png')
 fig1A = readPNG("/home/vagrant/Manuscript_1/FIGURE1/Fig1A.png")
 
-plotRaster(image = fig1A,
-           x = 0.25, 
-           y = 1, 
-           width = 8.0, 
-           height = 1.0, 
-           just = "left",
-           interpolate = TRUE)
+plotRaster(image = fig1A, x = 0.25, y = 1, width = 8, height = 1, just = "left",
+    interpolate = TRUE)
 
 # text B
-plotText(label = "B", 
-         fontsize = 12,
-         fontfamily = "Helvetica",
-         x = 0.25, 
-         y = 1.5, 
-         just = "left", 
-         default.units = "inches",
-         fontface = "bold")
+plotText(label = "B", fontsize = 12, fontfamily = "Helvetica", x = 0.25, y = 1.5,
+    just = "left", default.units = "inches", fontface = "bold")
 
 # text C
-plotText(label = "C", 
-         fontsize = 12,
-         fontfamily = "Helvetica",
-         x = 0.25, 
-         y = 4.5, 
-         just = "left", 
-         default.units = "inches",
-         fontface = "bold")
+plotText(label = "C", fontsize = 12, fontfamily = "Helvetica", x = 0.25, y = 4.5,
+    just = "left", default.units = "inches", fontface = "bold")
 
 # text D
-plotText(label = "D", 
-         fontsize = 12,
-         fontfamily = "Helvetica",
-         x = 0.25, 
-         y = 8.25, 
-         just = "left", 
-         default.units = "inches",
-         fontface = "bold")
+plotText(label = "D", fontsize = 12, fontfamily = "Helvetica", x = 3.25, y = 4.5,
+    just = "left", default.units = "inches", fontface = "bold")
+
+# text E
+plotText(label = "E", fontsize = 12, fontfamily = "Helvetica", x = 0.25, y = 4.5,
+    just = "left", default.units = "inches", fontface = "bold")
 
 
-###################
-#### Figure 1B ####
-###################
-# Load data obtained from Jochen
+################### Figure 1B #### Load data obtained from Jochen
 RNAseq_odd = read_delim("/home/vagrant/Manuscript_1/FIGURE1/REFORMAT_tpm_gene_sets.gsa.txt",
-                        delim = "\t",
-                        col_names = TRUE)
+    delim = "\t", col_names = TRUE)
 
-RNAseq_odd = read_delim("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/REFORMAT_tpm_gene_sets.gsa.txt",
-                      delim = "\t",
-                      col_names = TRUE)
+# RNAseq_odd =
+# read_delim('/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/REFORMAT_tpm_gene_sets.gsa.txt',
+# delim = '\t', col_names = TRUE)
 
 # Calculate odd ratio
-RNAseq_odd = RNAseq_odd %>% 
-  dplyr::filter(!VARIABLE %in% c("microglia")) %>% 
-  mutate(odd_R = exp(BETA)) %>% 
-  mutate(VARIABLE = factor(VARIABLE, 
-                           levels = c("smNPC",
-                                      "D15negsort",
-                                      "D15possort",
-                                      "D30postsort",
-                                      "D50negsort",
-                                      "D50possort",
-                                      "astrocytes")))
+RNAseq_odd = RNAseq_odd %>%
+    dplyr::filter(!VARIABLE %in% c("microglia")) %>%
+    mutate(odd_R = exp(BETA)) %>%
+    mutate(VARIABLE = factor(VARIABLE, levels = c("smNPC", "D15negsort", "D15possort",
+        "D30postsort", "D50negsort", "D50possort", "astrocytes")))
 
 # Plot
-fig1B = ggplot(RNAseq_odd,
-       aes(x = odd_R,
-           y = VARIABLE)) +
-  geom_point(shape = 16, size = 3) +
-  geom_errorbarh(aes(xmin = odd_R - SE, 
-                     xmax = odd_R + SE), 
-                 height = 0.25) +
-  geom_vline(xintercept = 1.0, linetype = "dashed", color = "grey") +
-  theme_classic() +
-  theme(axis.title = element_text(face = "bold"),
-        axis.text = element_text(face = "bold")) +
-  scale_y_discrete(labels = c("smNPC" = "smNPC", 
-                              "D15negsort" = "non-mDAN D15", 
-                              "D15possort" = "mDAN D15", 
-                              "D30postsort" = "mDAN D30", 
-                              "D50negsort" = "non-mDAN D50",
-                              "D50possort" = "mDAN D50",
-                              "astrocytes" = "Astrocytes")) +
-  geom_text(label = round(RNAseq_odd$P, 
-                          digits = 3),
-            nudge_y = 0.40) +
-  xlab("Odds ratio (95% Confidence Interval)") +
-  ylab("")
+fig1B = ggplot(RNAseq_odd, aes(x = odd_R, y = VARIABLE)) + geom_point(shape = 16,
+    size = 3) + geom_errorbarh(aes(xmin = odd_R - SE, xmax = odd_R + SE), height = 0.25) +
+    geom_vline(xintercept = 1, linetype = "dashed", color = "grey") + theme_classic() +
+    theme(axis.title = element_text(face = "bold"), axis.text = element_text(face = "bold")) +
+    scale_y_discrete(labels = c(smNPC = "smNPC", D15negsort = "non-mDAN D15", D15possort = "mDAN D15",
+        D30postsort = "mDAN D30", D50negsort = "non-mDAN D50", D50possort = "mDAN D50",
+        astrocytes = "Astrocytes")) + geom_text(label = round(RNAseq_odd$P, digits = 3),
+    nudge_y = 0.4) + xlab("Odds ratio (95% Confidence Interval)") + ylab("")
 
 # Place
-plotGG(plot = fig1B, 
-       x = 0.375, 
-       y = 1.75, 
-       width = 3.0, 
-       height = 2.5,
-       just = c("left", "top"), 
-       default.units = "inches")
+plotGG(plot = fig1B, x = 0.375, y = 1.75, width = 3, height = 2.5, just = c("left",
+    "top"), default.units = "inches")
 
-###################
-#### Figure 1C ####
-###################
+################### Figure 1C ####
 Fig1C_pip = readPNG("/home/vagrant/Manuscript_1/FIGURE1/Fig1C_pipeline.png")
-Fig1C_pip = readPNG("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/Fig1C_pipeline.png")
+# Fig1C_pip =
+# readPNG('/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/Fig1C_pipeline.png')
 
 # Plot Figure 1C - Pipeline
-plotRaster(image = Fig1C_pip,
-           x = 0.375,
-           y = 4.75,
-           width = 3.0,
-           height = 3.5,
-           just = c("left", 
-                    "top"),
-           interpolate = TRUE)
+plotRaster(image = Fig1C_pip, x = 0.375, y = 4.75, width = 3, height = 3.5, just = c("left",
+    "top"), interpolate = TRUE)
 
-###################
-#### Figure 1C Manhattan plot ####
-###################
-# Load the Nalls et al. GWAS data
-nalls_allSNPs.HG38.GR = readRDS(
-  "/home/vagrant/Manuscript_1/FIGURE1/nalls_allSNPs.HG38.GR.rds")
+################### Figure 1C Manhattan plot #### Load the Nalls et al. GWAS
+################### data
+nalls_allSNPs.HG38.GR = readRDS("/home/vagrant/Manuscript_1/FIGURE1/nalls_allSNPs.HG38.GR.rds")
 
-nalls_allSNPs.HG38.GR = readRDS(
-"/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/nalls_allSNPs.HG38.GR.rds")
+# nalls_allSNPs.HG38.GR = readRDS(
+#'/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/nalls_allSNPs.HG38.GR.rds')
 
 # Load the rsIDS FOR THE 28 significant SNPs
 rsID.28 = read_delim("/home/vagrant/Manuscript_1/FIGURE1/20210309_28SNPs_rsID.csv",
-                     delim = ",",
-                     col_names = TRUE)
+    delim = ",", col_names = TRUE)
 
-rsID.28.filt = rsID.28 %>% 
-  dplyr::select(chrom, chromEnd, name) %>% 
-  unite(col = "pos", chrom, chromEnd, sep = "_")
+rsID.28 = read_delim("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/20210309_28SNPs_rsID.csv",
+    delim = ",", col_names = TRUE)
+
+rsID.28.filt = rsID.28 %>%
+    dplyr::select(chrom, chromEnd, name) %>%
+    unite(col = "pos", chrom, chromEnd, sep = "_")
 
 # Select the SNPs position from nalls et al and associate rsIDs
-nalls.manH = nalls_allSNPs.HG38.GR %>% 
-  as_tibble() %>% 
-  dplyr::select(seqnames, base_pair_position, p) %>% 
-  unite(col = "pos", seqnames, base_pair_position, sep = "_", remove = FALSE) %>%
-  left_join(rsID.28.filt, by = "pos") %>% 
-  separate(pos, into = c("chrom", "pos"), sep = "_", remove = TRUE) %>% 
-  dplyr::select(chrom, pos, p, name)
+nalls.manH = nalls_allSNPs.HG38.GR %>%
+    as_tibble() %>%
+    dplyr::select(seqnames, base_pair_position, p) %>%
+    unite(col = "pos", seqnames, base_pair_position, sep = "_", remove = FALSE) %>%
+    left_join(rsID.28.filt, by = "pos") %>%
+    separate(pos, into = c("chrom", "pos"), sep = "_", remove = TRUE) %>%
+    dplyr::select(chrom, pos, p, name)
 
 # Save
-write_rds(nalls.manH,
-          "/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/20240304_28SNPs_rdID_manH.rds")
+write_rds(nalls.manH, "/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/20240304_28SNPs_rdID_manH.rds")
 
-#nalls.manH = read_rds("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/20240304_28SNPs_rdID_manH.rds")
+nalls.manH = read_rds("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/20240304_28SNPs_rdID_manH.rds")
 nalls.manH = read_rds("/home/vagrant/Manuscript_1/FIGURE1/20240304_28SNPs_rdID_manH.rds")
 
 # Rename columns
-nalls.manH = nalls.manH %>% 
-  dplyr::rename(snp = name) %>% 
-  mutate(pos = as.numeric(pos)) %>% 
-  dplyr::filter(chrom %in% rsID.28$chrom)
+nalls.manH = nalls.manH %>%
+    dplyr::rename(snp = name) %>%
+    mutate(pos = as.numeric(pos)) %>%
+    dplyr::filter(chrom %in% rsID.28$chrom)
 
-# Manhattan plot - highlight  the 28 SNPs with rsID
-snp_2_high = nalls.manH %>% 
-  dplyr::filter(!is.na(snp))
+# Manhattan plot - highlight the 28 SNPs with rsID
+snp_2_high = nalls.manH %>%
+    dplyr::filter(!is.na(snp), p <= 5e-08)
 
-nalls.manH.pl = plotManhattan(data = nalls.manH,
-              assembly = "hg38",
-              fill = c("grey", "#37a7db"),
-              sigLine = TRUE,
-              trans = "-log10",
-              sigCol = "#996699",
-              lty = 2, range = c(0, 14),
-    x = 3.625, y = 4.75, width = 4.5, height = 3.5,
-    just = c("left", "top"),
-    default.units = "inches")
+# Random sampling for plotting test
+snp_to_pl = nalls.manH %>%
+    mutate(snp = NA_character_) %>%
+    bind_rows(snp_2_high) %>%
+    # dplyr::filter(p <= 5e-08) %>%
+mutate(pbis = -log10(p), chrom = factor(chrom, levels = c("chr1", "chr3", "chr4",
+    "chr7", "chr10", "chr12", "chr16", "chr17")))
 
-# Add genome label 
-annoGenomeLabel(
-    plot = nalls.manH.pl, x = 3.625, y = 8.375, fontsize = 8,
-    just = c("left", "top"),
-    default.units = "inches"
-)
+# And plot
+snp.pl = manhattan_plot(x = snp_to_pl, pval.colname = "p", chr.colname = "chrom",
+    pos.colname = "pos", label.colname = "snp", signif = 5e-08, max.overlaps = 50)
 
-plotText(
-    label = "Chromosome", fontsize = 8,
-    x = 5.75, y = 8.5, just = "center", default.units = "inches"
-)
+saveRDS(snp.pl, "/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/Nalls_manh_label.rds")
+snp.pl = readRDS("/home/vagrant/Manuscript_1/FIGURE1/Nalls_manh_label.rds")
 
-annoYaxis(
-    plot = nalls.manH.pl, at = c(0, 2, 4, 6, 8, 10, 12, 14),
-    axisLine = TRUE, fontsize = 8
-)
+# Place the plot
+plotGG(plot = snp.pl, x = 3.5, y = 4.75, width = 4.5, height = 3.5, just = c("left",
+    "top"), default.units = "inches")
 
-plotText(
-    label = "-log10(p-value)", x = 3.5, y = 6.5, rot = 90,
-    fontsize = 8, fontface = "bold", just = "center",
-    default.units = "inches"
-)
+################### Figure 1D ####
 
-
-
-
-
-###################
-#### Figure 1D ####
-###################
-
-# Locus plot
-# Here our SNPs of interest and their location
-snp = GRanges(seqnames = c("chr10", "chr4", "chr4"),
-              ranges = IRanges(start = c(119651404, 987107, 76213716),
-                               end = c(119651405, 987108, 76213717)))
+# Locus plot Here our SNPs of interest and their location
+snp = GRanges(seqnames = c("chr10", "chr4", "chr4"), ranges = IRanges(start = c(119651404,
+    987107, 76213716), end = c(119651405, 987108, 76213717)))
 
 # Retrieve them from Nalls et al data
-snp_Nalls = subsetByOverlaps(nalls_allSNPs.HG38.GR, snp) %>% 
-  as_tibble() %>% 
-  dplyr::select(-width, -strand) %>% 
-  mutate(rsID = c("rs144814361", "rs1465922", "rs11248061"))
+snp_Nalls = subsetByOverlaps(nalls_allSNPs.HG38.GR, snp) %>%
+    as_tibble() %>%
+    dplyr::select(-width, -strand) %>%
+    mutate(rsID = c("rs144814361", "rs1465922", "rs11248061"))
 
-# Visualise the genomic region per SNP (+- 400100 bp)
-# rs144814361
+# Visualise the genomic region per SNP (+- 400100 bp) rs144814361
 r = 40100
 
 # Filter for the SNP in BAG3 regulatory region
-Nalls_sel_reg.BAG3 = nalls_allSNPs.HG38.GR %>% 
-  as_tibble() %>% 
-  dplyr::filter(seqnames == "chr10",
-         between(base_pair_position, 119651405 - r, 119651405 + r)) %>% 
-  mutate(minus_log_10_p = -log10(p),
-         GWAS_p_sig = if_else(minus_log_10_p > -log10(5e-8), "yes", "no"),
-         rsID = if_else(seqnames == "chr10" & base_pair_position == 119651405, "rs144814361", ""))
-  
-# Get SNPs info from Ensembl
-snp.ensembl = useEnsembl(biomart = "snp", dataset = "hsapiens_snp")
+Nalls_sel_reg.BAG3 = nalls_allSNPs.HG38.GR %>%
+    as_tibble() %>%
+    dplyr::filter(seqnames == "chr10", between(base_pair_position, 119651405 - r,
+        119651405 + r)) %>%
+    mutate(minus_log_10_p = -log10(p), GWAS_p_sig = if_else(minus_log_10_p > -log10(5e-08),
+        "yes", "no"), rsID = if_else(seqnames == "chr10" & base_pair_position ==
+        119651405, "rs144814361", ""))
+
+# Get SNPs info from Ensembl snp.ensembl = useEnsembl(biomart = 'snp', dataset
+# = 'hsapiens_snp')
+
+snp.ensembl = useMart(biomart = "ENSEMBL_MART_SNP", dataset = "hsapiens_snp")
 
 # SNP info
-query.snp = getBM(c("ensembl_gene_stable_id", 
-                            "refsnp_id", 
-                            "chr_name", 
-                            "chrom_start", 
-                            "chrom_end", 
-                            "minor_allele", 
-                            "minor_allele_freq"),
-                          filters = "snp_filter",
-                          values = c("rs144814361", "rs1465922", "rs11248061"),
-                  mart = snp.ensembl)
+query.snp = getBM(c("ensembl_gene_stable_id", "refsnp_id", "chr_name", "chrom_start",
+    "chrom_end", "minor_allele", "minor_allele_freq"), filters = "snp_filter", values = c("rs144814361",
+    "rs1465922", "rs11248061"), mart = snp.ensembl)
 
-# Get rsID of SNPs that are significant and append 
-position_chr10 = Nalls_sel_reg.BAG3 %>% 
-  mutate(chr = gsub("chr", "", seqnames)) %>% 
-  unite(col = "position", c(chr, end, base_pair_position), sep = ":", remove = FALSE) %>% 
-  dplyr::filter(GWAS_p_sig != "no") %>%
-  dplyr::select(position) %>% 
-  pull()
+# Get rsID of SNPs that are significant and append
+position_chr10 = Nalls_sel_reg.BAG3 %>%
+    mutate(chr = gsub("chr", "", seqnames)) %>%
+    unite(col = "position", c(chr, end, base_pair_position), sep = ":", remove = FALSE) %>%
+    dplyr::filter(GWAS_p_sig != "no") %>%
+    dplyr::select(position) %>%
+    pull()
 
 
-rsID_sig_SNPs.chr10 = getBM(c("refsnp_id", "chr_name", "chrom_start", "chrom_end", "allele", "minor_allele"),
-                      filters = "chromosomal_region",
-                      values = position_chr10,
-                      mart = snp.ensembl)
+rsID_sig_SNPs.chr10 = getBM(c("refsnp_id", "chr_name", "chrom_start", "chrom_end",
+    "allele", "minor_allele"), filters = "chromosomal_region", values = position_chr10,
+    mart = snp.ensembl)
 
-rsID_sig_SNPs.chr10 = rsID_sig_SNPs.chr10 %>% 
-  unite(col = "position", chr_name:chrom_end, sep = ":", remove = FALSE)
+rsID_sig_SNPs.chr10 = rsID_sig_SNPs.chr10 %>%
+    unite(col = "position", chr_name:chrom_end, sep = ":", remove = FALSE)
 
-Nalls_sel_reg.BAG3 = Nalls_sel_reg.BAG3 %>% 
-  mutate(chr = gsub("chr", "", seqnames)) %>% 
-  unite(col = "position", c(chr, end, base_pair_position),
-        sep = ":", remove = FALSE) %>% 
-  left_join(rsID_sig_SNPs.chr10, by = "position")
+Nalls_sel_reg.BAG3 = Nalls_sel_reg.BAG3 %>%
+    mutate(chr = gsub("chr", "", seqnames)) %>%
+    unite(col = "position", c(chr, end, base_pair_position), sep = ":", remove = FALSE) %>%
+    left_join(rsID_sig_SNPs.chr10, by = "position")
 
 # Calculate R2 to check if SNPs are in LD
-BAG3_SNPs_LD = Nalls_sel_reg.BAG3 %>% 
-  dplyr::select(refsnp_id) %>% 
-  drop_na()
+BAG3_SNPs_LD = Nalls_sel_reg.BAG3 %>%
+    dplyr::select(refsnp_id) %>%
+    drop_na()
 
-BAG3_R2 = LDproxy(snp = "rs144814361",
-                   pop = "EUR",
-                   r2d = "r2",
-                   token = "5bba40af90d7",
-                   genome_build = "grch38_high_coverage")
+BAG3_R2 = LDproxy(snp = "rs144814361", pop = "EUR", r2d = "r2", token = "5bba40af90d7",
+    genome_build = "grch38_high_coverage")
 
-BAG3_R2 = BAG3_R2 %>% 
-  as_tibble() %>% 
-  dplyr::select(RS_Number, Coord, R2) %>% 
-  dplyr::rename(refsnp_id = RS_Number)
+BAG3_R2 = BAG3_R2 %>%
+    as_tibble() %>%
+    dplyr::select(RS_Number, Coord, R2) %>%
+    dplyr::rename(refsnp_id = RS_Number)
 
 # Plot
-BAG3.pl = Nalls_sel_reg.BAG3 %>% 
-  unite("Coord", seqnames, base_pair_position, sep = ":", remove = FALSE) %>% 
-  left_join(BAG3_R2, by = "Coord") %>% 
-  dplyr::select(seqnames, base_pair_position, p, refsnp_id.x,R2) %>% 
-  dplyr::rename(chrom = seqnames,
-               pos = base_pair_position,
-               snp = refsnp_id.x, 
-               LD = R2) %>% 
-  mutate(chrom = as.character(chrom)) %>% 
-  group_by(LD) %>% 
-  mutate(LD_grp = cut(LD, seq(0, 1.0, 0.2)))
+BAG3.pl = Nalls_sel_reg.BAG3 %>%
+    unite("Coord", seqnames, base_pair_position, sep = ":", remove = FALSE) %>%
+    left_join(BAG3_R2, by = "Coord") %>%
+    dplyr::select(seqnames, base_pair_position, p, refsnp_id.x, R2) %>%
+    dplyr::rename(chrom = seqnames, pos = base_pair_position, snp = refsnp_id.x,
+        LD = R2) %>%
+    mutate(chrom = as.character(chrom)) %>%
+    group_by(LD) %>%
+    mutate(LD_grp = cut(LD, seq(0, 1, 0.2)))
 
 BAG3.pl$LD_grp = addNA(BAG3.pl$LD_grp)
 
 BAG3_leadSNP = "rs144814361"
 
-BAG3_MP = plotManhattan(data = BAG3.pl,
-              chrom = "chr10",
-              chromstart = 119611405,
-              chromend = 119691405,
-              assembly = "hg38",
-              fill = colorby("LD_grp",
-                             palette = colorRampPalette(c("#35b779",
-                                                          "#21918c", 
-                                                          "#31688e",
-                                                          "#443983", 
-                                                          "#440154", 
-                                                          "#CCCCCC"))),
-        trans = "-log10", 
-        sigLine = TRUE, col = "grey",
-        lty = 2, range = c(0, 16),
-        leadSNP = list(
-        snp = BAG3_leadSNP,
-        pch = 18,
-        cex = 0.75,
-        fill = "#990066",
-        fontsize = 8),
-              x = 0.5, 
-              y = 8.5, 
-              width = 1.5, 
-              height = 2.5,
-              just = c("left", "top"), 
-              default.units = "inches")
+BAG3_MP = plotManhattan(data = BAG3.pl, chrom = "chr10", chromstart = 119611405,
+    chromend = 119691405, assembly = "hg38", fill = colorby("LD_grp", palette = colorRampPalette(c("#35b779",
+        "#21918c", "#31688e", "#443983", "#440154", "#CCCCCC"))), trans = "-log10",
+    sigLine = TRUE, col = "grey", lty = 2, range = c(0, 16), leadSNP = list(snp = BAG3_leadSNP,
+        pch = 18, cex = 0.75, fill = "#990066", fontsize = 8), x = 0.5, y = 8.5,
+    width = 1.5, height = 2.5, just = c("left", "top"), default.units = "inches")
 
 ## Annotate genome label
-annoGenomeLabel(
-    plot = BAG3_MP, x = 0.5, y = 11,
-    fontsize = 8, scale = "Mb",
-    just = c("left", "top"), default.units = "inches"
-)
+annoGenomeLabel(plot = BAG3_MP, x = 0.5, y = 11, fontsize = 8, scale = "Mb", just = c("left",
+    "top"), default.units = "inches")
 
 ## Annotate y-axis
-annoYaxis(
-    plot = BAG3_MP,
-    at = c(0, 2, 4, 6, 8, 10, 12),
-    axisLine = TRUE, fontsize = 8
-)
+annoYaxis(plot = BAG3_MP, at = c(0, 2, 4, 6, 8, 10, 12), axisLine = TRUE, fontsize = 8)
 
 ## Plot y-axis label
-plotText(
-    label = "-log10(p-value)", x = 0.125, y = 10.125, rot = 90,
-    fontsize = 8, fontface = "bold", just = "center",
-    default.units = "inches"
-)
+plotText(label = "-log10(p-value)", x = 0.125, y = 10.125, rot = 90, fontsize = 8,
+    fontface = "bold", just = "center", default.units = "inches")
 
 # Plot gene BAG3
-plotGenes(
-    chrom = "chr10", chromstart = 119611405, chromend = 119691405,
-    x = 0.5, y = 8.5, width = 1.5, height = 0.5,
-    just = c("left", "top"), default.units = "inches",
-    fontcolor = "black",
-    fill = "black",
-    assembly = assembly(Genome = "hg38refGene", 
-                      TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", 
-                      OrgDb = "org.Hs.eg.db")
-)
+plotGenes(chrom = "chr10", chromstart = 119611405, chromend = 119691405, x = 0.5,
+    y = 8.5, width = 1.5, height = 0.5, just = c("left", "top"), default.units = "inches",
+    fontcolor = "black", fill = "black", assembly = assembly(Genome = "hg38refGene",
+        TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", OrgDb = "org.Hs.eg.db"))
 
 # Filter for the SNP in IDUA regulatory region
-Nalls_sel_reg.IDUA = nalls_allSNPs.HG38.GR %>% 
-  as_tibble() %>% 
-  dplyr::filter(seqnames == "chr4",
-         between(base_pair_position, 987108 - r, 987108 + r)) %>% 
-  mutate(minus_log_10_p = -log10(p),
-         GWAS_p_sig = if_else(minus_log_10_p > -log10(5e-8), "yes", "no"),
-         rsID = if_else(seqnames == "chr4" & base_pair_position == 987108, "rs11248061", ""))
+Nalls_sel_reg.IDUA = nalls_allSNPs.HG38.GR %>%
+    as_tibble() %>%
+    dplyr::filter(seqnames == "chr4", between(base_pair_position, 987108 - r, 987108 +
+        r)) %>%
+    mutate(minus_log_10_p = -log10(p), GWAS_p_sig = if_else(minus_log_10_p > -log10(5e-08),
+        "yes", "no"), rsID = if_else(seqnames == "chr4" & base_pair_position == 987108,
+        "rs11248061", ""))
 
-# Get rsID of SNPs that significant and append 
-position_chr4.IDUA = Nalls_sel_reg.IDUA %>% 
-  mutate(chr = gsub("chr", "", seqnames)) %>% 
-  unite(col = "position", c(chr, end, base_pair_position), sep = ":", remove = FALSE) %>% 
-  dplyr::filter(GWAS_p_sig != "no") %>%
-  dplyr::select(position) %>% 
-  pull()
+# Get rsID of SNPs that significant and append
+position_chr4.IDUA = Nalls_sel_reg.IDUA %>%
+    mutate(chr = gsub("chr", "", seqnames)) %>%
+    unite(col = "position", c(chr, end, base_pair_position), sep = ":", remove = FALSE) %>%
+    dplyr::filter(GWAS_p_sig != "no") %>%
+    dplyr::select(position) %>%
+    pull()
 
-rsID_sig_SNPs.chr4.IDUA = getBM(c("refsnp_id", "chr_name", "chrom_start", "chrom_end", "allele", "minor_allele",
-                        "minor_allele_freq"),
-                      filters = "chromosomal_region",
-                      values = position_chr4.IDUA,
-                      mart = snp.ensembl)
+rsID_sig_SNPs.chr4.IDUA = getBM(c("refsnp_id", "chr_name", "chrom_start", "chrom_end",
+    "allele", "minor_allele", "minor_allele_freq"), filters = "chromosomal_region",
+    values = position_chr4.IDUA, mart = snp.ensembl)
 
-rsID_sig_SNPs.chr4.IDUA = rsID_sig_SNPs.chr4.IDUA %>% 
-  unite(col = "position", chr_name:chrom_end, sep = ":", remove = FALSE)
+rsID_sig_SNPs.chr4.IDUA = rsID_sig_SNPs.chr4.IDUA %>%
+    unite(col = "position", chr_name:chrom_end, sep = ":", remove = FALSE)
 
-Nalls_sel_reg.IDUA = Nalls_sel_reg.IDUA %>% 
-  mutate(chr = gsub("chr", "", seqnames)) %>% 
-  unite(col = "position", c(chr, end, base_pair_position),
-        sep = ":", remove = FALSE) %>% 
-  left_join(rsID_sig_SNPs.chr4.IDUA, by = "position")
+Nalls_sel_reg.IDUA = Nalls_sel_reg.IDUA %>%
+    mutate(chr = gsub("chr", "", seqnames)) %>%
+    unite(col = "position", c(chr, end, base_pair_position), sep = ":", remove = FALSE) %>%
+    left_join(rsID_sig_SNPs.chr4.IDUA, by = "position")
 
 # Calculate R2 to check if SNPs are in LD
-IDUA_SNPs_LD = Nalls_sel_reg.IDUA %>% 
-  dplyr::select(refsnp_id) %>% 
-  drop_na()
+IDUA_SNPs_LD = Nalls_sel_reg.IDUA %>%
+    dplyr::select(refsnp_id) %>%
+    drop_na()
 
-IDUA_SNPs_LD = IDUA_SNPs_LD %>% 
-  filter(!str_detect(refsnp_id, "^CR"))
+IDUA_SNPs_LD = IDUA_SNPs_LD %>%
+    dplyr::filter(!str_detect(refsnp_id, "^CR"))
 
-IDUA_R2 = LDproxy(snp = "rs11248061",
-                   pop = "EUR",
-                   r2d = "r2",
-                   token = "5bba40af90d7",
-                   genome_build = "grch38_high_coverage")
+IDUA_R2 = LDproxy(snp = "rs11248061", pop = "EUR", r2d = "r2", token = "5bba40af90d7",
+    genome_build = "grch38_high_coverage")
 
-IDUA_R2 = IDUA_R2 %>% 
-  as_tibble() %>% 
-  dplyr::select(RS_Number, Coord, R2) %>% 
-  dplyr::rename(refsnp_id = RS_Number)
+IDUA_R2 = IDUA_R2 %>%
+    as_tibble() %>%
+    dplyr::select(RS_Number, Coord, R2) %>%
+    dplyr::rename(refsnp_id = RS_Number)
 
 
 # Plot
-IDUA.pl = Nalls_sel_reg.IDUA %>% 
-  unite("Coord", seqnames, base_pair_position, sep = ":", remove = FALSE) %>% 
-  distinct(Coord, .keep_all = TRUE) %>% 
-  left_join(IDUA_R2, by = "Coord") %>% 
-  dplyr::select(seqnames, base_pair_position, p, refsnp_id.x, R2) %>% 
-  dplyr::rename(chrom = seqnames,
-               pos = base_pair_position,
-               snp = refsnp_id.x, 
-               LD = R2) %>% 
-  mutate(chrom = as.character(chrom)) %>% 
-  group_by(LD) %>% 
-  mutate(LD_grp = cut(LD, seq(0, 1.0, 0.2)))
+IDUA.pl = Nalls_sel_reg.IDUA %>%
+    unite("Coord", seqnames, base_pair_position, sep = ":", remove = FALSE) %>%
+    distinct(Coord, .keep_all = TRUE) %>%
+    left_join(IDUA_R2, by = "Coord") %>%
+    dplyr::select(seqnames, base_pair_position, p, refsnp_id.x, R2) %>%
+    dplyr::rename(chrom = seqnames, pos = base_pair_position, snp = refsnp_id.x,
+        LD = R2) %>%
+    mutate(chrom = as.character(chrom)) %>%
+    group_by(LD) %>%
+    mutate(LD_grp = cut(LD, seq(0, 1, 0.2)))
 
 IDUA.pl$LD_grp = addNA(IDUA.pl$LD_grp)
 
 IDUA_leadSNP = "rs11248061"
 
-IDUA_MP = plotManhattan(data = IDUA.pl,
-              chrom = "chr4",
-              chromstart = 947108,
-              chromend = 1027108,
-              assembly = "hg38",
-              fill = colorby("LD_grp",
-                             palette = colorRampPalette(c("#35b779",
-                                                          "#21918c", 
-                                                          "#31688e",
-                                                          "#443983", 
-                                                          "#440154", 
-                                                          "#CCCCCC"))),
-        trans = "-log10", 
-        sigLine = TRUE, col = "grey",
-        lty = 2, range = c(0, 16),
-        leadSNP = list(
-        snp = IDUA_leadSNP,
-        pch = 18,
-        cex = 0.75,
-        fill = "#990066",
-        fontsize = 8),
-              x = 2.5, 
-              y = 8.5, 
-              width = 1.5, 
-              height = 2.5,
-              just = c("left", "top"), 
-              default.units = "inches")
+IDUA_MP = plotManhattan(data = IDUA.pl, chrom = "chr4", chromstart = 947108, chromend = 1027108,
+    assembly = "hg38", fill = colorby("LD_grp", palette = colorRampPalette(c("#35b779",
+        "#21918c", "#31688e", "#443983", "#440154", "#CCCCCC"))), trans = "-log10",
+    sigLine = TRUE, col = "grey", lty = 2, range = c(0, 16), leadSNP = list(snp = IDUA_leadSNP,
+        pch = 18, cex = 0.75, fill = "#990066", fontsize = 8), x = 2.5, y = 8.5,
+    width = 1.5, height = 2.5, just = c("left", "top"), default.units = "inches")
 
 ## Annotate genome label
-annoGenomeLabel(
-    plot = IDUA_MP, x = 2.5, y = 11,
-    fontsize = 8, scale = "Mb",
-    just = c("left", "top"), default.units = "inches"
-)
+annoGenomeLabel(plot = IDUA_MP, x = 2.5, y = 11, fontsize = 8, scale = "Mb", just = c("left",
+    "top"), default.units = "inches")
 
 ## Annotate y-axis
-annoYaxis(
-    plot = IDUA_MP,
-    at = c(0, 2, 4, 6, 8, 10, 12),
-    axisLine = TRUE, fontsize = 8
-)
+annoYaxis(plot = IDUA_MP, at = c(0, 2, 4, 6, 8, 10, 12), axisLine = TRUE, fontsize = 8)
 
 ## Plot y-axis label
-plotText(
-    label = "-log10(p-value)", x = 2.125, y = 10.125, rot = 90,
-    fontsize = 8, fontface = "bold", just = "center",
-    default.units = "inches"
-)
+plotText(label = "-log10(p-value)", x = 2.125, y = 10.125, rot = 90, fontsize = 8,
+    fontface = "bold", just = "center", default.units = "inches")
 
 # Plot gene IDUA
-plotGenes(
-    chrom = "chr4", chromstart = 947108, chromend = 1027108,
-    x = 2.5, y = 8.5, width = 1.5, height = 0.5,
-    just = c("left", "top"), default.units = "inches",
-    fontcolor = "black",
-    fill = "black",
-    assembly = assembly(Genome = "hg38refGene", 
-                      TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", 
-                      OrgDb = "org.Hs.eg.db")
-)
+plotGenes(chrom = "chr4", chromstart = 947108, chromend = 1027108, x = 2.5, y = 8.5,
+    width = 1.5, height = 0.5, just = c("left", "top"), default.units = "inches",
+    fontcolor = "black", fill = "black", assembly = assembly(Genome = "hg38refGene",
+        TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", OrgDb = "org.Hs.eg.db"))
 
 # Filter for the SNP in SCARB2 regulatory region
-Nalls_sel_reg.SCARB2 = nalls_allSNPs.HG38.GR %>% 
-  as_tibble() %>% 
-  filter(seqnames == "chr4",
-         between(base_pair_position, 76213717 - r, 76213717 + r)) %>% 
-  mutate(minus_log_10_p = -log10(p),
-         GWAS_p_sig = if_else(minus_log_10_p > -log10(5e-8), "yes", "no"),
-         rsID = if_else(seqnames == "chr4" & base_pair_position == 76213717, "rs1465922", ""))
+Nalls_sel_reg.SCARB2 = nalls_allSNPs.HG38.GR %>%
+    as_tibble() %>%
+    dplyr::filter(seqnames == "chr4", between(base_pair_position, 76213717 - r, 76213717 +
+        r)) %>%
+    mutate(minus_log_10_p = -log10(p), GWAS_p_sig = if_else(minus_log_10_p > -log10(5e-08),
+        "yes", "no"), rsID = if_else(seqnames == "chr4" & base_pair_position == 76213717,
+        "rs1465922", ""))
 
-# Get rsID of SNPs that significant and append 
-position_chr4.SCARB2 = Nalls_sel_reg.SCARB2 %>% 
-  mutate(chr = gsub("chr", "", seqnames)) %>% 
-  unite(col = "position", c(chr, end, base_pair_position), sep = ":", remove = FALSE) %>% 
-  filter(GWAS_p_sig != "no") %>%
-  dplyr::select(position) %>% 
-  pull()
+# Get rsID of SNPs that significant and append
+position_chr4.SCARB2 = Nalls_sel_reg.SCARB2 %>%
+    mutate(chr = gsub("chr", "", seqnames)) %>%
+    unite(col = "position", c(chr, end, base_pair_position), sep = ":", remove = FALSE) %>%
+    dplyr::filter(GWAS_p_sig != "no") %>%
+    dplyr::select(position) %>%
+    pull()
 
-rsID_sig_SNPs.chr4.SCARB2 = getBM(c("refsnp_id", "chr_name", "chrom_start", "chrom_end", "allele", "minor_allele",
-                        "minor_allele_freq"),
-                      filters = "chromosomal_region",
-                      values = position_chr4.SCARB2,
-                      mart = snp.ensembl)
+rsID_sig_SNPs.chr4.SCARB2 = getBM(c("refsnp_id", "chr_name", "chrom_start", "chrom_end",
+    "allele", "minor_allele", "minor_allele_freq"), filters = "chromosomal_region",
+    values = position_chr4.SCARB2, mart = snp.ensembl)
 
-rsID_sig_SNPs.chr4.SCARB2 = rsID_sig_SNPs.chr4.SCARB2 %>% 
-  unite(col = "position", chr_name:chrom_end, sep = ":", remove = FALSE)
+rsID_sig_SNPs.chr4.SCARB2 = rsID_sig_SNPs.chr4.SCARB2 %>%
+    unite(col = "position", chr_name:chrom_end, sep = ":", remove = FALSE)
 
-Nalls_sel_reg.SCARB2 = Nalls_sel_reg.SCARB2 %>% 
-  mutate(chr = gsub("chr", "", seqnames)) %>% 
-  unite(col = "position", c(chr, end, base_pair_position),
-        sep = ":", remove = FALSE) %>% 
-  left_join(rsID_sig_SNPs.chr4.SCARB2, by = "position")
+Nalls_sel_reg.SCARB2 = Nalls_sel_reg.SCARB2 %>%
+    mutate(chr = gsub("chr", "", seqnames)) %>%
+    unite(col = "position", c(chr, end, base_pair_position), sep = ":", remove = FALSE) %>%
+    left_join(rsID_sig_SNPs.chr4.SCARB2, by = "position")
 
 # Calculate R2 to check if SNPs are in LD
-SCARB2_SNPs_LD = Nalls_sel_reg.SCARB2 %>% 
-  dplyr::select(refsnp_id) %>% 
-  drop_na()
+SCARB2_SNPs_LD = Nalls_sel_reg.SCARB2 %>%
+    dplyr::select(refsnp_id) %>%
+    drop_na()
 
-SCARB2_R2 = LDproxy(snp = "rs1465922",
-                   pop = "EUR",
-                   r2d = "r2",
-                   token = "5bba40af90d7",
-                   genome_build = "grch38_high_coverage")
+SCARB2_R2 = LDproxy(snp = "rs1465922", pop = "EUR", r2d = "r2", token = "5bba40af90d7",
+    genome_build = "grch38_high_coverage")
 
-SCARB2_R2 = SCARB2_R2 %>% 
-  as_tibble() %>% 
-  dplyr::select(RS_Number, Coord, R2) %>% 
-  dplyr::rename(refsnp_id = RS_Number)
+SCARB2_R2 = SCARB2_R2 %>%
+    as_tibble() %>%
+    dplyr::select(RS_Number, Coord, R2) %>%
+    dplyr::rename(refsnp_id = RS_Number)
 
 # Plot
-SCARB2.pl = Nalls_sel_reg.SCARB2 %>% 
-  unite("Coord", seqnames, base_pair_position, sep = ":", remove = FALSE) %>% 
-  left_join(SCARB2_R2, by = "Coord") %>% 
-  dplyr::select(seqnames, base_pair_position, p, refsnp_id.x, R2) %>% 
-  dplyr::rename(chrom = seqnames,
-               pos = base_pair_position,
-               snp = refsnp_id.x, 
-               LD = R2) %>% 
-  mutate(chrom = as.character(chrom)) %>% 
-  group_by(LD) %>% 
-  mutate(LD_grp = cut(LD, seq(0, 1.0, 0.2)))
+SCARB2.pl = Nalls_sel_reg.SCARB2 %>%
+    unite("Coord", seqnames, base_pair_position, sep = ":", remove = FALSE) %>%
+    left_join(SCARB2_R2, by = "Coord") %>%
+    dplyr::select(seqnames, base_pair_position, p, refsnp_id.x, R2) %>%
+    dplyr::rename(chrom = seqnames, pos = base_pair_position, snp = refsnp_id.x,
+        LD = R2) %>%
+    mutate(chrom = as.character(chrom)) %>%
+    group_by(LD) %>%
+    mutate(LD_grp = cut(LD, seq(0, 1, 0.2)))
 
 SCARB2.pl$LD_grp = addNA(SCARB2.pl$LD_grp)
 
 SCARB2_leadSNP = "rs1465922"
 
-SCARB2_MP = plotManhattan(data = SCARB2.pl,
-              chrom = "chr4",
-              chromstart = 76173717,
-              chromend = 76253717,
-              assembly = "hg38",
-              fill = colorby("LD_grp",
-                             palette = colorRampPalette(c("#35b779",
-                                                          "#21918c", 
-                                                          "#31688e",
-                                                          "#443983", 
-                                                          "#440154", 
-                                                          "#CCCCCC"))),
-        trans = "-log10", 
-        sigLine = TRUE, col = "grey",
-        lty = 2, range = c(0, 16),
-        leadSNP = list(
-        snp = SCARB2_leadSNP,
-        pch = 18,
-        cex = 0.75,
-        fill = "#990066",
-        fontsize = 8),
-              x = 4.5, 
-              y = 8.5, 
-              width = 1.5, 
-              height = 2.5,
-              just = c("left", "top"), 
-              default.units = "inches")
+SCARB2_MP = plotManhattan(data = SCARB2.pl, chrom = "chr4", chromstart = 76173717,
+    chromend = 76253717, assembly = "hg38", fill = colorby("LD_grp", palette = colorRampPalette(c("#35b779",
+        "#21918c", "#31688e", "#443983", "#440154", "#CCCCCC"))), trans = "-log10",
+    sigLine = TRUE, col = "grey", lty = 2, range = c(0, 16), leadSNP = list(snp = SCARB2_leadSNP,
+        pch = 18, cex = 0.75, fill = "#990066", fontsize = 8), x = 4.5, y = 8.5,
+    width = 1.5, height = 2.5, just = c("left", "top"), default.units = "inches")
 
 ## Annotate genome label
-annoGenomeLabel(
-    plot = SCARB2_MP, x = 4.5, y = 11,
-    fontsize = 8, scale = "Mb",
-    just = c("left", "top"), default.units = "inches"
-)
+annoGenomeLabel(plot = SCARB2_MP, x = 4.5, y = 11, fontsize = 8, scale = "Mb", just = c("left",
+    "top"), default.units = "inches")
 
 ## Annotate y-axis
-annoYaxis(
-    plot = SCARB2_MP,
-    at = c(0, 2, 4, 6, 8, 10, 12),
-    axisLine = TRUE, fontsize = 8
-)
+annoYaxis(plot = SCARB2_MP, at = c(0, 2, 4, 6, 8, 10, 12), axisLine = TRUE, fontsize = 8)
 
 ## Plot y-axis label
-plotText(
-    label = "-log10(p-value)", x = 4.125, y = 10.125, rot = 90,
-    fontsize = 8, fontface = "bold", just = "center",
-    default.units = "inches"
-)
+plotText(label = "-log10(p-value)", x = 4.125, y = 10.125, rot = 90, fontsize = 8,
+    fontface = "bold", just = "center", default.units = "inches")
 
 # Plot gene SCARB2
-plotGenes(
-    chrom = "chr4", chromstart = 76173717, chromend = 76253717,
-    x = 4.5, y = 8.5, width = 1.5, height = 0.5,
-    just = c("left", "top"), default.units = "inches",
-    fontcolor = "black",
-    fill = "black",
-    assembly = assembly(Genome = "hg38refGene", 
-                      TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", 
-                      OrgDb = "org.Hs.eg.db")
-)
+plotGenes(chrom = "chr4", chromstart = 76173717, chromend = 76253717, x = 4.5, y = 8.5,
+    width = 1.5, height = 0.5, just = c("left", "top"), default.units = "inches",
+    fontcolor = "black", fill = "black", assembly = assembly(Genome = "hg38refGene",
+        TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", OrgDb = "org.Hs.eg.db"))
 
 # Legend LD score
-plotLegend(
-  legend = c("LD reference SNP",
-             paste("0", "<", "r^2", "<= 0.2"),
-             paste("0.2", "<", "r^2", "<= 0.4"),
-             paste("0.4", "<", "r^2", "<= 0.6"),
-             paste("0.6", "<", "r^2", "<= 0.8"),
-             paste("0.8", "<", "r^2", "<= 1.0"),
-             "no LD data"),
-    fill = c("#990066", "#35b779", "#21918c", "#31688e", "#443983", "#440154", "#CCCCCC"), 
-  cex = 0.75,
-    pch = c(18, 19, 19, 19, 19, 19, 19), border = FALSE, x = 6.5, y = 9.25,
-    width = 1.0, height = 1.0, just = c("left", "top"),
-    default.units = "inches"
-)
+plotLegend(legend = c("LD reference SNP", paste("0", "<", "r^2", "<= 0.2"), paste("0.2",
+    "<", "r^2", "<= 0.4"), paste("0.4", "<", "r^2", "<= 0.6"), paste("0.6", "<",
+    "r^2", "<= 0.8"), paste("0.8", "<", "r^2", "<= 1.0"), "no LD data"), fill = c("#990066",
+    "#35b779", "#21918c", "#31688e", "#443983", "#440154", "#CCCCCC"), cex = 0.75,
+    pch = c(18, 19, 19, 19, 19, 19, 19), border = FALSE, x = 6.5, y = 9.25, width = 1,
+    height = 1, just = c("left", "top"), default.units = "inches")
 
-plotLegend(
-  legend = list(expression("LD reference SNP"),
-                expression(0 ~ "<" ~ "r"^2 ~ "<="))),
-
-    fill = c("#990066", "#35b779", "#21918c", "#31688e", "#443983", "#440154", "#CCCCCC"), 
-  cex = 0.75,
-    pch = c(18, 19, 19, 19, 19, 19, 19), border = FALSE, x = 6.5, y = 9.25,
-    width = 1.0, height = 1.0, just = c("left", "top"),
-    default.units = "inches"
-)
 
 dev.off()
 ```
@@ -1090,6 +828,11 @@ plotText(label = "B", fontsize = 12, fontfamily = "Helvetica", x = 5, y = 0.5, j
 # Load it for making the plots
 dat.RPKM.filt = read_rds("/home/vagrant/Manuscript_1/FIGURE2/mat_RPKM.rds")
 dat.RPKM.filt = read_rds("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE2/mat_RPKM.rds")
+
+dat.RPKM.filt %>%
+    # filter(str_detect(gene_id, ' ENSG00000272414'))
+filter(str_detect(gene_name, paste0(c("FAM47E", "STBD1"), collapse = "|"))) %>%
+    View()
 
 # Expression for BAG3 and LHX1
 BAG3.LHX1.exp = ggboxplot(dat.RPKM.filt %>%
@@ -1890,8 +1633,9 @@ AI_ATAC = countList$chr4_76213717 %>%
 # Plot
 chrom_AI = ggplot(AI_ATAC, aes(Sample.n, Reads, fill = interaction(Sample.n, Base)),
     alpha = Base) + geom_bar(stat = "identity", position = "dodge", width = 0.5,
-    colour = "black") + geom_text(aes(label = format(c(0.3, "", 0.3, "", 0.003, "",
-    3e-07, "", 0.2, ""), scientific = TRUE), y = Reads + 100), vjust = 0) + scale_fill_manual(aesthetics = "fill",
+    colour = "black") + geom_text(aes(label = format(c(paste0("p = ", 0.3), "", paste0("p = ",
+    0.3), "", paste0("p = ", 0.003), "", paste0("p = ", 3e-07), "", paste0("p = ",
+    0.2), ""), scientific = TRUE), y = Reads + 100), vjust = 0) + scale_fill_manual(aesthetics = "fill",
     values = c("#D3D3D3", "#B22222", "#FF6347", "#FFA07A", "#b8627db2", "#C0C0C0",
         "#A52A2A", "#FF0000", "#FA8072", "#cc6a70b2")) + coord_flip() + theme_classic() +
     scale_y_continuous(expand = c(0, 0), limits = c(0, 330)) + xlab("") + theme(axis.text = element_text(face = "bold",
@@ -1939,7 +1683,8 @@ AI_ATAC = AI_ATAC %>%
 
 chrom_AI = ggbarplot(AI_ATAC, x = "Sample.n", y = "Reads", fill = "Allele", position = position_dodge(0.7),
     xlab = "", ylab = "Reads", title = "Read at SCARB2 promoter overlapping rs1465922 (SCARB2)",
-    label = format(c(0.3, "", 0.3, "", 0.003, "", 3e-07, "", 0.2, ""), scientific = TRUE),
+    label = format(c(paste0("p = ", 0.3), "", paste0("p = ", 0.3), "", paste0("p = ",
+        0.003), "", paste0("p = ", 3e-07), "", paste0("p = ", 0.2), ""), scientific = TRUE),
     label.pos = "out", lab.size = 3, lab.vjust = 0.5, lab.hjust = -0.5, orientation = "horiz") +
     theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1,
         face = "bold", size = 10), axis.text.y = element_text(face = "bold", size = 10),
@@ -3268,5 +3013,9 @@ SNEEP_out_all %>%
     dplyr::filter(SNP_position %in% nalls_allSNPs.HG38.GR.pvalFilt106$SNP_position) %>%
     distinct(SNP_position, .keep_all = TRUE) %>%
     View()
+
+
+
+strawr::readHicChroms("/Volumes/deborah.gerard/Documents/Wetlab/epifunc/LOW_C/LowCO/LowCO/FANC_output_mixedNeur/hic/binned/FANC_opti_mixed_neur_100kb.hic")
 ```
 
