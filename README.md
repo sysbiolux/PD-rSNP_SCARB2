@@ -23,5 +23,5 @@ Figure 4 has been created with the [plotgardener R package](https://phanstiellab
 Supplementary Figure 1 has been created with the [plotgardener R package](https://phanstiellab.github.io/plotgardener/index.html). 
 
 ## Supplementary Figure 2
-Supplementary Figure 1 has been created with the [plotgardener R package](https://phanstiellab.github.io/plotgardener/index.html). 
+Supplementary Figure 2 has been created with the [plotgardener R package](https://phanstiellab.github.io/plotgardener/index.html). 
 
