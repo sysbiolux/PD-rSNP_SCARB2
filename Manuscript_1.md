@@ -1,7 +1,7 @@
 ---
 title: "Manuscript_1"
 author: Deborah Gérard^[University of Luxembourg - FSTM - DLSM - Systems Biology group - Epigenetics team]
-date: "03 April, 2024"
+date: "30 January, 2025"
 output: 
   html_document:
     keep_md: true
@@ -20,7 +20,7 @@ editor_options:
 Work within a Singularity container to ensure reproducibility
 
 
-```bash
+``` bash
 # Initiate virtual box Vagrant
 cd $HOME/Manuscript_1_vagrant
 
@@ -32,6 +32,13 @@ vagrant ssh
 free -h
 nproc
 
+##
+#rsync -avzPhu iris-cluster:/home/users/dgerard/Singularity_containers/Manuscript_1_singularity.sif ~/Downloads/
+
+#scp -r -P 2222 -i /Users/deborah.gerard/singularity-vm/.vagrant/machines/default/virtualbox/private_key \
+#~/Downloads/Manuscript_1_singularity.sif vagrant@127.0.0.1:/home/vagrant/Manuscript_1_singularity/
+
+##
 # Check singularity version
 singularity version   # 3.9.0
 
@@ -44,6 +51,9 @@ sudo singularity build --sandbox Manuscript_1_singularity_tmp Manuscript_1_singu
 
 # Run the container in writable mode to make changes
 sudo singularity shell --writable Manuscript_1_singularity_tmp
+
+# TEST
+sudo singularity build --sandbox Manuscript_1_singularity_tmp Manuscript_1_singularity.sif
 
 # Now that all necessay packages and library have been installed, build the container
 sudo singularity build Manuscript_1_singularity.sif Manuscript_1_singularity_tmp
@@ -62,7 +72,7 @@ R.Version()
 Install different R libraries
 
 
-```r
+``` r
 # tidyverse, ggpubr, rstatix
 install.packages(c("tidyverse", "ggpubr", "rstatix"))
 # plotgardener
@@ -107,12 +117,15 @@ install.packages("ggflowchart")
 # Issue between dplyr, BiocFilrCache and biomaRt - > downgrade dbplyr
 install.packages("devtools")
 devtools::install_version("dbplyr", version = "2.3.4")
+
+# ggmanh
+BiocManager::install("ggmanh")
 ```
 
 Load libraries and check their versions
 
 
-```r
+``` r
 # Load
 library("tidyverse")
 library("rstatix")
@@ -136,6 +149,9 @@ library("scales")
 library("flowCore")
 library("ggcyto")
 library("ggmanh")
+library("rtracklayer")
+library("plyranges")
+library("RColorBrewer")
 
 # Check
 packageVersion("tidyverse")  #2.0.0
@@ -147,17 +163,23 @@ packageVersion("plotgardener")  #1.4.2
 packageVersion("TxDb.Hsapiens.UCSC.hg38.refGene")  #3.15.0
 packageVersion("org.Hs.eg.db")  #3.16.0
 packageVersion("extrafont")  #0.19
-packageVersion("showtext")  #0.9.6
+packageVersion("showtext")  #0.9.7
 packageVersion("JASPAR2020")  #0.99.10
 packageVersion("TFBSTools")  #1.36.0
-packageVersion("ggseqlogo")  #0.1
+packageVersion("ggseqlogo")  #0.2
 packageVersion("biomaRt")  #2.54.1
-packageVersion("LDlinkR")  #1.3.0
+packageVersion("LDlinkR")  #1.4.0
 packageVersion("AllelicImbalance")  #1.36.0
 packageVersion("png")  #0.1.8
 packageVersion("AnnotationDbi")  #1.60.2
-packageVersion("dbplyr")  #2.3.4
+# packageVersion('dbplyr') #2.5.0
+packageVersion("scales")  #1.3.0
+packageVersion("flowCore")  #2.10.0
+packageVersion("ggcyto")  #1.26.4
 packageVersion("ggmanh")  #1.2.0
+packageVersion("rtracklayer")  #1.58.0
+packageVersion("plyranges")  #1.18.0
+packageVersion("RColorBrewer")  #1.1.3
 
 # Import all available fonts
 font_import()
@@ -166,27 +188,24 @@ font_import()
 # FIGURES
 Generating the manhattan plot for the PD GWAS is memory demanding. Go to the HPC
 
-```bash
-ssh iris-cluster
-salloc --nodes=1 -p interactive --qos debug -C batch -t 02:00:00 --mem 24G
+``` bash
+#ssh iris-cluster
+#salloc --nodes=1 -p interactive --qos debug -C batch -t 02:00:00 --mem 24G
 
 # Load the Singularity module
-module load tools/Singularity/3.8.1
-singularity shell --bind /scratch/users/dgerard:/scratch/users/dgerard $HOME/Singularity_containers/Manuscript_1_singularity.sif
+#module load tools/Singularity/3.8.1
+#singularity shell --bind /scratch/users/dgerard:/scratch/users/dgerard $HOME/Singularity_containers/Manuscript_1_singularity.sif
 ```
 
 ### FIGURE 1
 
-```r
-########## FIGURE 1 ########## Save as a PDF
-pdf("/home/vagrant/Manuscript_1/FIGURE1/FIGURE1.pdf", width = 8.3, height = 11.7)
-
-# Save as TIFF, 300 ppi
-tiff("/home/vagrant/Manuscript_1/FIGURE1/FIGURE1.tiff", width = 8.27, height = 11.67,
+``` r
+########## FIGURE 1 ########## Save as TIFF, 300 ppi
+tiff("/home/vagrant/Manuscript_1/FIGURE1/FIGURE1.tiff", width = 8.27, height = 9.5,
     units = "in", res = 300, compression = "lzw")
 
 # Create a A4 blank page
-pageCreate(width = 8.27, height = 11.67, default.units = "inches", showGuides = FALSE)
+pageCreate(width = 8.27, height = 9.5, default.units = "inches", showGuides = TRUE)
 
 #### PANEL A - text Figure 1
 plotText(label = "Figure 1", fontsize = 14, fontfamily = "Helvetica", x = 0.25, y = 0.25,
@@ -196,37 +215,22 @@ plotText(label = "Figure 1", fontsize = 14, fontfamily = "Helvetica", x = 0.25, 
 plotText(label = "A", fontsize = 12, fontfamily = "Helvetica", x = 0.25, y = 0.5,
     just = "left", default.units = "inches", fontface = "bold")
 
-################### Figure 1A #### Figure 1A generated in Biorender fig1A =
-################### readPNG('/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/Fig1A.png')
-fig1A = readPNG("/home/vagrant/Manuscript_1/FIGURE1/Fig1A.png")
+########################################## Figure 1A Data generation scheme
+########################################## #### Figure 1A generated in
+########################################## Biorender
+fig1A = readPNG("/home/vagrant/Manuscript_1/FIGURE1/Fig1A_Biorender_vertical.png")
 
-plotRaster(image = fig1A, x = 0.25, y = 1, width = 8, height = 1, just = "left",
-    interpolate = TRUE)
+plotRaster(image = fig1A, x = 0.5, y = 2.5, default.units = "inches", width = 2.5,
+    height = 3.75, just = "left", interpolate = TRUE)
 
-# text B
-plotText(label = "B", fontsize = 12, fontfamily = "Helvetica", x = 0.25, y = 1.5,
-    just = "left", default.units = "inches", fontface = "bold")
+########################################## Figure 1B Odd ratio
+########################################## ################# text B
+plotText(label = "B", fontsize = 12, fontfamily = "Helvetica", x = 3, y = 0.5, just = "left",
+    default.units = "inches", fontface = "bold")
 
-# text C
-plotText(label = "C", fontsize = 12, fontfamily = "Helvetica", x = 0.25, y = 4.5,
-    just = "left", default.units = "inches", fontface = "bold")
-
-# text D
-plotText(label = "D", fontsize = 12, fontfamily = "Helvetica", x = 3.25, y = 4.5,
-    just = "left", default.units = "inches", fontface = "bold")
-
-# text E
-plotText(label = "E", fontsize = 12, fontfamily = "Helvetica", x = 0.25, y = 4.5,
-    just = "left", default.units = "inches", fontface = "bold")
-
-
-################### Figure 1B #### Load data obtained from Jochen
+# Load data obtained from Jochen
 RNAseq_odd = read_delim("/home/vagrant/Manuscript_1/FIGURE1/REFORMAT_tpm_gene_sets.gsa.txt",
     delim = "\t", col_names = TRUE)
-
-# RNAseq_odd =
-# read_delim('/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/REFORMAT_tpm_gene_sets.gsa.txt',
-# delim = '\t', col_names = TRUE)
 
 # Calculate odd ratio
 RNAseq_odd = RNAseq_odd %>%
@@ -243,83 +247,723 @@ fig1B = ggplot(RNAseq_odd, aes(x = odd_R, y = VARIABLE)) + geom_point(shape = 16
     scale_y_discrete(labels = c(smNPC = "smNPC", D15negsort = "non-mDAN D15", D15possort = "mDAN D15",
         D30postsort = "mDAN D30", D50negsort = "non-mDAN D50", D50possort = "mDAN D50",
         astrocytes = "Astrocytes")) + geom_text(label = round(RNAseq_odd$P, digits = 3),
-    nudge_y = 0.4) + xlab("Odds ratio (95% Confidence Interval)") + ylab("")
-
-# Place
-plotGG(plot = fig1B, x = 0.375, y = 1.75, width = 3, height = 2.5, just = c("left",
-    "top"), default.units = "inches")
-
-################### Figure 1C ####
-Fig1C_pip = readPNG("/home/vagrant/Manuscript_1/FIGURE1/Fig1C_pipeline.png")
-# Fig1C_pip =
-# readPNG('/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/Fig1C_pipeline.png')
-
-# Plot Figure 1C - Pipeline
-plotRaster(image = Fig1C_pip, x = 0.375, y = 4.75, width = 3, height = 3.5, just = c("left",
-    "top"), interpolate = TRUE)
-
-################### Figure 1C Manhattan plot #### Load the Nalls et al. GWAS
-################### data
-nalls_allSNPs.HG38.GR = readRDS("/home/vagrant/Manuscript_1/FIGURE1/nalls_allSNPs.HG38.GR.rds")
-
-# nalls_allSNPs.HG38.GR = readRDS(
-#'/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/nalls_allSNPs.HG38.GR.rds')
-
-# Load the rsIDS FOR THE 28 significant SNPs
-rsID.28 = read_delim("/home/vagrant/Manuscript_1/FIGURE1/20210309_28SNPs_rsID.csv",
-    delim = ",", col_names = TRUE)
-
-rsID.28 = read_delim("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/20210309_28SNPs_rsID.csv",
-    delim = ",", col_names = TRUE)
-
-rsID.28.filt = rsID.28 %>%
-    dplyr::select(chrom, chromEnd, name) %>%
-    unite(col = "pos", chrom, chromEnd, sep = "_")
-
-# Select the SNPs position from nalls et al and associate rsIDs
-nalls.manH = nalls_allSNPs.HG38.GR %>%
-    as_tibble() %>%
-    dplyr::select(seqnames, base_pair_position, p) %>%
-    unite(col = "pos", seqnames, base_pair_position, sep = "_", remove = FALSE) %>%
-    left_join(rsID.28.filt, by = "pos") %>%
-    separate(pos, into = c("chrom", "pos"), sep = "_", remove = TRUE) %>%
-    dplyr::select(chrom, pos, p, name)
-
-# Save
-write_rds(nalls.manH, "/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/20240304_28SNPs_rdID_manH.rds")
-
-nalls.manH = read_rds("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/20240304_28SNPs_rdID_manH.rds")
-nalls.manH = read_rds("/home/vagrant/Manuscript_1/FIGURE1/20240304_28SNPs_rdID_manH.rds")
-
-# Rename columns
-nalls.manH = nalls.manH %>%
-    dplyr::rename(snp = name) %>%
-    mutate(pos = as.numeric(pos)) %>%
-    dplyr::filter(chrom %in% rsID.28$chrom)
-
-# Manhattan plot - highlight the 28 SNPs with rsID
-snp_2_high = nalls.manH %>%
-    dplyr::filter(!is.na(snp), p <= 5e-08)
-
-# Random sampling for plotting test
-snp_to_pl = nalls.manH %>%
-    mutate(snp = NA_character_) %>%
-    bind_rows(snp_2_high) %>%
-    # dplyr::filter(p <= 5e-08) %>%
-mutate(pbis = -log10(p), chrom = factor(chrom, levels = c("chr1", "chr3", "chr4",
-    "chr7", "chr10", "chr12", "chr16", "chr17")))
-
-# And plot
-snp.pl = manhattan_plot(x = snp_to_pl, pval.colname = "p", chr.colname = "chrom",
-    pos.colname = "pos", label.colname = "snp", signif = 5e-08, max.overlaps = 50)
-
-saveRDS(snp.pl, "/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/Nalls_manh_label.rds")
-snp.pl = readRDS("/home/vagrant/Manuscript_1/FIGURE1/Nalls_manh_label.rds")
+    nudge_y = 0.4) + xlab("Odds ratio \n(95% Confidence Interval)") + ylab("")
 
 # Place the plot
-plotGG(plot = snp.pl, x = 3.5, y = 4.75, width = 4.5, height = 3.5, just = c("left",
+plotGG(plot = fig1B, x = 3.25, y = 0.5, width = 4.5, height = 4.5, just = c("left",
     "top"), default.units = "inches")
 
+#################################### Figure 1C LowC - Chr4 ######### text C
+plotText(label = "C", fontsize = 12, fontfamily = "Helvetica", x = 0.25, y = 5.25,
+    just = "left", default.units = "inches", fontface = "bold")
+
+# Load TH REP1 mCHERRY mDAN neurons D30 (N1) at 50kb resolution
+mDAN.D30.50kb = readHic(file = "/home/vagrant/epifunc/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30/hic/juicer_like/N1_mDAN_D30.juicer.50kb.hic",
+    chrom = "chr4", assembly = "hg38", resolution = 50000, res_scale = "BP", norm = "NONE",
+    matrix = "observed")
+
+# Load TH REP1 mCHERRY mDAN neurons D30 (N1) at 25kb resolution
+mDAN.D30.25kb = readHic(file = "/home/vagrant/epifunc/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30/hic/juicer_like/N1_mDAN_D30.juicer.25kb.hic",
+    chrom = "chr4", assembly = "hg38", resolution = 25000, res_scale = "BP", norm = "NONE",
+    matrix = "observed")
+
+# Load TH REP1 mCHERRY smNPCs (N1) at 50kb resolution
+smNPC.50kb = readHic(file = "/home/vagrant/epifunc/LowC_smNPC_THpos_neur/FANC_output_N1_smNPC/hic/juicer_like/N1_smNPC.juicer.50kb.hic",
+    chrom = "chr4", assembly = "hg38", resolution = 50000, res_scale = "BP", norm = "NONE",
+    matrix = "observed")
+
+# Full chr4 to display
+region.p.chr4 = pgParams(chrom = "chr4", assembly = assembly(Genome = "hg38refGene",
+    TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", OrgDb = "org.Hs.eg.db"), just = c("left",
+    "top"), width = 3.5, fontcolor = "black", fill = "black")
+
+# Plot full chr4 - smNPC on top of the diagonale and mDAN D30 at the bottom of
+# the diagonale
+LowC_smNPC.top = plotHicSquare(data = smNPC.50kb, params = region.p.chr4, zrange = c(0,
+    5), resolution = "auto", half = "top", x = 0.5, y = 5.5, height = 3.5)
+
+annoHeatmapLegend(plot = LowC_smNPC.top, fontsize = 7, x = 0.375, y = 6, width = 0.07,
+    height = 0.5, just = c("left", "top"), default.units = "inches")
+
+# smNPC
+plotText(label = "smNPC", fontsize = 12, fontfamily = "Helvetica", x = 0.5625, y = 5.625,
+    just = "left", default.units = "inches", fontface = "bold")
+
+LowC_mDAND30.bottom = plotHicSquare(data = mDAN.D30.50kb, params = region.p.chr4,
+    zrange = c(0, 5), resolution = "auto", half = "bottom", x = 0.5, y = 5.5, height = 3.5)
+
+annoHeatmapLegend(plot = LowC_mDAND30.bottom, fontsize = 7, x = 4.0625, y = 6, width = 0.07,
+    height = 0.5, just = c("left", "top"), default.units = "inches")
+
+# mDAN D30
+plotText(label = "mDAN D30", fontsize = 12, fontfamily = "Helvetica", x = 3, y = 8.9375,
+    just = "left", default.units = "inches", fontface = "bold")
+
+# Add genome label of chr4
+annoGenomeLabel(plot = LowC_mDAND30.bottom, scale = "Mb", axis = "x", x = 0.5, y = 9.0625,
+    just = c("left", "top"))
+
+# Annotate SNCA domain that will be zoomed in fid1D
+SNCA.TAD = GRanges("chr4", ranges = IRanges(start = 8.9e+07, end = 9.1e+07))
+
+domainAnno = annoDomains(plot = LowC_mDAND30.bottom, data = SNCA.TAD, half = "bottom",
+    linecolor = "red")
+
+################################### Figure 1D SNCA locus ######### Zoom on SNCA
+################################### an add ATACseq dataof the locus Define
+################################### parameters for a small part of chr4 where
+################################### SNCA is Add ATACseq track of smNPC, mDAN
+################################### D15, mDAN D30, mDAN D50 text D
+plotText(label = "D", fontsize = 12, fontfamily = "Helvetica", x = 4.125, y = 5.25,
+    just = "left", default.units = "inches", fontface = "bold")
+
+bw.path = "/home/vagrant/epifunc/"
+
+# smNPC N1
+bw.SNCA.smNPC.1 = readBigwig(file = paste0(bw.path, "BIGWIG/smNPC_I.bw"), chrom = "chr4",
+    chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# smNPC N2
+bw.SNCA.smNPC.2 = readBigwig(file = paste0(bw.path, "BIGWIG/smNPC_II.bw"), chrom = "chr4",
+    chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# smNPC N3
+bw.SNCA.smNPC.3 = readBigwig(file = paste0(bw.path, "BIGWIG/smNPC_III.bw"), chrom = "chr4",
+    chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D15 N1
+bw.SNCA.mDAN.D15.1 = readBigwig(file = paste0(bw.path, "BIGWIG/D15_POS_I.bw"), chrom = "chr4",
+    chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D15 N2
+bw.SNCA.mDAN.D15.2 = readBigwig(file = paste0(bw.path, "BIGWIG/D15_POS_II.bw"), chrom = "chr4",
+    chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D15 N3
+bw.SNCA.mDAN.D15.3 = readBigwig(file = paste0(bw.path, "BIGWIG/D15_POS_III.bw"),
+    chrom = "chr4", chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D30 N1
+bw.SNCA.mDAN.D30.1 = readBigwig(file = paste0(bw.path, "BIGWIG/D30_POS_I.bw"), chrom = "chr4",
+    chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D30 N2
+bw.SNCA.mDAN.D30.2 = readBigwig(file = paste0(bw.path, "BIGWIG/D30_POS_II.bw"), chrom = "chr4",
+    chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D30 N3
+bw.SNCA.mDAN.D30.3 = readBigwig(file = paste0(bw.path, "BIGWIG/D30_POS_III.bw"),
+    chrom = "chr4", chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D50 N1
+bw.SNCA.mDAN.D50.1 = readBigwig(file = paste0(bw.path, "BIGWIG/HFFTHmCherry_D50_possort_S1.bw"),
+    chrom = "chr4", chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D50 N2
+bw.SNCA.mDAN.D50.2 = readBigwig(file = paste0(bw.path, "BIGWIG/HFFTHmCherry_D50_possort_S3.bw"),
+    chrom = "chr4", chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D50 N3
+bw.SNCA.mDAN.D50.3 = readBigwig(file = paste0(bw.path, "BIGWIG/HFFTHmCherry_D50_possort_S4.bw"),
+    chrom = "chr4", chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# Add a scale next to the bigwig files - check the maximum to choose
+scale.SNCA.max = max(c(bw.SNCA.smNPC.1$score, bw.SNCA.smNPC.2$score, bw.SNCA.smNPC.3$score,
+    bw.SNCA.mDAN.D15.1$score, bw.SNCA.mDAN.D15.2$score, bw.SNCA.mDAN.D15.3$score,
+    bw.SNCA.mDAN.D30.1$score, bw.SNCA.mDAN.D30.2$score, bw.SNCA.mDAN.D30.3$score,
+    bw.SNCA.mDAN.D50.1$score, bw.SNCA.mDAN.D50.2$score, bw.SNCA.mDAN.D50.3$score))
+
+print(scale.SNCA.max)
+
+# Define a small region of chr4
+region.p.chr4.small = pgParams(chrom = "chr4", chromstart = 8.9e+07, chromend = 9.1e+07,
+    assembly = assembly(Genome = "hg38refGene", TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene",
+        OrgDb = "org.Hs.eg.db"), just = c("left", "top"), width = 3.5, fontcolor = "black",
+    fill = "black", range = c(0, scale.SNCA.max))
+
+
+# Plot Low-C data SNCA in mDAN D30 (10kb resolution)
+chr4.SNCA.sq = plotHicTriangle(data = mDAN.D30.25kb, params = region.p.chr4.small,
+    height = 1.75, resolution = 25000, x = 4.5, y = 5.5, zrange = c(0, 5), just = c("left",
+        "top"), default.units = "inches", palette = colorRampPalette(brewer.pal(n = 9,
+        "YlGnBu")))
+
+
+# ATACseq signal smNPC_I and scale
+ATAC_smNPC_I = plotSignal(data = bw.SNCA.smNPC.1, params = region.p.chr4.small, fill = "#313695",
+    alpha = 0.7, linecolor = NA, x = 4.5, y = 7.25, height = 0.25, just = c("left",
+        "top"), default.units = "inches")
+
+# ATACseq signal smNPC_II and scale
+ATAC_smNPC_II = plotSignal(data = bw.SNCA.smNPC.2, params = region.p.chr4.small,
+    fill = "#313695", alpha = 0.6, linecolor = NA, x = 4.5, y = 7.25, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+# ATACseq signal smNPC_III and scale
+ATAC_smNPC_III = plotSignal(data = bw.SNCA.smNPC.3, params = region.p.chr4.small,
+    fill = "#313695", alpha = 0.5, linecolor = NA, x = 4.5, y = 7.25, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+annoYaxis(plot = ATAC_smNPC_III, at = c(0, scale.SNCA.max), fontsize = 6)
+
+plotText(label = "smNPC", fontsize = 6, fontcolor = "#313695", fontfamily = "Helvetica",
+    x = 4.125, y = 7.3125, just = c("left", "top"), default.units = "inches", fontface = "bold")
+
+# ATACseq signal mDAN D15 I and scale
+ATAC_mDAN.D15_I = plotSignal(data = bw.SNCA.mDAN.D15.1, params = region.p.chr4.small,
+    fill = "#053061", alpha = 0.7, linecolor = NA, x = 4.5, y = 7.625, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+# ATACseq signal mDAN D15 II and scale
+ATAC_mDAN.D15_II = plotSignal(data = bw.SNCA.mDAN.D15.2, params = region.p.chr4.small,
+    fill = "#053061", alpha = 0.6, linecolor = NA, x = 4.5, y = 7.625, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+# ATACseq signal mDAN D15 III and scale
+ATAC_mDAN.D15_III = plotSignal(data = bw.SNCA.mDAN.D15.3, params = region.p.chr4.small,
+    fill = "#053061", alpha = 0.5, linecolor = NA, x = 4.5, y = 7.625, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+annoYaxis(plot = ATAC_mDAN.D15_III, at = c(0, scale.SNCA.max), fontsize = 6)
+
+plotText(label = "mDAN D15", fontsize = 6, fontcolor = "#053061", fontfamily = "Helvetica",
+    x = 4.125, y = 7.6875, just = c("left", "top"), default.units = "inches", fontface = "bold")
+
+# ATACseq signal mDAN D30 I and scale
+ATAC_mDAN.D30_I = plotSignal(data = bw.SNCA.mDAN.D30.1, params = region.p.chr4.small,
+    fill = "#2D004B", alpha = 0.7, linecolor = NA, x = 4.5, y = 8, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+# ATACseq signal mDAN D30 II and scale
+ATAC_mDAN.D30_II = plotSignal(data = bw.SNCA.mDAN.D30.2, params = region.p.chr4.small,
+    fill = "#2D004B", alpha = 0.6, linecolor = NA, x = 4.5, y = 8, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+# ATACseq signal mDAN D30 III and scale
+ATAC_mDAN.D30_III = plotSignal(data = bw.SNCA.mDAN.D30.3, params = region.p.chr4.small,
+    fill = "#2D004B", alpha = 0.5, linecolor = NA, x = 4.5, y = 8, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+annoYaxis(plot = ATAC_mDAN.D30_III, at = c(0, scale.SNCA.max), fontsize = 6)
+
+plotText(label = "mDAN D30", fontsize = 6, fontcolor = "#2D004B", fontfamily = "Helvetica",
+    x = 4.125, y = 8.125, just = c("left", "top"), default.units = "inches", fontface = "bold")
+
+# ATACseq signal mDAN D50 I and scale
+ATAC_mDAN.D50_I = plotSignal(data = bw.SNCA.mDAN.D50.1, params = region.p.chr4.small,
+    fill = "#003C30", alpha = 0.7, linecolor = NA, x = 4.5, y = 87.375, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+# ATACseq signal mDAN D50 II and scale
+ATAC_mDAN.D50_II = plotSignal(data = bw.SNCA.mDAN.D50.2, params = region.p.chr4.small,
+    fill = "#003C30", alpha = 0.6, linecolor = NA, x = 4.5, y = 8.375, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+# ATACseq signal mDAN D50 III and scale
+ATAC_mDAN.D50_III = plotSignal(data = bw.SNCA.mDAN.D50.3, params = region.p.chr4.small,
+    fill = "#003C30", alpha = 0.5, linecolor = NA, x = 4.5, y = 8.375, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+annoYaxis(plot = ATAC_mDAN.D50_III, at = c(0, scale.SNCA.max), fontsize = 6)
+
+plotText(label = "mDAN D50", fontsize = 6, fontcolor = "#003C30", fontfamily = "Helvetica",
+    x = 4.125, y = 8.5, just = c("left", "top"), default.units = "inches", fontface = "bold")
+
+# Add gene name and genome labels for the chr4 Add gene name
+SNCA_g = plotGenes(params = region.p.chr4.small, x = 4.5, y = 8.8125, height = 0.5,
+    geneHighlights = data.frame(gene = c("SNCA"), color = "red"), assembly = assembly(Genome = "hg38refGene",
+        TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", OrgDb = "org.Hs.eg.db"), geneBackground = "black")
+
+
+# Add genome label
+annoGenomeLabel(plot = SNCA_g, scale = "Mb", axis = "x", x = 4.5, y = 8.6875, just = c("left",
+    "top"))
+
+pageGuideHide()
+dev.off()
+```
+
+Process the results of the SNEEP pipeline
+
+``` r
+## Take the smNPCs, TH+ neurons at day 15 - day 30 - day 50 Load the data smNPC
+SNEEP.smNPC = read_delim("/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/parkinsonDisease_project_Deborah_Lasse/sneep_witATAC_mergedlowC_2409/result_PD_smNPV_lowC_ATAC_merged_2409.txt",
+    delim = "\t", col_names = TRUE)
+
+# Add a column specifying the sample name
+SNEEP.smNPC = SNEEP.smNPC %>%
+    mutate(Sample = "smNPC")
+
+# Unique rSNPs
+SNEEP.smNPC %>%
+    distinct(SNP_position) %>%
+    write_delim("/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/uniq_rSNPs_smNPC.txt",
+        delim = "\t", col_names = FALSE)
+
+# How many unique target genes associated to those 91 PD-rSNPs found in smNPC
+TG_smNPC = SNEEP.smNPC %>%
+    dplyr::select(SNP_position, geneNames) %>%
+    dplyr::filter(geneNames != ".") %>%
+    group_by(SNP_position, geneNames) %>%
+    distinct(SNP_position, .keep_all = TRUE) %>%
+    separate_rows(geneNames, sep = ",") %>%
+    ungroup() %>%
+    distinct(geneNames)
+
+write_delim(TG_smNPC, "/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/enrichR/distinct_target_genes_smNPC.txt",
+    delim = "\t", col_names = FALSE)
+
+# 293 target genes are associated to 91 PD-rSNPs in smNPC
+
+# TH+ neurons day 15
+SNEEP.THposD15 = read_delim("/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/parkinsonDisease_project_Deborah_Lasse/sneep_witATAC_mergedlowC_2409/result_PD_mDAN_day15_lowC_ATAC_N1_2409.txt",
+    delim = "\t", col_names = TRUE)
+
+SNEEP.THposD15 = SNEEP.THposD15 %>%
+    mutate(Sample = "THpos_neurons_D15")
+
+# Unique rSNPs
+SNEEP.THposD15 %>%
+    distinct(SNP_position) %>%
+    write_delim("/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/uniq_rSNPs_mDAND15.txt",
+        delim = "\t", col_names = FALSE)
+
+# How many unique target genes associated to those 180 PD-rSNPs found in mDAN
+# D15
+TG_mDAN.D15 = SNEEP.THposD15 %>%
+    dplyr::select(SNP_position, geneNames) %>%
+    dplyr::filter(geneNames != ".") %>%
+    group_by(SNP_position, geneNames) %>%
+    distinct(SNP_position, .keep_all = TRUE) %>%
+    separate_rows(geneNames, sep = ",") %>%
+    ungroup() %>%
+    distinct(geneNames)
+
+write_delim(TG_mDAN.D15, "/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/enrichR/distinct_target_genes_mDAN_D15.txt",
+    delim = "\t", col_names = FALSE)
+
+# 308 target genes are associated to 180 PD-rSNPs in mDAN D15
+
+# TH+ neurons day 30
+SNEEP.THposD30 = read_delim("/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/parkinsonDisease_project_Deborah_Lasse/sneep_witATAC_mergedlowC_2409/result_PD_mDAN_day30_lowC_ATAC_N1_2409.txt",
+    delim = "\t", col_names = TRUE)
+
+SNEEP.THposD30 = SNEEP.THposD30 %>%
+    mutate(Sample = "THpos_neurons_D30")
+
+# Unique rSNPs
+SNEEP.THposD30 %>%
+    distinct(SNP_position) %>%
+    write_delim("/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/uniq_rSNPs_mDAND30.txt",
+        delim = "\t", col_names = FALSE)
+
+# How many unique target genes associated to those 181 PD-rSNPs found in mDAN
+# D30
+TG_mDAN.D30 = SNEEP.THposD30 %>%
+    dplyr::select(SNP_position, geneNames) %>%
+    dplyr::filter(geneNames != ".") %>%
+    group_by(SNP_position, geneNames) %>%
+    distinct(SNP_position, .keep_all = TRUE) %>%
+    separate_rows(geneNames, sep = ",") %>%
+    ungroup() %>%
+    distinct(geneNames)
+
+write_delim(TG_mDAN.D30, "/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/enrichR/distinct_target_genes_mDAN_D30.txt",
+    delim = "\t", col_names = FALSE)
+
+# 301 target genes are associated to 181 PD-rSNPs in mDAN D30
+
+# TH+ neurons day 50
+SNEEP.THposD50 = read_delim("/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/parkinsonDisease_project_Deborah_Lasse/sneep_witATAC_mergedlowC_2409/result_PD_mDAN_day50_lowC_ATAC_N1_2409.txt",
+    delim = "\t", col_names = TRUE)
+
+
+SNEEP.THposD50 = SNEEP.THposD50 %>%
+    mutate(Sample = "THpos_neurons_D50")
+
+# Unique rSNPs
+SNEEP.THposD50 %>%
+    distinct(SNP_position) %>%
+    write_delim("/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/uniq_rSNPs_mDAND50.txt",
+        delim = "\t", col_names = FALSE)
+
+# How many unique target genes associated to those 160 PD-rSNPs found in mDAN
+# D50
+TG_mDAN.D50 = SNEEP.THposD50 %>%
+    dplyr::select(SNP_position, geneNames) %>%
+    dplyr::filter(geneNames != ".") %>%
+    group_by(SNP_position, geneNames) %>%
+    distinct(SNP_position, .keep_all = TRUE) %>%
+    separate_rows(geneNames, sep = ",") %>%
+    ungroup() %>%
+    distinct(geneNames)
+
+write_delim(TG_mDAN.D50, "/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/enrichR/distinct_target_genes_mDAN_D50.txt",
+    delim = "\t", col_names = FALSE)
+
+# 300 target genes are associated to 160 PD-rSNPs in mDAN D50
+
+# Combine target genes from mDAN D15, D30 and D50 together
+TG_distinct_mDAN = TG_mDAN.D15 %>%
+    bind_rows(TG_mDAN.D30) %>%
+    bind_rows(TG_mDAN.D50) %>%
+    distinct(geneNames)
+
+write_delim(TG_distinct_mDAN, "/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/enrichR/distinct_target_genes_mDAN_all_together.txt",
+    delim = "\t", col_names = FALSE)
+
+# Combine them all
+SNEEP_all = SNEEP.smNPC %>%
+    bind_rows(SNEEP.THposD15) %>%
+    bind_rows(SNEEP.THposD30) %>%
+    bind_rows(SNEEP.THposD50)
+
+# And save them
+write_delim(SNEEP_all, "/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/SNEEP_all_res_comb.txt",
+    delim = "\t", col_names = TRUE)
+
+# Load when needed
+SNEEP_all = read_delim("/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/SNEEP_all_res_comb.txt",
+    delim = "\t", col_names = TRUE)
+
+SNEEP_all = read_delim("/Volumes/deborah.gerard/Documents/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/SNEEP_all_res_comb.txt",
+    delim = "\t", col_names = TRUE)
+
+# How many unique rSNPs per samples
+SNEEP_all %>%
+    group_by(Sample) %>%
+    summarise(dplyr::n())
+
+SNEEP_all %>%
+    group_by(Sample) %>%
+    distinct(SNP_position) %>%
+    summarise(dplyr::n())
+
+# How many unique rSNPs?
+SNEEP_all %>%
+    distinct(SNP_position) %>%
+    write_delim(., "/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/SNEEP_uniq_rSNPs.txt",
+        delim = "\t", col_names = TRUE)
+
+# How many SNPs among the 254 PD-rSNPs are creating or disturbing TFBS
+SNEEP_all %>%
+    distinct(SNP_position, .keep_all = TRUE) %>%
+    dplyr::select(SNP_position, log_pvalueBindAffVar1_pvalueBindAffVar2) %>%
+    mutate(pos = sum(log_pvalueBindAffVar1_pvalueBindAffVar2 > 0), neg = sum(log_pvalueBindAffVar1_pvalueBindAffVar2 <
+        0))
+
+# How many SNPs among the 254 PD-rSNPs are associated to MAPT or SNCA MAPT
+SNEEP_all %>%
+    # group_by(SNP_position, geneNames) %>%
+dplyr::select(SNP_position, TF, geneNames) %>%
+    # distinct(SNP_position, .keep_all = TRUE) %>%
+dplyr::filter(str_detect(geneNames, "MAPT")) %>%
+    distinct(SNP_position, .keep_all = TRUE)
+
+# 34 out 254 PD-rSNPs are associated to MAPT SNCA
+SNEEP_all %>%
+    # group_by(SNP_position, geneNames) %>%
+dplyr::select(SNP_position, TF, geneNames) %>%
+    # distinct(SNP_position, .keep_all = TRUE) %>%
+dplyr::filter(str_detect(geneNames, "SNCA")) %>%
+    distinct(SNP_position, .keep_all = TRUE)
+
+# 7 out 254 PD-rSNPs are associated to SNCA
+
+# How many chromosomes have at least one of the 254 PD-rSNPs
+SNEEP_all %>%
+    distinct(SNP_position) %>%
+    separate(SNP_position, into = c("chr", "tmp"), sep = ":") %>%
+    group_by(chr) %>%
+    summarise(chr_nb = n())
+```
+
+Now that unique set of rSNPs is available, filter this number by computing correlation between the expression of the TFs and their predicted target genes
+
+``` r
+# Load RNAse data
+dat.RPKM.filt = read_rds("/home/vagrant/Manuscript_1/FIGURE2/mat_RPKM.rds")
+#dat.RPKM.filt = read_rds("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE2/mat_RPKM.rds")
+
+# Extract the TFBS predicted to be altered by the 254 rSNPs and plot their expression as well a and s the expression of their putative target genes
+## As some TFs act as dimers, extract the expression of each and the lowest one (of each pair) will be the rate limiting TF
+TF_dimer_exp = SNEEP_all %>% 
+  dplyr::select(SNP_position:var2, TF, geneNames, Sample) %>% 
+  group_by(SNP_position, Sample) %>% 
+  dplyr::filter(geneNames != ".") %>% # Filter out rSNPs where there are no putative target genes
+  mutate(TF = gsub("\\(.*", "\\1", TF)) %>% # remove the JASPAR ID next to some TFs
+  dplyr::filter(str_detect(TF, "::")) %>%  # Filter out the TF dimers and check if one of the TFs is low expressed
+  dplyr::select(SNP_position, TF) %>% 
+  mutate(TF_dimer = TF) %>% 
+  separate_rows(TF, sep = "::") %>% 
+  ungroup() %>% 
+  dplyr::select(-Sample)
+
+## Plot
+dat_2_plot = dat.RPKM.filt %>% 
+  dplyr::filter(gene_name %in% TF_dimer_exp$TF) %>% 
+  dplyr::rename(TF = gene_name) %>% 
+  left_join(TF_dimer_exp,
+            by = "TF") %>% 
+  mutate(TF = as.factor(TF))
+
+pdf("/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/TF_dimer_Ind_exp.pdf",
+    width = 15,
+    height = 20)
+ggboxplot(dat_2_plot,
+          x = "Cond", 
+          y = "RPKM", 
+          add = "jitter", 
+          color = "TF", 
+          #palette = c("#A9A9A9", "#B22222", "#DC143C", "#E9967A"),
+          facet.by = "TF_dimer",
+          xlab = "", 
+          ylab = "Reads Per Kilobase Million (RPKM)") +
+  geom_hline(yintercept = 5,
+             linetype = "dashed") +  # 5 RPKM expression threshold
+  scale_x_discrete(labels = c("smNPC",
+                              expression("mDAN D15"),
+                              expression("mDAN D30"),
+                              expression("mDAN D50"))) +
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 90))
+
+dev.off()
+
+## Compute Pearson correlation to filter rSNPs
+# Tibble for TF expression
+TF_exp = SNEEP_all %>%
+  dplyr::select(SNP_position, TF, geneNames) %>%
+  dplyr::filter(geneNames != ".") %>% # no target genes idenditifed
+  mutate(TF = gsub("\\(.*", "\\1", TF)) %>%
+  separate_rows(TF, sep = "::") %>% # Separate TF dimers into single TF
+  separate_rows(geneNames, sep = ",") %>% # Separate target genes into single target genes
+  unite(col = "Item", c("SNP_position", "TF", "geneNames"), remove = FALSE) %>%
+  dplyr::select(Item, TF) %>%
+  dplyr::rename(gene_name = TF) %>%
+  dplyr::filter(gene_name %in% dat.RPKM.filt$gene_name) %>%
+  left_join(dat.RPKM.filt,
+            by = "gene_name") %>%
+  group_by(gene_name) %>% 
+  dplyr::filter(any(RPKM > 1)) %>% # Keep only TF that have RPKM > 1 in all samples
+  dplyr::select(-gene_id, -Cond) %>%
+  dplyr::rename(TF = gene_name,
+                RPKM.TF = RPKM)
+
+# Tibble for TG expression  
+TG_exp = SNEEP_all %>%
+  dplyr::select(SNP_position, TF, geneNames) %>%
+  dplyr::filter(geneNames != ".") %>% # no target genes idenditifed
+  mutate(TF = gsub("\\(.*", "\\1", TF)) %>%
+  separate_rows(TF, sep = "::") %>% # Separate TF dimers into single TF
+  separate_rows(geneNames, sep = ",") %>% # Separate target genes into single target genes
+  unite(col = "Item", c("SNP_position", "TF", "geneNames"), remove = FALSE) %>%
+  dplyr::select(Item, geneNames) %>%
+  separate_rows(geneNames, sep = ",") %>%
+  dplyr::rename(gene_name = geneNames) %>%
+  dplyr::filter(gene_name %in% dat.RPKM.filt$gene_name) %>%
+  left_join(dat.RPKM.filt,
+            by = "gene_name") %>%
+  group_by(gene_name) %>% 
+  dplyr::filter(any(RPKM > 1)) %>% # Keep only target genes that have RPKM > 1 in all samples
+  dplyr::select(-gene_id, -Cond) %>%
+  dplyr::rename(target_gene = gene_name,
+                RPKM.TG = RPKM)
+
+# Join both target gene and TF tables. Filter out TF or target genes with expression below 1 RPKM
+TF_TG_mat = merge(TF_exp, TG_exp) %>% 
+  as_tibble() %>% 
+  group_by(TF, target_gene) %>% 
+  distinct(Sample, .keep_all = TRUE)
+
+# Pearson correlation
+TF_TG_mat_Pearson_cor = cor_test(TF_TG_mat %>% 
+                                   group_by(TF, target_gene),
+                                 vars = c("RPKM.TF","RPKM.TG"),
+                                 use = "everything")
+
+write_delim(TF_TG_mat_Pearson_cor,
+            "/Volumes/deborah.gerard/Documents/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/TF_TG_exp_pearsonCor.txt",
+            delim = "\t",
+            col_names = TRUE)
+
+# Filter the correlation matrix to only keep TF-target gene pairs with a strong correlation/anti-correlation
+TF_TG_mat_Pearson_cor.filt = TF_TG_mat_Pearson_cor %>% 
+  dplyr::filter(cor > 0.5 | cor < -0.5)
+
+unique(TF_TG_mat_Pearson_cor.filt$target_gene)
+unique(TF_TG_mat_Pearson_cor.filt$TF)
+
+write_delim(TF_TG_mat_Pearson_cor.filt,
+            "/Volumes/deborah.gerard/Documents/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/TF_TG_exp_pearsonCor_abs0.5.txt",
+            delim = "\t",
+            col_names = TRUE)
+
+# Reassociate the rSNPs to which the TF-target genes pairs belongs and make a table
+tbl.TF.TG = TF_TG_mat_Pearson_cor.filt %>% 
+  unite(col = "TF_TG_pair", TF, target_gene, sep = "_", remove = FALSE)
+
+tbl.TF.TG.FINAL = TF_TG_mat %>% 
+  ungroup() %>% 
+  dplyr::filter(str_detect(Item, paste0(tbl.TF.TG$TF_TG_pair, collapse = "|"))) %>% 
+  distinct(Item, .keep_all = TRUE) %>% 
+  dplyr::select(Item, TF, target_gene) %>% 
+  mutate(rSNPs = gsub("\\_.*", "\\1", Item)) %>% 
+  dplyr::select(rSNPs, TF, target_gene)
+
+# Select the coordinates of the rSNPs ans associate back rsID from UCSC using all snps from db155
+tbl.TF.TG.FINAL %>% 
+  dplyr::select(rSNPs) %>% 
+  distinct(rSNPs) %>% 
+  write_delim(.,
+              "/Volumes/deborah.gerard/Documents/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/UCSC_coordinates_rSNPs.txt",
+              delim = "\t",
+              col_names = FALSE)
+
+# Load the newly created file
+# rsID_PD_rSNP = read_delim("/Volumes/deborah.gerard/Documents/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/UCSC_coordinates_rSNPs_rsID.txt",
+#               delim = ",",
+#               col_names = TRUE)
+
+rsID_PD_rSNP = read_delim("/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/UCSC_coordinates_rSNPs_rsID.txt",
+              delim = ",",
+              col_names = TRUE)
+
+# Load the newly created file
+rsID_PD_rSNP.filt = rsID_PD_rSNP %>% 
+  dplyr::filter(class == "snv") %>% 
+  unite(col = "tmp", c(`#"chrom"`, chromStart), sep = ":", remove = TRUE) %>% 
+  unite(col = "rSNPs", c("tmp", "chromEnd"), sep = "-", remove = FALSE) %>% 
+  dplyr::select(rSNPs, name, ref, alts) %>% 
+  distinct(name, .keep_all = TRUE) # Remove doublets
+
+# Filter the final table
+tbl.TF.TG.FINAL.rsID = tbl.TF.TG.FINAL %>% 
+  #dplyr::select(rSNPs) %>% 
+  #distinct(rSNPs) %>% 
+  dplyr::filter(rSNPs %in% rsID_PD_rSNP.filt$rSNPs) %>% 
+  left_join(rsID_PD_rSNP.filt,
+            by = "rSNPs") %>% 
+  dplyr::select(rSNPs, name:alts, TF, target_gene) %>% 
+  separate(rSNPs, into = c("chr", "tmp"), sep = ":", remove = TRUE) %>% 
+  separate(tmp, into = c("start", "end"), sep = "-", remove = TRUE) %>% 
+  dplyr::rename(rsID = name)
+
+# Extract the unique rsIDs and get the MAF (minor allele frequencies)
+snp2MAF = tbl.TF.TG.FINAL.rsID %>% 
+  dplyr::select(rsID) %>% 
+  distinct(rsID) %>% 
+  pull()
+
+# Get allele frequencies
+LDproxy_batch(snp = snp2MAF,
+              pop = "EUR",
+              r2d = "r2",
+              token = "5bba40af90d7",
+              append = TRUE,
+              genome_build = "grch38_high_coverage")
+
+# The data has been automaticcaly saved -> load it
+MAF.snp = read_delim("/home/vagrant/Manuscript_1/TABLES/combined_query_snp_list_grch38_high_coverage.txt",
+                     delim = "\t",
+                     col_names = TRUE)
+
+# MAF.snp = read_delim("/Volumes/deborah.gerard/Documents/Manuscript_1/TABLES/combined_query_snp_list_grch38_high_coverage.txt",
+#                      delim = "\t",
+#                      col_names = TRUE)
+
+# The linkage desiquilibrium linkage value has been also calculated. Filter only the snp that are in linkage desiquilibrium with themselves
+MAF.snp %>% 
+  dplyr::select(RS_Number:Distance) %>% 
+  dplyr::rename(query_snp = RS_Number,
+                rsID = Coord,
+                Coord = Alleles,
+                Allele = MAF,
+                MAF = Distance) %>% 
+  mutate(same.snp = if_else(query_snp == rsID, 1, 0)) %>% 
+  # dplyr::filter(same.snp == 1,
+  #               rsID %in% snp2MAF) %>% 
+  dplyr::filter(same.snp == 1) %>% 
+  #left_join(tbl.TF.TG.FINAL.rsID, by = "rsID") %>% 
+  full_join(tbl.TF.TG.FINAL.rsID, by = "rsID") %>% 
+  #distinct(rsID, .keep_all = TRUE) %>% 
+  View()
+  write_delim(.,
+            "/home/vagrant/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/final_tbl_PD_rSNPs_with_MAF.txt",
+            delim = "\t",
+            col_names = TRUE)
+
+# Expression distribution of the 77 target genes
+#unique(TF_TG_mat_Pearson_cor.filt$target_gene)
+pdf("/Volumes/deborah.gerard/Documents/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/ExpDistri77TG.pdf",
+    width = 10,
+    height = 13)
+
+TF_TG_mat %>% 
+  ungroup() %>% 
+  dplyr::select(Sample, target_gene, RPKM.TG) %>% 
+  group_by(Sample) %>% 
+  distinct(target_gene, .keep_all = TRUE) %>% 
+  dplyr::filter(target_gene %in% TF_TG_mat_Pearson_cor.filt$target_gene) %>% 
+  mutate(target_gene = as.factor(target_gene),
+         Cond = gsub("\\_.*", "\\1", Sample),
+         log2RPKM.TG = log2(RPKM.TG + 0.001)) %>% # add a pseudocount to avoid -Inf if RPKM is 0
+  ggdensity(.,
+            x = "log2RPKM.TG",
+            facet.by = "target_gene",
+            fill = "target_gene",
+            title = "Distribution of the log2 expression of the 77 target genes") +
+  theme(legend.position = "none") +
+  geom_vline(xintercept = 0,
+             linetype = "dashed")
+
+dev.off()
+
+# Plot of the Pearson correlation coefficient vs the pvalue of the diffbinf affinity
+# Take the necessary columns from SNEEP_all
+SNEEP_all_2 = SNEEP_all %>% 
+  mutate(TF = gsub("\\(.*", "\\1", TF)) %>% 
+  dplyr::select(SNP_position, TF, geneNames, pvalue_DiffBindAff) %>% 
+  dplyr::filter(geneNames != ".") %>% 
+  separate_rows(., geneNames, sep = ",") %>% 
+  unite(col = "Item", SNP_position, TF, geneNames, sep = "_", remove = FALSE) 
+
+# And merge with the table with the Pearson correlation
+TF_TG_mat_Pearson_cor2 = TF_TG_mat_Pearson_cor %>% 
+  unite(col = "TF_TG_pair", TF, target_gene, sep = "_", remove = TRUE)
+
+lbl.pl = c("LHX1_BAG3",
+           "ZBTB14_IDUA",
+           "NR2C2_SCARB2")
+
+pvalDiffBind_cor = TF_TG_mat %>% 
+  ungroup() %>% 
+  dplyr::select(Item) %>% 
+  mutate(SNP_position = gsub("\\_.*", "\\1", Item)) %>% 
+  distinct(Item, .keep_all = TRUE) %>% 
+  left_join(SNEEP_all_2,
+            by = "Item") %>% 
+  unite(col = "TF_TG_pair", TF, geneNames, sep = "_", remove = TRUE) %>%
+  left_join(TF_TG_mat_Pearson_cor2, 
+            by = "TF_TG_pair") %>% 
+  #drop_na() %>% 
+  dplyr::select(Item, TF_TG_pair, pvalue_DiffBindAff, cor) %>% 
+  distinct(Item, .keep_all = TRUE) %>% 
+  mutate(pvalue_DiffBindAff_log = log2(pvalue_DiffBindAff),
+         lbl = if_else(TF_TG_pair %in% lbl.pl, TF_TG_pair, NA_character_))
+
+# And plot
+ggscatter(pvalDiffBind_cor,
+          x = "cor",
+          y = "pvalue_DiffBindAff_log",
+          color = "lbl", 
+          #palette = c("#00AFBB", "black"),
+          label = "lbl",
+          repel = TRUE)
+```
+
+
+``` r
 ################### Figure 1D ####
 
 # Locus plot Here our SNPs of interest and their location
@@ -606,249 +1250,958 @@ plotLegend(legend = c("LD reference SNP", paste("0", "<", "r^2", "<= 0.2"), past
 dev.off()
 ```
 
+
 ### FIGURE 2
+The SNEEP analysis will be run again by Nina with the PD GWAS SNPs that been filtered only for the GWAS p-value of 5e-08
+
+``` r
+# This is the file obtained by Jochen
+nalls_allSNPs = vroom(
+  "/Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/nallsEtAl2019_hg38_full.tsv")
+
+# Select the coordinates, the alleles and the p-value columns. Filter for the GWAS p-value
+nalls_allSNPs %>% 
+  dplyr::select(CHR_hg38:END_hg38, A1:A2, p) %>% 
+  dplyr::filter(p < 5e-08) %>% # GWAS p-value threshold
+  write_delim("/Volumes/deborah.gerard/Documents/epifunc/SNEEP2024/input/Nalls_PD_SNPs_GWASpval_filtered.txt",
+              delim = "\t",
+              col_names = TRUE)
+
+# Provide the RPKM data from the RNAseq to Nina
+dat.RPKM = read_delim("/Volumes/deborah.gerard/Documents/epifunc/RNAseq/RPKM_genename",
+                      delim = "\t", 
+                      col_names = TRUE)
+
+# Provide the file as a text file
+dat.RPKM %>% 
+  write_delim(.,
+              "/Volumes/deborah.gerard/Documents/epifunc/SNEEP2024/input/RNAseq/All_samples_RPKM.txt",
+              delim = "\t",
+              col_names = TRUE)
+
+# Check the hg38 coordinates 
+nalls_allSNPs %>% 
+  dplyr::filter(CHR_hg38 == "chr4",
+                END_hg38 == "76213717")
+```
+
+For the SNEEP analysis, retrieve also the `narrowPeak` files and send them to Nina
+
+``` bash
+# narrowPeak files for smNPC, mDAN neurons day 15 - day 30 - day 50
+rsync -avzPhu --no-p iris-cluster:/work/projects/epifunc/manuscript_sample_submission/ATAC/peaks/*narrowPeak /Volumes/deborah.gerard/Documents/epifunc/SNEEP2024/input/ATAC/narrowPeaks/
+
+# narrowPeak files for astrocytes and non-mDAN neurons at day 15 and day 50 (day 30 data does not exist)
+# According to the epifunc gitlab (https://git-r3lab.uni.lu/jochen.ohnmacht/epifunc) they are in /work/projects/epifunc/genrich_replicates_opt. According the epifunc gitlab, the filtered.narrowPeak files were used for HINT-ATAC and EPIC-DREM
+rsync -avzPhu --no-p iris-cluster:/work/projects/epifunc/genrich_replicates_opt/*neg.filtered.narrowPeak /Volumes/deborah.gerard/Documents/epifunc/SNEEP2024/input/ATAC/narrowPeaks/
+
+rsync -avzPhu --no-p iris-cluster:/work/projects/epifunc/genrich_replicates_opt/astrocytes.filtered.narrowPeak /Volumes/deborah.gerard/Documents/epifunc/SNEEP2024/input/ATAC/narrowPeaks/
+```
+
 Create the page layout that will contain all the necessary plots
 
 
-```r
-########## FIGURE 2 ##########
-
-# Save as a PDF
-pdf("/home/vagrant/Manuscript_1/FIGURE2/FIGURE2.pdf", width = 8.3, height = 11.7)
-
+``` r
+####################
+#### Figure 2  ####
+###################
 # Save as TIFF, 300 ppi
-tiff("/home/vagrant/Manuscript_1/FIGURE2/FIGURE2.tiff", width = 8.27, height = 11.67,
-    units = "in", res = 300, compression = "lzw")
+tiff("/home/vagrant/Manuscript_1/FIGURE2/FIGURE2.tiff",
+     width = 8.27,
+     height = 11.67,
+     units = "in",
+     res = 300,
+     compression = "lzw")
 
 # Create a A4 blank page
-pageCreate(width = 8.27, height = 11.67, default.units = "inches", showGuides = FALSE)
+pageCreate(width = 8.27, 
+           height = 11.67, 
+           default.units = "inches",
+           showGuides = TRUE)
 
+# text Figure 2
+plotText(label = "Figure 2", 
+         fontsize = 14,
+         fontfamily = "Helvetica",
+         x = 0.25, 
+         y = 0.25, 
+         just = "left", 
+         default.units = "inches",
+         fontface = "bold")
 
-#### PANEL A - BAG3 locus text Figure 2
-plotText(label = "Figure 2", fontsize = 14, fontfamily = "Helvetica", x = 0.25, y = 0.25,
-    just = "left", default.units = "inches", fontface = "bold")
-
+#### PANEL A - SNEEP PIPELINE ####
 # text A
-plotText(label = "A", fontsize = 12, fontfamily = "Helvetica", x = 0.25, y = 0.5,
-    just = "left", default.units = "inches", fontface = "bold")
+plotText(label = "A", 
+         fontsize = 12,
+         fontfamily = "Helvetica",
+         x = 0.25, 
+         y = 0.5, 
+         just = "left", 
+         default.units = "inches",
+         fontface = "bold")
 
-# ATACseq signal BAG3 path where bigwig files are
+# Load the picture prepared in Biorender
+Fig2A_pip = readPNG("/home/vagrant/Manuscript_1/FIGURE2/Fig2A_FlowChart.png")
+
+# Plot Figure 2A - Pipeline
+plotRaster(image = Fig2A_pip,
+           x = 0.5,
+           y = 0.625,
+           width = 3.5,
+           height = 3.0,
+           just = c("left", 
+                    "top"),
+           interpolate = TRUE)
+
+#### PANEL B - Pizza plot of 50 PD-rSNPs (among 54) that shows allelic imbalance #### 
+# text B
+plotText(label = "B", 
+         fontsize = 12,
+         fontfamily = "Helvetica",
+         x = 4.125, 
+         y = 0.5, 
+         just = "left", 
+         default.units = "inches",
+         fontface = "bold")
+
+# Since there are 254 unique rSNPs but we do not have about them being heterozygous or not, check if there is also chromatin allelic imbalance
+# hg38
+# Load the 254 PD rSNPs coordinates
+PD_rSNPs_254 = read_delim("/Volumes/deborah.gerard/Documents/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/SNEEP_uniq_rSNPs.txt",
+                          delim = "\t",
+                          col_names = TRUE)
+
+PD_rSNPs_254_fmt = PD_rSNPs_254 %>% 
+  separate(SNP_position, into = c("chr", "tmp"), sep = ":", remove = FALSE) %>% 
+  separate(tmp, into = c("start", "end"), sep = "-", remove = TRUE) %>% 
+  mutate(start = as.numeric(start),
+         end = as.numeric(end))
+  
+# Make a Granges object of the 254 PD rSNPs (width has to be one)
+searchArea = GRanges(seqnames = PD_rSNPs_254_fmt$chr, 
+                     ranges = IRanges(start = PD_rSNPs_254_fmt$end, 
+                                      end = PD_rSNPs_254_fmt$end),
+                     name = PD_rSNPs_254_fmt$SNP_position)
+
+# Path where the ATACseq BAM files are
+pathToFiles = "/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE4/"
+
+# Import a specific region from the BAM files (based on the search area above)
+reads = impBamGAL(pathToFiles, 
+                  searchArea, 
+                  verbose = TRUE)
+
+# Count the number of reads for the 2 different alleles at that position
+countList = getAlleleCounts(reads, 
+                           searchArea, 
+                            verbose = TRUE)
+
+# Save as a rds file for loading later if necessary
+saveRDS(countList, 
+        file = "/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE4/PD_rSNPs_254_het_counts_THREP1_ATACseq.rds")
+
+# Load the new results of the 254 rSNPs
+countList = read_rds("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE4/PD_rSNPs_254_het_counts_THREP1_ATACseq.rds")
+
+# Make an ASEset object to be able to plot
+countList.ASE = ASEsetFromCountList(searchArea, countList)
+
+# And plot one graph per pdf file
+for (i in 1:length(countList.ASE)){
+  pdf(paste0("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE4/20241111_AlellicImbalance_254rSNPs_", 
+             rownames(countList.ASE[i]),
+             ".pdf"))
+  barplot(countList.ASE[i])
+  dev.off()
+}
+
+# Now check how many are truly heterozygous thanks to the whole genome sequencing data (WGS)
+# Use table browser to retrieve according to this link http://genome.ucsc.edu/FAQ/FAQreleases.html#snpConversion
+searchArea %>% 
+  as_tibble() %>% 
+  dplyr::select(-start) %>% # Not the real start when converting a GRanges to a tibble 
+  mutate(start = end - 1) %>% 
+  dplyr::select(seqnames, start, end, name) %>% 
+  dplyr::rename(rSNPs = name) %>% 
+  inner_join(PD_rSNPs_254_rsID.filt,
+             by = "rSNPs") %>% 
+  dplyr::select(name) %>% 
+  write_delim(.,
+              "/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE4/rsIDs_254PDrSNPs.txt",
+              delim = "\t",
+              col_names = FALSE)
+
+# Load now the coordinates that are in hg19
+PD_rSNPs_254_hg19 = read_delim("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE4/rsIDs_254PDrSNPs_hg19_coord.txt",
+                               delim = "\t",
+                               col_names = TRUE)
+
+# Only keep SNPs that are on canonical chromosomes
+PD_rSNPs_254_hg19.GR = PD_rSNPs_254_hg19 %>% 
+  dplyr::filter(!str_detect(`#chrom`, "_")) %>% 
+  dplyr::select(`#chrom`:name) %>% 
+  dplyr::rename(chr = `#chrom`) %>% 
+  makeGRangesFromDataFrame(.,
+                           keep.extra.columns = TRUE,
+                           seqnames.field = "chr",
+                           start.field = "chromStart",
+                           end.field = "chromEnd",
+                           starts.in.df.are.0based = TRUE)
+
+# Load WGS data of TH REP1 mCHERRY cell line (hg19 genome version)
+dat.SNPs.only.GR = read_rds("/Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/E19D017a78.merge.qc.SNP_INDEL.hg19.annotated.rds")
+
+dat.SNPs.only.GR = dat.SNPs.only.GR %>% 
+  dplyr::select(CHR:POS, REF:FILTER, E19D017a78) %>% 
+  mutate(START = POS - 1) %>% 
+  makeGRangesFromDataFrame(.,
+                           keep.extra.columns = TRUE,
+                           seqnames.field = "CHR",
+                           start.field = "START",
+                           end.field = "POS",
+                           starts.in.df.are.0based = TRUE)
+
+seqlevelsStyle(dat.SNPs.only.GR) = "UCSC"
+seqlevelsStyle(dat.SNPs.only.GR)
+
+# Overlap
+hits = findOverlaps(PD_rSNPs_254_hg19.GR, dat.SNPs.only.GR)
+rSNP.254_in_E19D017a78 = PD_rSNPs_254_hg19.GR[queryHits(hits)]
+E19D017a78_w_rSNP.254 = dat.SNPs.only.GR[subjectHits(hits)]
+
+mcols(rSNP.254_in_E19D017a78) = cbind(mcols(rSNP.254_in_E19D017a78),
+                                 mcols(E19D017a78_w_rSNP.254))
+
+rSNP.254_in_E19D017a78 = as.data.frame(rSNP.254_in_E19D017a78) %>% 
+  as_tibble()
+
+# Out of 254 PD-rSNPs, we have information about 242
+
+# Save
+write_delim(rSNP.254_in_E19D017a78,
+            "/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE4/Genotype_of_254PDrSNPs_in_THREP1mCHERRY.txt",
+            delim = "\t",
+            col_names = TRUE)
+
+# Load later
+rSNP.254_in_E19D017a78 = read_delim("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE4/Genotype_of_254PDrSNPs_in_THREP1mCHERRY.txt",
+                                    delim = "\t",
+                                    col_names = TRUE)
+
+# Check how many are "unknown" (./.:.)
+rSNP.254_in_E19D017a78 %>% 
+  mutate(Genotype = gsub("\\:.*", "\\1", E19D017a78)) %>% 
+  group_by(Genotype) %>% 
+  summarise(GT.num = n()) # 54 PD-rSNPs are heterozygous in TH REP1 mCHERRY cell line, 24 are homozygous for the alternative allele and 164 are                                  unknown
+
+# Check if the 54 PD-rSNPs that are heterozygous in TH REP1 mCHERRY cell line also lead to chromatin allelic imbalance
+# rsIDs of the 54 heterozygous PD-rSNPs 
+rSNP.254_in_E19D017a78_0.1 = rSNP.254_in_E19D017a78 %>% 
+  mutate(Genotype = gsub("\\:.*", "\\1", E19D017a78),
+         Genotype2 = gsub("\\|", "\\/", Genotype)) %>% 
+  dplyr::filter(str_detect(Genotype2, "0/1")) %>% 
+  #unite(col = "toInves", seqnames, end, sep = "_") %>% 
+  dplyr::select(name)
+
+# Get their coordinates
+hetero_54_rSNP_in_E19D017a78.hg38 = searchArea %>% 
+  as_tibble() %>% 
+  dplyr::select(-start) %>% # Not the real start when converting a GRanges to a tibble 
+  mutate(start = end - 1) %>% 
+  dplyr::select(seqnames, start, end, name) %>% 
+  dplyr::rename(rSNPs = name) %>% 
+  inner_join(PD_rSNPs_254_rsID.filt,
+             by = "rSNPs") %>% 
+  dplyr::filter(name %in% rSNP.254_in_E19D017a78_0.1$name) %>% 
+  unite(col = "coordToInves", seqnames, end, sep = "_")
+
+# Extract the 54 heterozygous PD-rSNPs from thre ASet object
+PDrSNPs_54_het = countList[intersect(names(countList), hetero_54_rSNP_in_E19D017a78.hg38$coordToInves)]
+
+searchArea.0.1 = searchArea %>% 
+  as_tibble() %>% 
+  dplyr::filter(name %in% hetero_54_rSNP_in_E19D017a78.hg38$rSNPs)
+
+searchArea.0.1 = searchArea.0.1 %>% 
+  makeGRangesFromDataFrame(.,
+                           keep.extra.columns = TRUE,
+                           seqnames.field = "seqnames",
+                           start.field = "start",
+                           end.field = "end",
+                           starts.in.df.are.0based = FALSE)
+
+# And make it a ASet object back and proceed with a chi-squared test
+PDrSNPs_54_het.ASE = ASEsetFromCountList(searchArea.0.1, PDrSNPs_54_het)
+ref(PDrSNPs_54_het.ASE) = c("G", "T", "C")
+PDrSNPs_54_het.ASE.chisq = as_tibble(chisq.test(PDrSNPs_54_het.ASE[,1:7], "+")) %>% 
+  mutate(Sample = colnames(PDrSNPs_54_het.ASE)) %>% 
+  dplyr::select(Sample, everything())
+
+# Consider that a PD-rSNP lead to allelic imbalance if at least one sample (smNPC, mDAN-D15, mDAN-D30, mDAN-D50) shows allelic imbalance
+PDrSNPs_54_het.ASE.chisq %>% 
+  dplyr::filter(!str_detect(Sample, paste0(c("astrocyte", "neg"), collapse = "|"))) %>% 
+  #pivot_longer(!Sample, names_to = "PDrSNPs", values_to = "pvalue") %>% 
+  #group_by(Sample) %>% 
+  #dplyr::filter(if_any(where(is.numeric), ~ . < 0.05))
+  select_if(~any(. < 0.05)) %>% 
+  mutate(AI_yes = ncol(.)) %>% 
+  View()
+# 46 among 54 PD-rSNPs show allelic imbalance
+
+test = tibble(AI = c("yes", "no"),
+       value = c(46, 8),
+       percent = round((value/sum(value))*100, digits = 1))
+
+pizza.AI = ggplot(test,
+       aes(x = "", y = value, fill = AI)) +
+  geom_bar(width = 1, stat = "identity", alpha = 0.5) +
+    #theme_void() +
+    scale_fill_manual(values = c("#4682BD", "#64A7D1")) +
+    coord_polar(theta = "y", start = 2.125, clip = "off") +
+    geom_text(aes(
+        x = c(1.0, 1.2),
+        y = c(21.5, 50),
+        label = paste0(percent, "%")),
+        size = 5.0, 
+        color = "black",
+        fontface = "bold") +
+  theme_void() +
+  theme(legend.position = "none")
+
+plotGG(plot = pizza.AI, 
+       x = 3.0, 
+       y = 0.5, 
+       width = 6.0, 
+       height = 1.75,
+       just = c("left", "top"), 
+       default.units = "inches")
+  
+# And plot one graph per pdf file
+for (i in 1:length(PDrSNPs_54_het.ASE)){
+  pdf(paste0("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE4/20241115_AlellicImbalance_54HeterorSNPs_",
+             rownames(PDrSNPs_54_het.ASE[i]),
+             ".pdf"))
+  barplot(PDrSNPs_54_het.ASE[i])
+  dev.off()
+}
+
+#### PANEL C - Manhattan plot #### 
+# text C
+plotText(label = "C", 
+         fontsize = 12,
+         fontfamily = "Helvetica",
+         x = 4.125, 
+         y = 2.125, 
+         just = "left", 
+         default.units = "inches",
+         fontface = "bold") 
+
+# Load the Nalls et al. GWAS data
+nalls_allSNPs.HG38.GR = readRDS("/home/vagrant/Manuscript_1/FIGURE1/nalls_allSNPs.HG38.GR.rds")
+#nalls_allSNPs.HG38.GR = readRDS("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/nalls_allSNPs.HG3#8.GR.rds")
+
+
+# Load the rsIDS FOR THE 254 significant SNPs
+rsID.254 = read_delim("/Volumes/deborah.gerard/Documents/epifunc/SNEEP2024/RESULTS_SEPTEMBER_2024/output/SNEEP_uniq_rSNPs.txt",
+                     delim = "\t",
+                     col_names = TRUE)
+
+# Extract the chr and the position
+rsID.254_2 = rsID.254 %>% 
+  separate(col = "SNP_position", 
+           into = c("chr", "pos"), 
+           sep = ":",
+           remove = FALSE) %>% 
+  separate(col = "pos",
+           into = c("start", "end"),
+           sep = "-",
+           remove = TRUE) %>% 
+  unite(col = pos, 
+        c("chr", "end"), 
+        sep = "_", 
+        remove = TRUE) %>% 
+  dplyr::select(-start)
+
+# Select the SNPs position from nalls et al and associate rsIDs
+nalls.manH = nalls_allSNPs.HG38.GR %>% 
+  as_tibble() %>% 
+  dplyr::select(seqnames, base_pair_position, p) %>% 
+  unite(col = "pos", seqnames, base_pair_position, sep = "_", remove = FALSE) %>%
+  left_join(rsID.254_2, by = "pos") %>% 
+  separate(pos, into = c("chrom", "pos"), sep = "_", remove = TRUE) %>% 
+  dplyr::select(chrom, pos, p, SNP_position)
+
+# Save
+write_rds(nalls.manH,
+          "/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/20241107_254_manH.rds")
+
+# Load for later 
+nalls.manH = read_rds("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/20241107_254_manH.rds")
+
+# Rename columns
+nalls.manH = nalls.manH %>% 
+  dplyr::rename(snp = SNP_position) %>% 
+  mutate(pos = as.numeric(pos))
+
+# Manhattan plot - highlight the 254 SNPs with rsID
+# Get the rsID of the 254 rSNPs first
+nalls.manH %>% 
+  dplyr::filter(!is.na(snp),
+                p <= 5e-08) %>% 
+  dplyr::select(snp) %>% 
+  write_delim(.,
+              "/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/20241107_254PDrSNPs_coord.txt",
+              col_names = FALSE,
+              delim = "\t")
+
+# Load the files with the associated rsIDs
+PD_rSNPs_254_rsID = read_delim("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/20241107_254PDrSNPs_rsID.txt",
+                               delim = "\t",
+                               col_names = TRUE)
+
+# Only keep snv
+PD_rSNPs_254_rsID.filt = PD_rSNPs_254_rsID %>% 
+  filter(class == "snv") %>% 
+  dplyr::select(`#chrom`:name) %>% 
+  distinct(name, .keep_all = TRUE) %>% 
+  unite(col = "tmp", `#chrom`, chromStart, sep = ":", remove = FALSE) %>% 
+  unite(col = "rSNPs", tmp, chromEnd, sep = "-", remove = TRUE)
+
+# Associated then the significant GWAS pvalue
+snp_2_high = nalls.manH %>% 
+  dplyr::filter(!is.na(snp),
+                p <= 5e-08) %>% 
+  dplyr::rename(rSNPs = snp) %>% 
+  left_join(PD_rSNPs_254_rsID.filt,
+            by = "rSNPs") %>% 
+  dplyr::select(-rSNPs, -`#chrom`, -chromStart) %>% 
+  dplyr::rename(snp = name)
+  
+# Get the full set of SNPs and associate rsID to the one I want to highlight
+# snp_to_pl = nalls.manH %>% 
+#   mutate(snp = NA_character_) %>% 
+#   bind_rows(snp_2_high)
+
+snp_to_pl = nalls.manH %>%
+  mutate(snp = NA_character_) %>%
+  bind_rows(snp_2_high) %>%
+  mutate(pbis = -log10(p),
+         chrom = factor(chrom,
+                        levels = paste0("chr",
+                                        1:22)),
+         color = if_else(is.na(snp), "no_high", "high"),
+         
+         label = if_else(snp %in% c("rs1465922", "rs144814361"), snp, NA_character_))
+
+highlight_colormap = c("no_high" = adjustcolor( "grey", 
+                                                alpha.f = 0.2), 
+                       "high" = "#6600FF")
+
+no_high = manhattan_data_preprocess(snp_to_pl,
+                                    pval.colname = "p",
+                                    chr.colname = "chrom",
+                                    pos.colname = "pos",
+                                    highlight.colname = "color",
+                                    highlight.col = highlight_colormap,
+                                    signif = c(5e-08))
+# Plot
+snp.pl = manhattan_plot(x = no_high,
+                        color.by.highlight = TRUE,
+                        rescale = TRUE,
+                        label.colname = "label") +
+  theme(axis.text.x = element_text(size = 9,
+                                 face = "bold",
+                                 angle = 90),
+        axis.text.y = element_text(size = 9,
+                                   face = "bold"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(size = 11,
+                                    face = "bold"))
+ 
+# saveRDS(snp.pl,
+#        "/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE2/Fig2C_ManhattanPlot.rds")
+snp.pl = readRDS("/home/vagrant/Manuscript_1/FIGURE2/Fig2C_ManhattanPlot.rds")
+
+# Place the plot
+plotGG(plot = snp.pl, 
+       x = 4.5, 
+       y = 2.25, 
+       width = 3.75, 
+       height = 1.5,
+       just = c("left", "top"), 
+       default.units = "inches")
+
+#### PANEL D - BAG3 locus #### 
+# text D
+plotText(label = "D", 
+         fontsize = 12,
+         fontfamily = "Helvetica",
+         x = 0.25, 
+         y = 4.0, 
+         just = "left", 
+         default.units = "inches",
+         fontface = "bold") 
+
+# ATACseq signal BAG3
+# path where bigwig files are
 bw.path = "/home/vagrant/epifunc/"
-# bw.path = '/Volumes/deborah.gerard/Documents/epifunc/'
+#bw.path = "/Volumes/deborah.gerard/Documents/epifunc/"
 
 # 1st bio replicate smNPC
-bw.smNPC_1 = readBigwig(file = paste0(bw.path, "BIGWIG/smNPC_I.bw"), chrom = "chr10",
-    chromstart = 119611305, chromend = 119691505)
+bw.smNPC_1 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/smNPC_I.bw"),
+                        chrom = "chr10",
+                        chromstart = 119611305,
+                        chromend = 119691505)
 
 # 2nd bio replicate smNPC
-bw.smNPC_2 = readBigwig(file = paste0(bw.path, "BIGWIG/smNPC_II.bw"), chrom = "chr10",
-    chromstart = 119611305, chromend = 119691505)
+bw.smNPC_2 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/smNPC_II.bw"),
+                        chrom = "chr10",
+                        chromstart = 119611305,
+                        chromend = 119691505)
 
 # 3rd bio replicate smNPC
-bw.smNPC_3 = readBigwig(file = paste0(bw.path, "BIGWIG/smNPC_III.bw"), chrom = "chr10",
-    chromstart = 119611305, chromend = 119691505)
+bw.smNPC_3 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/smNPC_III.bw"),
+                        chrom = "chr10",
+                        chromstart = 119611305,
+                        chromend = 119691505)
 
 # 1st bio replicate TH positive neurons D15
-bw.TH.pos_D15_1 = readBigwig(file = paste0(bw.path, "BIGWIG/D15_POS_I.bw"), chrom = "chr10",
-    chromstart = 119611305, chromend = 119691505)
+bw.TH.pos_D15_1 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/D15_POS_I.bw"),
+                        chrom = "chr10",
+                        chromstart = 119611305,
+                        chromend = 119691505)
 
 # 2nd bio replicate TH positive neurons D15
-bw.TH.pos_D15_2 = readBigwig(file = paste0(bw.path, "BIGWIG/D15_POS_II.bw"), chrom = "chr10",
-    chromstart = 119611305, chromend = 119691505)
+bw.TH.pos_D15_2 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/D15_POS_II.bw"),
+                        chrom = "chr10",
+                        chromstart = 119611305,
+                        chromend = 119691505)
 
 # 3rd bio replicate TH positive neurons D15
-bw.TH.pos_D15_3 = readBigwig(file = paste0(bw.path, "BIGWIG/D15_POS_III.bw"), chrom = "chr10",
-    chromstart = 119611305, chromend = 119691505)
+bw.TH.pos_D15_3 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/D15_POS_III.bw"),
+                        chrom = "chr10",
+                        chromstart = 119611305,
+                        chromend = 119691505)
 
 # 1st bio replicate TH positive neurons D30
-bw.TH.pos_D30_1 = readBigwig(file = paste0(bw.path, "BIGWIG/D30_POS_I.bw"), chrom = "chr10",
-    chromstart = 119611305, chromend = 119691505)
+bw.TH.pos_D30_1 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/D30_POS_I.bw"),
+                        chrom = "chr10",
+                        chromstart = 119611305,
+                        chromend = 119691505)
 
 # 2nd bio replicate TH positive neurons D30
-bw.TH.pos_D30_2 = readBigwig(file = paste0(bw.path, "BIGWIG/D30_POS_II.bw"), chrom = "chr10",
-    chromstart = 119611305, chromend = 119691505)
+bw.TH.pos_D30_2 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/D30_POS_II.bw"),
+                        chrom = "chr10",
+                        chromstart = 119611305,
+                        chromend = 119691505)
 
 # 3rd bio replicate TH positive neurons D30
-bw.TH.pos_D30_3 = readBigwig(file = paste0(bw.path, "BIGWIG/D30_POS_III.bw"), chrom = "chr10",
-    chromstart = 119611305, chromend = 119691505)
+bw.TH.pos_D30_3 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/D30_POS_III.bw"),
+                        chrom = "chr10",
+                        chromstart = 119611305,
+                        chromend = 119691505)
 
 # 1st bio replicate TH positive neurons D50
-bw.TH.pos_D50_1 = readBigwig(file = paste0(bw.path, "BIGWIG/HFFTHmCherry_D50_possort_S1.bw"),
-    chrom = "chr10", chromstart = 119611305, chromend = 119691505)
+bw.TH.pos_D50_1 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/HFFTHmCherry_D50_possort_S1.bw"),
+                        chrom = "chr10",
+                        chromstart = 119611305,
+                        chromend = 119691505)
 
 # 2nd bio replicate TH positive neurons D50
-bw.TH.pos_D50_2 = readBigwig(file = paste0(bw.path, "BIGWIG/HFFTHmCherry_D50_possort_S3.bw"),
-    chrom = "chr10", chromstart = 119611305, chromend = 119691505)
+bw.TH.pos_D50_2 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/HFFTHmCherry_D50_possort_S3.bw"),
+                        chrom = "chr10",
+                        chromstart = 119611305,
+                        chromend = 119691505)
 
 # 3rd bio replicate TH positive neurons D50
-bw.TH.pos_D50_3 = readBigwig(file = paste0(bw.path, "BIGWIG/HFFTHmCherry_D50_possort_S4.bw"),
-    chrom = "chr10", chromstart = 119611305, chromend = 119691505)
+bw.TH.pos_D50_3 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/HFFTHmCherry_D50_possort_S4.bw"),
+                        chrom = "chr10",
+                        chromstart = 119611305,
+                        chromend = 119691505)
 
 # Add a scale next to the bigwig files - check the maximum to choose
-scale.BAG3.max = max(c(bw.smNPC_1$score, bw.smNPC_2$score, bw.smNPC_3$score, bw.TH.pos_D15_1$score,
-    bw.TH.pos_D15_2$score, bw.TH.pos_D15_3$score, bw.TH.pos_D30_1$score, bw.TH.pos_D30_2$score,
-    bw.TH.pos_D30_3$score, bw.TH.pos_D50_1$score, bw.TH.pos_D50_2$score, bw.TH.pos_D50_3$score))
+scale.BAG3.max = max(c(bw.smNPC_1$score,
+                       bw.smNPC_2$score,
+                       bw.smNPC_3$score,
+                       bw.TH.pos_D15_1$score,
+                       bw.TH.pos_D15_2$score,
+                       bw.TH.pos_D15_3$score,
+                       bw.TH.pos_D30_1$score,
+                       bw.TH.pos_D30_2$score,
+                       bw.TH.pos_D30_3$score,
+                       bw.TH.pos_D50_1$score,
+                       bw.TH.pos_D50_2$score,
+                       bw.TH.pos_D50_3$score))
 
 print(scale.BAG3.max)
 
 # Define parameters for the regions
-region.p.BAG3 = pgParams(chrom = "chr10", chromstart = 119611405, chromend = 119691405,
-    assembly = "hg38", range = c(0, scale.BAG3.max))
+region.p.BAG3 = pgParams(chrom = "chr10",
+                         chromstart = 119611405,
+                         chromend = 119691405,
+                         assembly = "hg38",
+                         range = c(0, scale.BAG3.max))
 
 # Add the genomic label
-plotGenomeLabel(chrom = "chr10", chromstart = 119611405, chromend = 119691405, assembly = "hg38",
-    x = 0.75, y = 0.625, length = 4, default.units = "inches", scale = "Mb")
+plotGenomeLabel(
+  chrom = "chr10",
+  chromstart = 119611405,
+  chromend = 119691405,
+  assembly = "hg38",
+  x = 0.5,
+  y = 4.125,
+  length = 4.0,
+  default.units = "inches",
+  scale = "Mb")
 
 # ATACseq signal smNPC_I and scale
-ATAC_smNPC_I = plotSignal(data = bw.smNPC_1, params = region.p.BAG3, fill = "#D3D3D3",
-    alpha = 0.7, linecolor = NA, x = 0.75, y = 0.875, width = 4, height = 0.25, just = c("left",
-        "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_smNPC_I, at = c(0, scale.BAG3.max), fontsize = 6)
+ATAC_smNPC_I = plotSignal(
+  data = bw.smNPC_1, 
+  params = region.p.BAG3,
+  fill = "#D3D3D3", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 4.375, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
 
 # ATACseq signal smNPC_II
-ATAC_smNPC_II = plotSignal(data = bw.smNPC_2, params = region.p.BAG3, fill = "#C0C0C0",
-    alpha = 0.7, linecolor = NA, x = 0.75, y = 0.875, width = 4, height = 0.25, just = c("left",
-        "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_smNPC_II, at = c(0, scale.BAG3.max), fontsize = 6)
+ATAC_smNPC_II = plotSignal(
+  data = bw.smNPC_2, 
+  params = region.p.BAG3,
+  fill = "#C0C0C0", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 4.375, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
 
 # ATACseq signal smNPC_III
-ATAC_smNPC_III = plotSignal(data = bw.smNPC_3, params = region.p.BAG3, fill = "#A9A9A9",
-    alpha = 0.7, linecolor = NA, x = 0.75, y = 0.875, width = 4, height = 0.25, just = c("left",
-        "top"), default.units = "inches")
+ATAC_smNPC_III = plotSignal(
+  data = bw.smNPC_3, 
+  params = region.p.BAG3,
+  fill = "#A9A9A9", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 4.375, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
 
-annoYaxis(plot = ATAC_smNPC_III, at = c(0, scale.BAG3.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D15 I
-ATAC_TH.pos_D15_I = plotSignal(data = bw.TH.pos_D15_1, params = region.p.BAG3, fill = "#B22222",
-    alpha = 0.7, linecolor = NA, x = 0.75, y = 1.25, width = 4, height = 0.25, just = c("left",
-        "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D15_I, at = c(0, scale.BAG3.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D15 II
-ATAC_TH.pos_D15_II = plotSignal(data = bw.TH.pos_D15_2, params = region.p.BAG3, fill = "#A52A2A",
-    alpha = 0.7, linecolor = NA, x = 0.75, y = 1.25, width = 4, height = 0.25, just = c("left",
-        "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D15_II, at = c(0, scale.BAG3.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D15 III
-ATAC_TH.pos_D15_III = plotSignal(data = bw.TH.pos_D15_3, params = region.p.BAG3,
-    fill = "#8B0000", alpha = 0.7, linecolor = NA, x = 0.75, y = 1.25, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D15_III, at = c(0, scale.BAG3.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D30 I
-ATAC_TH.pos_D30_I = plotSignal(data = bw.TH.pos_D30_1, params = region.p.BAG3, fill = "#FF6347",
-    alpha = 0.7, linecolor = NA, x = 0.75, y = 1.625, width = 4, height = 0.25, just = c("left",
-        "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D30_I, at = c(0, scale.BAG3.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D30 II
-ATAC_TH.pos_D30_II = plotSignal(data = bw.TH.pos_D30_2, params = region.p.BAG3, fill = "#FF0000",
-    alpha = 0.7, linecolor = NA, x = 0.75, y = 1.625, width = 4, height = 0.25, just = c("left",
-        "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D30_II, at = c(0, scale.BAG3.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D30 III
-ATAC_TH.pos_D30_III = plotSignal(data = bw.TH.pos_D30_3, params = region.p.BAG3,
-    fill = "#DC143C", alpha = 0.7, linecolor = NA, x = 0.75, y = 1.625, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D30_III, at = c(0, scale.BAG3.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D50 I
-ATAC_TH.pos_D50_I = plotSignal(data = bw.TH.pos_D50_1, params = region.p.BAG3, fill = "#FFA07A",
-    alpha = 0.7, linecolor = NA, x = 0.75, y = 2, width = 4, height = 0.25, just = c("left",
-        "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D50_I, at = c(0, scale.BAG3.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D50 II
-ATAC_TH.pos_D50_II = plotSignal(data = bw.TH.pos_D50_2, params = region.p.BAG3, fill = "#FA8072",
-    alpha = 0.7, linecolor = NA, x = 0.75, y = 2, width = 4, height = 0.25, just = c("left",
-        "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D50_II, at = c(0, scale.BAG3.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D50 III
-ATAC_TH.pos_D50_III = plotSignal(data = bw.TH.pos_D50_3, params = region.p.BAG3,
-    fill = "#E9967A", alpha = 0.7, linecolor = NA, x = 0.75, y = 2, width = 4, height = 0.25,
-    just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D50_III, at = c(0, scale.BAG3.max), fontsize = 6)
-
-# Gene track
-plotGenes(chrom = "chr10", chromstart = 119611405, chromend = 119691405, assembly = assembly(Genome = "hg38refGene",
-    TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", OrgDb = "org.Hs.eg.db"), fontcolor = "black",
-    fill = "black", x = 0.75, y = 2.375, width = 4, height = 0.375, just = c("left",
-        "top"), default.units = "inches")
+annoYaxis(plot = ATAC_smNPC_III, 
+          at = c(0, scale.BAG3.max),
+          fontsize = 6)
 
 # Add the samples name
-plotText(label = "smNPC", fontsize = 6, fontcolor = "#A9A9A9", fontfamily = "Helvetica",
-    x = 0.75, y = 0.875, just = c("left", "top"), default.units = "inches", fontface = "bold")
+plotText(label = "smNPC", 
+         fontsize = 6, 
+         fontcolor = "#A9A9A9",
+         fontfamily = "Helvetica",
+         x = 0.25, 
+         y = 4.5, 
+         just = c("left", "top"),
+         default.units = "inches",
+         fontface = "bold")
 
-plotText(label = "mDAN D15", fontsize = 6, fontfamily = "Helvetica", fontcolor = "#B22222",
-    x = 0.75, y = 1.25, just = c("left", "top"), default.units = "inches", fontface = "bold")
+# ATACseq signal TH positive neurons D15 I
+ATAC_TH.pos_D15_I = plotSignal(
+  data = bw.TH.pos_D15_1, 
+  params = region.p.BAG3,
+  fill = "#B22222", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 4.675, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
 
-plotText(label = "mDAN D30", fontsize = 6, fontfamily = "Helvetica", fontcolor = "#DC143C",
-    x = 0.75, y = 1.625, just = c("left", "top"), default.units = "inches", fontface = "bold")
+# ATACseq signal TH positive neurons D15 II
+ATAC_TH.pos_D15_II = plotSignal(
+  data = bw.TH.pos_D15_2, 
+  params = region.p.BAG3,
+  fill = "#A52A2A", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 4.675, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
 
-plotText(label = "mDAN D50", fontsize = 6, fontfamily = "Helvetica", fontcolor = "#E9967A",
-    x = 0.75, y = 2, just = c("left", "top"), default.units = "inches", fontface = "bold")
+# ATACseq signal TH positive neurons D15 III
+ATAC_TH.pos_D15_III = plotSignal(
+  data = bw.TH.pos_D15_3, 
+  params = region.p.BAG3,
+  fill = "#8B0000", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 4.675, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
 
-#### PANEL B - BAG3 and LHX1 expression (RNAseq) text B
-plotText(label = "B", fontsize = 12, fontfamily = "Helvetica", x = 5, y = 0.5, just = "left",
-    default.units = "inches", fontface = "bold")
+annoYaxis(plot = ATAC_TH.pos_D15_III, 
+          at = c(0, scale.BAG3.max),
+          fontsize = 6)
 
-# Load RPKM matrix obtained from Borja and rename columns dat.RPKM =
-# read_delim('/home/vagrant/epifunc/RNAseq/RPKM_genename', delim = '\t',
-# col_names = TRUE) dat.RPKM = dat.RPKM %>% dplyr::select(gene_id, gene_name,
-# everything())
+# Annotate sample name
+plotText(label = "mDAN D15", 
+         fontsize = 6, 
+         fontfamily = "Helvetica",
+         fontcolor = "#B22222",
+         x = 0.25, 
+         y = 4.75, 
+         just = c("left", "top"),
+         default.units = "inches",
+         fontface = "bold")
 
-# RPKM data - Remove the negative sorted neurons and astrocytes dat.RPKM.filt =
-# dat.RPKM %>% dplyr::select(!contains('negsort'), -starts_with('ASTRO')) %>%
-# pivot_longer(cols = ends_with('bam'), names_to = 'Sample', values_to =
-# 'RPKM') %>% mutate(Cond = case_when(str_detect(Sample, 'D15_possort') ~
-# 'Positively sorted neurons D15', str_detect(Sample, 'D30_possort') ~
-# 'Positively sorted neurons D30', str_detect(Sample, 'D50_possort') ~
-# 'Positively sorted neurons D50', TRUE ~ 'smNPCs'), Cond = factor(Cond, levels
-# = c('smNPCs', 'Positively sorted neurons D15', 'Positively sorted neurons
-# D30', 'Positively sorted neurons D50')), gene_id = gsub('\\..*', '',
-# gene_id))
+# ATACseq signal TH positive neurons D30 I
+ATAC_TH.pos_D30_I = plotSignal(
+  data = bw.TH.pos_D30_1, 
+  params = region.p.BAG3,
+  fill = "#FF6347", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 4.975, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
 
-# Save the matrix of expression write_rds(dat.RPKM.filt,
-# '/home/vagrant/Manuscript_1/FIGURE2/mat_RPKM.rds')
+# ATACseq signal TH positive neurons D30 II
+ATAC_TH.pos_D30_II = plotSignal(
+  data = bw.TH.pos_D30_2, 
+  params = region.p.BAG3,
+  fill = "#FF0000", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 4.975, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
+
+# ATACseq signal TH positive neurons D30 III
+ATAC_TH.pos_D30_III = plotSignal(
+  data = bw.TH.pos_D30_3, 
+  params = region.p.BAG3,
+  fill = "#DC143C", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 4.975,
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
+
+annoYaxis(plot = ATAC_TH.pos_D30_III, 
+          at = c(0, scale.BAG3.max),
+          fontsize = 6)
+
+# Annotate sample name
+plotText(label = "mDAN D30", 
+         fontsize = 6, 
+         fontfamily = "Helvetica",
+         fontcolor = "#DC143C",
+         x = 0.25, 
+         y = 5.0625, 
+         just = c("left", "top"),
+         default.units = "inches",
+         fontface = "bold")
+
+# ATACseq signal TH positive neurons D50 I
+ATAC_TH.pos_D50_I = plotSignal(
+  data = bw.TH.pos_D50_1, 
+  params = region.p.BAG3,
+  fill = "#FFA07A", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 5.275, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
+
+# ATACseq signal TH positive neurons D50 II
+ATAC_TH.pos_D50_II = plotSignal(
+  data = bw.TH.pos_D50_2, 
+  params = region.p.BAG3,
+  fill = "#FA8072", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 5.275, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
+
+# ATACseq signal TH positive neurons D50 III
+ATAC_TH.pos_D50_III = plotSignal(
+  data = bw.TH.pos_D50_3, 
+  params = region.p.BAG3,
+  fill = "#E9967A", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 5.275,
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
+
+annoYaxis(plot = ATAC_TH.pos_D50_III, 
+          at = c(0, scale.BAG3.max),
+          fontsize = 6)
+
+# Annotate sample name
+plotText(label = "mDAN D50", 
+         fontsize = 6, 
+         fontfamily = "Helvetica",
+         fontcolor = "#E9967A",
+         x = 0.25, 
+         y = 5.375, 
+         just = c("left", "top"),
+         default.units = "inches",
+         fontface = "bold")
+
+# Gene track
+plotGenes(chrom = "chr10",
+  chromstart = 119611405,
+  chromend = 119691405,
+  assembly = assembly(Genome = "hg38refGene", 
+                      TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", 
+                      OrgDb = "org.Hs.eg.db"),
+  fontcolor = "black",
+  fill = "black",
+  x = 0.5,
+  y = 5.625,
+  width = 4.0,
+  height = 0.375,
+  just = c("left", "top"),
+  default.units = "inches")
+
+#### PANEL E - BAG3 and LHX1 expression (RNAseq)
+# text E
+plotText(label = "E", 
+         fontsize = 12,
+         fontfamily = "Helvetica",
+         x = 4.75, 
+         y = 4.0, 
+         just = "left", 
+         default.units = "inches",
+         fontface = "bold")
+
+# Load RPKM matrix obtained from Borja and rename columns
+# dat.RPKM = read_delim("/home/vagrant/epifunc/RNAseq/RPKM_genename",
+#                       delim = "\t", 
+#                       col_names = TRUE)
+# 
+# dat.RPKM = dat.RPKM %>% 
+#   dplyr::select(gene_id, gene_name, everything())
+
+# RPKM data - Remove the negative sorted neurons and astrocytes
+# dat.RPKM.filt = dat.RPKM %>% 
+#   dplyr::select(!contains("negsort"), -starts_with("ASTRO")) %>% 
+#   pivot_longer(cols = ends_with("bam"), names_to = "Sample", values_to = "RPKM") %>% 
+#   mutate(Cond = case_when(str_detect(Sample, "D15_possort") ~ "Positively sorted neurons D15",
+#                          str_detect(Sample, "D30_possort") ~ "Positively sorted neurons D30",
+#                          str_detect(Sample, "D50_possort") ~ "Positively sorted neurons D50",
+#                          TRUE ~ "smNPCs"),
+#          Cond = factor(Cond, levels = c("smNPCs", "Positively sorted neurons D15",
+#                                   "Positively sorted neurons D30", 
+#                                   "Positively sorted neurons D50")),
+#          gene_id = gsub("\\..*", "", gene_id))
+
+# Save the matrix of expression
+# write_rds(dat.RPKM.filt,
+#           "/home/vagrant/Manuscript_1/FIGURE2/mat_RPKM.rds")
 
 # Load it for making the plots
 dat.RPKM.filt = read_rds("/home/vagrant/Manuscript_1/FIGURE2/mat_RPKM.rds")
-dat.RPKM.filt = read_rds("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE2/mat_RPKM.rds")
-
-dat.RPKM.filt %>%
-    # filter(str_detect(gene_id, ' ENSG00000272414'))
-filter(str_detect(gene_name, paste0(c("FAM47E", "STBD1"), collapse = "|"))) %>%
-    View()
+#dat.RPKM.filt = read_rds("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE2/mat_RPKM.rds")
 
 # Expression for BAG3 and LHX1
-BAG3.LHX1.exp = ggboxplot(dat.RPKM.filt %>%
-    dplyr::filter(gene_name %in% c("BAG3", "LHX1")), x = "Cond", y = "RPKM", add = "jitter",
-    fill = "Cond", palette = c("#A9A9A9", "#B22222", "#DC143C", "#E9967A"), facet.by = "gene_name",
-    xlab = "", ylab = "Reads Per Kilobase Million (RPKM)") + scale_x_discrete(labels = c("smNPC",
-    expression("mDAN D15"), expression("mDAN D30"), expression("mDAN D50"))) + theme(legend.position = "none",
-    axis.text.x = element_text(angle = 90))
-
+BAG3.LHX1.exp = ggboxplot(dat.RPKM.filt %>% 
+                            dplyr::filter(gene_name %in% c("BAG3", "LHX1")),
+                          x = "Cond", 
+                          y = "RPKM", 
+                          add = "jitter", 
+                          fill = "Cond", 
+                          palette = c("#A9A9A9", "#B22222", "#DC143C", "#E9967A"),
+                          facet.by = "gene_name",
+                          xlab = "", 
+                          ylab = "Reads Per Kilobase Million (RPKM)") +
+  scale_x_discrete(labels = c("smNPC",
+                              expression("mDAN D15"),
+                              expression("mDAN D30"),
+                              expression("mDAN D50"))) +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 90))
+  
 
 # Place the plot
-plotGG(plot = BAG3.LHX1.exp, x = 5.25, y = 0.625, width = 2, height = 3.5, just = c("left",
-    "top"), default.units = "inches")
+plotGG(plot = BAG3.LHX1.exp, 
+       x = 5.0, 
+       y = 4.125, 
+       width = 3, 
+       height = 3.5,
+       just = c("left", "top"), 
+       default.units = "inches")
+
+# Add the SNP position that zoom in the TFBS
+SNP_param = pgParams(chrom = "chr10",
+                     chromstart = 119651405,
+                     chromend = 119651405,
+                     assembly = "hg38")
+
+annoHighlight(plot = ATAC_smNPC_I, 
+              params = SNP_param,
+              fill = "#404788FF",
+              y = 4.5, 
+              height = 1.5, 
+              just = c("left", "top"), 
+              default.units = "inches")
+
+annoZoomLines(plot = ATAC_smNPC_I, 
+              params = SNP_param,
+              y0 = 6.0, 
+              x1 = c(2.25, 2.75), 
+              y1 = 6.125, 
+              default.units = "inches")
 
 # Add the transcription factor binding motif (TFBS) for LHX1
-pfm.LHX1 = getMatrixByID(JASPAR2020, ID = "MA1518.1")
+pfm.LHX1 = getMatrixByID(JASPAR2020, 
+                         ID = "MA1518.1")
 LHX1 = new.env()
 
 LHX1$LHX1 = pfm.LHX1@profileMatrix
@@ -856,437 +2209,956 @@ LHX1$LHX1 = pfm.LHX1@profileMatrix
 LHX1 = as.list(LHX1)
 
 # Remove the nucleotide position
-LHX1_TFBS = ggseqlogo(LHX1) + annotate("rect", xmin = 4.5, xmax = 5.5, ymin = -0.05,
-    ymax = 2.5, alpha = 0.1, col = "black", fill = "#404788FF") + theme(axis.text.x = element_blank())
+LHX1_TFBS = ggseqlogo(LHX1) +
+  annotate("rect", 
+           xmin = 4.5, 
+           xmax = 5.5, 
+           ymin = -0.05, 
+           ymax = 2.5, 
+           alpha = .1, 
+           col = "black", 
+           fill = "#404788FF") +
+  theme(axis.text.x = element_blank())
 
 # Place the plot
-plotGG(plot = LHX1_TFBS, x = 1.7425, y = 2.625, width = 1.5, height = 1.5, just = c("left",
-    "top"), default.units = "inches")
+plotGG(plot = LHX1_TFBS, 
+       x = 1.4925, 
+       y = 5.9375, 
+       width = 1.5, 
+       height = 1.5,
+       just = c("left", "top"), 
+       default.units = "inches")
 
-# Add the SNP position that zoom in the TFBS
-SNP_param = pgParams(chrom = "chr10", chromstart = 119651405, chromend = 119651405,
-    assembly = "hg38")
+# text F
+plotText(label = "F", 
+         fontsize = 12,
+         fontfamily = "Helvetica",
+         x = 0.25, 
+         y = 7.75, 
+         just = "left", 
+         default.units = "inches",
+         fontface = "bold")
 
-annoHighlight(plot = ATAC_smNPC_I, params = SNP_param, fill = "#404788FF", y = 0.875,
-    height = 1.75, just = c("left", "top"), default.units = "inches")
+# # ATACseq signal IDUA
+# # 1st bio replicate smNPC
+# bw.IDUA.smNPC_1 = readBigwig(file = paste0(bw.path, 
+#                                       "BIGWIG/smNPC_I.bw"),
+#                         chrom = "chr4",
+#                         chromstart = 947008,
+#                         chromend = 1027208)
+# 
+# # 2nd bio replicate smNPC
+# bw.IDUA.smNPC_2 = readBigwig(file = paste0(bw.path, 
+#                                       "BIGWIG/smNPC_II.bw"),
+#                         chrom = "chr4",
+#                         chromstart = 947008,
+#                         chromend = 1027208)
+# 
+# # 3rd bio replicate smNPC
+# bw.IDUA.smNPC_3 = readBigwig(file = paste0(bw.path, 
+#                                       "BIGWIG/smNPC_III.bw"),
+#                         chrom = "chr4",
+#                         chromstart = 947008,
+#                         chromend = 1027208)
+# 
+# # 1st bio replicate TH positive neurons D15
+# bw.IDUA.TH.pos_D15_1 = readBigwig(file = paste0(bw.path, 
+#                                       "BIGWIG/D15_POS_I.bw"),
+#                         chrom = "chr4",
+#                         chromstart = 947008,
+#                         chromend = 1027208)
+# 
+# # 2nd bio replicate TH positive neurons D15
+# bw.IDUA.TH.pos_D15_2 = readBigwig(file = paste0(bw.path, 
+#                                       "BIGWIG/D15_POS_II.bw"),
+#                         chrom = "chr4",
+#                         chromstart = 947008,
+#                         chromend = 1027208)
+# 
+# # 3rd bio replicate TH positive neurons D15
+# bw.IDUA.TH.pos_D15_3 = readBigwig(file = paste0(bw.path, 
+#                                       "BIGWIG/D15_POS_III.bw"),
+#                         chrom = "chr4",
+#                         chromstart = 947008,
+#                         chromend = 1027208)
+# 
+# # 1st bio replicate TH positive neurons D30
+# bw.IDUA.TH.pos_D30_1 = readBigwig(file = paste0(bw.path, 
+#                                       "BIGWIG/D30_POS_I.bw"),
+#                         chrom = "chr4",
+#                         chromstart = 947008,
+#                         chromend = 1027208)
+# 
+# # 2nd bio replicate TH positive neurons D30
+# bw.IDUA.TH.pos_D30_2 = readBigwig(file = paste0(bw.path, 
+#                                       "BIGWIG/D30_POS_II.bw"),
+#                         chrom = "chr4",
+#                         chromstart = 947008,
+#                         chromend = 1027208)
+# 
+# # 3rd bio replicate TH positive neurons D30
+# bw.IDUA.TH.pos_D30_3 = readBigwig(file = paste0(bw.path, 
+#                                       "BIGWIG/D30_POS_III.bw"),
+#                         chrom = "chr4",
+#                         chromstart = 947008,
+#                         chromend = 1027208)
+# 
+# # 1st bio replicate TH positive neurons D50
+# bw.IDUA.TH.pos_D50_1 = readBigwig(file = paste0(bw.path, 
+#                                       "BIGWIG/HFFTHmCherry_D50_possort_S1.bw"),
+#                         chrom = "chr4",
+#                         chromstart = 947008,
+#                         chromend = 1027208)
+# 
+# # 2nd bio replicate TH positive neurons D50
+# bw.IDUA.TH.pos_D50_2 = readBigwig(file = paste0(bw.path, 
+#                                       "BIGWIG/HFFTHmCherry_D50_possort_S3.bw"),
+#                         chrom = "chr4",
+#                         chromstart = 947008,
+#                         chromend = 1027208)
+# 
+# # 3rd bio replicate TH positive neurons D50
+# bw.IDUA.TH.pos_D50_3 = readBigwig(file = paste0(bw.path, 
+#                                       "BIGWIG/HFFTHmCherry_D50_possort_S4.bw"),
+#                         chrom = "chr4",
+#                         chromstart = 947008,
+#                         chromend = 1027208)
+# 
+# # Add a scale next to the bigwig files - check the maximum to choose
+# scale.IDUA.max = max(c(bw.IDUA.smNPC_1$score,
+#                        bw.IDUA.smNPC_2$score,
+#                        bw.IDUA.smNPC_3$score,
+#                        bw.IDUA.TH.pos_D15_1$score,
+#                        bw.IDUA.TH.pos_D15_2$score,
+#                        bw.IDUA.TH.pos_D15_3$score,
+#                        bw.IDUA.TH.pos_D30_1$score,
+#                        bw.IDUA.TH.pos_D30_2$score,
+#                        bw.IDUA.TH.pos_D30_3$score,
+#                        bw.IDUA.TH.pos_D50_1$score,
+#                        bw.IDUA.TH.pos_D50_2$score,
+#                        bw.IDUA.TH.pos_D50_3$score))
+# 
+# print(scale.IDUA.max)
+# 
+# # Define parameters for the regions
+# region.p.IDUA = pgParams(chrom = "chr4",
+#                          chromstart = 947108,
+#                          chromend = 1027108,
+#                          assembly = "hg38",
+#                          range = c(0, scale.IDUA.max))
+# 
+# # Add the genomic label
+# plotGenomeLabel(
+#   chrom = "chr4",
+#   chromstart = 947108,
+#   chromend = 1027108,
+#   assembly = "hg38",
+#   x = 0.75,
+#   y = 4.375,
+#   length = 4.0,
+#   default.units = "inches",
+#   scale = "Mb")
+# 
+# # ATACseq signal smNPC_I
+# ATAC_smNPC_I_IDUA = plotSignal(
+#   data = bw.IDUA.smNPC_1, 
+#   params = region.p.IDUA,
+#   fill = "#D3D3D3", 
+#   alpha = 0.7, 
+#   linecolor = NA,
+#   x = 0.75, 
+#   y = 4.625, 
+#   width = 4.0, 
+#   height = 0.25,
+#   just = c("left", "top"), 
+#   default.units = "inches")
+# 
+# annoYaxis(plot = ATAC_smNPC_I_IDUA, 
+#           at = c(0, scale.IDUA.max),
+#           fontsize = 6)
+# 
+# # ATACseq signal smNPC_II
+# ATAC_smNPC_II_IDUA = plotSignal(
+#   data = bw.IDUA.smNPC_2, 
+#   params = region.p.IDUA,
+#   fill = "#C0C0C0", 
+#   alpha = 0.7, 
+#   linecolor = NA,
+#   x = 0.75, 
+#   y = 4.625, 
+#   width = 4.0, 
+#   height = 0.25,
+#   just = c("left", "top"), 
+#   default.units = "inches")
+# 
+# annoYaxis(plot = ATAC_smNPC_II_IDUA, 
+#           at = c(0, scale.IDUA.max),
+#           fontsize = 6)
+# 
+# # Add the SNP position that zoom in the TFBS
+# SNP_param_IDUA = pgParams(chrom = "chr4",
+#                      chromstart = 987108,
+#                      chromend = 987108,
+#                      assembly = "hg38")
+# 
+# annoHighlight(plot = ATAC_smNPC_I_IDUA, 
+#               params = SNP_param_IDUA,
+#               fill = "#404788FF",
+#               y = 4.75, 
+#               height = 1.875, 
+#               just = c("left", "top"), 
+#               default.units = "inches")
+# 
+# annoZoomLines(plot = ATAC_smNPC_I_IDUA, 
+#               params = SNP_param_IDUA,
+#               y0 = 6.625, 
+#               x1 = c(2.25, 3.25), 
+#               y1 = 6.75, 
+#               default.units = "inches")
+# 
+# # ATACseq signal smNPC_III
+# ATAC_smNPC_III_IDUA = plotSignal(
+#   data = bw.IDUA.smNPC_3, 
+#   params = region.p.IDUA,
+#   fill = "#A9A9A9", 
+#   alpha = 0.7, 
+#   linecolor = NA,
+#   x = 0.75, 
+#   y = 4.625, 
+#   width = 4.0, 
+#   height = 0.25,
+#   just = c("left", "top"), 
+#   default.units = "inches")
+# 
+# annoYaxis(plot = ATAC_smNPC_III_IDUA, 
+#           at = c(0, scale.IDUA.max),
+#           fontsize = 6)
+# 
+# # ATACseq signal TH positive neurons D15 I
+# ATAC_TH.pos_D15_I_IDUA = plotSignal(
+#   data = bw.IDUA.TH.pos_D15_1, 
+#   params = region.p.IDUA,
+#   fill = "#B22222", 
+#   alpha = 0.7, 
+#   linecolor = NA,
+#   x = 0.75, 
+#   y = 5.0, 
+#   width = 4.0, 
+#   height = 0.25,
+#   just = c("left", "top"), 
+#   default.units = "inches")
+# 
+# annoYaxis(plot = ATAC_TH.pos_D15_I_IDUA, 
+#           at = c(0, scale.IDUA.max),
+#           fontsize = 6)
+# 
+# # ATACseq signal TH positive neurons D15 II
+# ATAC_TH.pos_D15_II_IDUA = plotSignal(
+#   data = bw.IDUA.TH.pos_D15_2, 
+#   params = region.p.IDUA,
+#   fill = "#A52A2A", 
+#   alpha = 0.7, 
+#   linecolor = NA,
+#   x = 0.75, 
+#   y = 5.0, 
+#   width = 4.0, 
+#   height = 0.25,
+#   just = c("left", "top"), 
+#   default.units = "inches")
+# 
+# annoYaxis(plot = ATAC_TH.pos_D15_II_IDUA, 
+#           at = c(0, scale.IDUA.max),
+#           fontsize = 6)
+# 
+# # ATACseq signal TH positive neurons D15 III
+# ATAC_TH.pos_D15_III_IDUA = plotSignal(
+#   data = bw.IDUA.TH.pos_D15_3, 
+#   params = region.p.IDUA,
+#   fill = "#8B0000", 
+#   alpha = 0.7, 
+#   linecolor = NA,
+#   x = 0.75, 
+#   y = 5.0, 
+#   width = 4.0, 
+#   height = 0.25,
+#   just = c("left", "top"), 
+#   default.units = "inches")
+# 
+# annoYaxis(plot = ATAC_TH.pos_D15_III_IDUA, 
+#           at = c(0, scale.IDUA.max),
+#           fontsize = 6)
+# 
+# # ATACseq signal TH positive neurons D30 I
+# ATAC_TH.pos_D30_I_IDUA = plotSignal(
+#   data = bw.IDUA.TH.pos_D30_1, 
+#   params = region.p.IDUA,
+#   fill = "#FF6347", 
+#   alpha = 0.7, 
+#   linecolor = NA,
+#   x = 0.75, 
+#   y = 5.375, 
+#   width = 4.0, 
+#   height = 0.25,
+#   just = c("left", "top"), 
+#   default.units = "inches")
+# 
+# annoYaxis(plot = ATAC_TH.pos_D30_I_IDUA, 
+#           at = c(0, scale.IDUA.max),
+#           fontsize = 6)
+# 
+# # ATACseq signal TH positive neurons D30 II
+# ATAC_TH.pos_D30_II_IDUA = plotSignal(
+#   data = bw.IDUA.TH.pos_D30_2, 
+#   params = region.p.IDUA,
+#   fill = "#FF0000", 
+#   alpha = 0.7, 
+#   linecolor = NA,
+#   x = 0.75, 
+#   y = 5.375, 
+#   width = 4.0, 
+#   height = 0.25,
+#   just = c("left", "top"), 
+#   default.units = "inches")
+# 
+# annoYaxis(plot = ATAC_TH.pos_D30_II_IDUA, 
+#           at = c(0, scale.IDUA.max),
+#           fontsize = 6)
+# 
+# # ATACseq signal TH positive neurons D30 III
+# ATAC_TH.pos_D30_III_IDUA = plotSignal(
+#   data = bw.IDUA.TH.pos_D30_3, 
+#   params = region.p.IDUA,
+#   fill = "#DC143C", 
+#   alpha = 0.7, 
+#   linecolor = NA,
+#   x = 0.75, 
+#   y = 5.375, 
+#   width = 4.0, 
+#   height = 0.25,
+#   just = c("left", "top"), 
+#   default.units = "inches")
+# 
+# annoYaxis(plot = ATAC_TH.pos_D30_III_IDUA, 
+#           at = c(0, scale.IDUA.max),
+#           fontsize = 6)
+# 
+# # ATACseq signal TH positive neurons D50 I
+# ATAC_TH.pos_D50_I_IDUA = plotSignal(
+#   data = bw.IDUA.TH.pos_D50_1, 
+#   params = region.p.IDUA,
+#   fill = "#FFA07A", 
+#   alpha = 0.7, 
+#   linecolor = NA,
+#   x = 0.75, 
+#   y = 5.75, 
+#   width = 4.0, 
+#   height = 0.25,
+#   just = c("left", "top"), 
+#   default.units = "inches")
+# 
+# annoYaxis(plot = ATAC_TH.pos_D50_I_IDUA, 
+#           at = c(0, scale.IDUA.max),
+#           fontsize = 6)
+# 
+# # ATACseq signal TH positive neurons D50 II
+# ATAC_TH.pos_D50_II_IDUA = plotSignal(
+#   data = bw.IDUA.TH.pos_D50_2, 
+#   params = region.p.IDUA,
+#   fill = "#FA8072", 
+#   alpha = 0.7, 
+#   linecolor = NA,
+#   x = 0.75, 
+#   y = 5.75, 
+#   width = 4.0, 
+#   height = 0.25,
+#   just = c("left", "top"), 
+#   default.units = "inches")
+# 
+# annoYaxis(plot = ATAC_TH.pos_D50_II_IDUA, 
+#           at = c(0, scale.IDUA.max),
+#           fontsize = 6)
+# 
+# # ATACseq signal TH positive neurons D50 III
+# ATAC_TH.pos_D50_III_IDUA = plotSignal(
+#   data = bw.IDUA.TH.pos_D50_3, 
+#   params = region.p.IDUA,
+#   fill = "#E9967A", 
+#   alpha = 0.7, 
+#   linecolor = NA,
+#   x = 0.75, 
+#   y = 5.75, 
+#   width = 4.0, 
+#   height = 0.25,
+#   just = c("left", "top"), 
+#   default.units = "inches")
+# 
+# annoYaxis(plot = ATAC_TH.pos_D50_III_IDUA, 
+#           at = c(0, scale.IDUA.max),
+#           fontsize = 6)
+# 
+# # Gene track
+# plotGenes(chrom = "chr4",
+#   chromstart = 947108,
+#   chromend = 1027108,
+#   assembly = assembly(Genome = "hg38refGene", 
+#                       TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", 
+#                       OrgDb = "org.Hs.eg.db"),
+#   fontcolor = "black",
+#   fill = "black",
+#   x = 0.75,
+#   y = 6.125,
+#   width = 4.0,
+#   height = 0.375,
+#   just = c("left", "top"),
+#   default.units = "inches")
+# 
+# # Add the samples name
+# plotText(label = "smNPC", 
+#          fontsize = 6, 
+#          fontcolor = "#A9A9A9",
+#          fontfamily = "Helvetica",
+#          x = 0.75, 
+#          y = 4.625, 
+#          just = c("left", "top"),
+#          default.units = "inches",
+#          fontface = "bold")
+# 
+# plotText(label = "mDAN D15", 
+#          fontsize = 6, 
+#          fontcolor = "#B22222",
+#          fontfamily = "Helvetica",
+#          x = 0.75, 
+#          y = 5.0, 
+#          just = c("left", "top"),
+#          default.units = "inches",
+#          fontface = "bold")
+# 
+# plotText(label = "mDAN D30", 
+#          fontsize = 6, 
+#          fontcolor = "#DC143C",
+#          fontfamily = "Helvetica",
+#          x = 0.75, 
+#          y = 5.375, 
+#          just = c("left", "top"),
+#          default.units = "inches",
+#          fontface = "bold")
+# 
+# plotText(label = "mDAN D50", 
+#          fontsize = 6, 
+#          fontcolor = "#E9967A",
+#          fontfamily = "Helvetica",
+#          x = 0.75, 
+#          y = 5.75, 
+#          just = c("left", "top"),
+#          default.units = "inches",
+#          fontface = "bold")
+# 
+# #### PANEL D - IDUA and ZBTB14 expression (RNAseq)
+# # text D
+# plotText(label = "D", 
+#          fontsize = 12,
+#          fontfamily = "Helvetica",
+#          x = 5.0, 
+#          y = 4.25, 
+#          just = "left", 
+#          default.units = "inches",
+#          fontface = "bold")
+# 
+# IDUA.ZBTB14.exp = ggboxplot(dat.RPKM.filt %>% 
+#                             dplyr::filter(gene_name %in% c("IDUA", "ZBTB14", "SLC26A1")) %>% 
+#                               mutate(gene_name = factor(gene_name,
+#                                                         levels = c("IDUA", "ZBTB14", "SLC26A1"))),
+#                           x = "Cond", 
+#                           y = "RPKM", 
+#                           add = "jitter", 
+#                           fill = "Cond", 
+#                           palette = c("#A9A9A9", "#B22222", "#DC143C", "#E9967A"),
+#                           facet.by = "gene_name",
+#                           xlab = "", 
+#                           ylab = "Reads Per Kilobase Million (RPKM)") +
+#   scale_x_discrete(labels = c("smNPC",
+#                               "mDAN D15",
+#                               "mDAN D30",
+#                               "mDAN D50")) +
+#   theme(legend.position = "none",
+#         axis.text.x = element_text(angle = 90))
+#   
+# 
+# # Place the plot
+# plotGG(plot = IDUA.ZBTB14.exp, 
+#        x = 5.25, 
+#        y = 4.25, 
+#        width = 3, 
+#        height = 3.5,
+#        just = c("left", "top"), 
+#        default.units = "inches")
+# 
+# # Add the transcription factor binding motif (TFBS) for ZBTB14
+# pfm.ZBTB14 = getMatrixByID(JASPAR2020, 
+#                          ID = "MA1650.1")
+# ZBTB14 = new.env()
+# 
+# ZBTB14$ZBTB14 = pfm.ZBTB14@profileMatrix
+# 
+# ZBTB14 = as.list(ZBTB14)
+# 
+# # Remove the nucleotide position
+# ZBTB14_TFBS = ggseqlogo(ZBTB14) +
+#   annotate("rect", 
+#            xmin = 8.5, 
+#            xmax = 9.5, 
+#            ymin = -0.05, 
+#            ymax = 2.5, 
+#            alpha = .1, 
+#            col = "black", 
+#            fill = "#404788FF") +
+#   theme(axis.text.x = element_blank())
+# 
+# # Place the plot
+# plotGG(plot = ZBTB14_TFBS, 
+#        x = 1.6225, 
+#        y = 6.625, 
+#        width = 1.5, 
+#        height = 1.5,
+#        just = c("left", "top"), 
+#        default.units = "inches")
+# 
+# # text E
+# plotText(label = "E", 
+#          fontsize = 12,
+#          fontfamily = "Helvetica",
+#          x = 0.25, 
+#          y = 8.0, 
+#          just = "left", 
+#          default.units = "inches",
+#          fontface = "bold")
 
-annoZoomLines(plot = ATAC_smNPC_I, params = SNP_param, y0 = 2.625, x1 = c(2.25, 3.25),
-    y1 = 2.75, default.units = "inches")
-
-# text C
-plotText(label = "C", fontsize = 12, fontfamily = "Helvetica", x = 0.25, y = 4.25,
-    just = "left", default.units = "inches", fontface = "bold")
-
-# ATACseq signal IDUA 1st bio replicate smNPC
-bw.IDUA.smNPC_1 = readBigwig(file = paste0(bw.path, "BIGWIG/smNPC_I.bw"), chrom = "chr4",
-    chromstart = 947008, chromend = 1027208)
+# ATACseq signal SCARB2
+# 1st bio replicate smNPC
+bw.SCARB2.smNPC_1 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/smNPC_I.bw"),
+                        chrom = "chr4",
+                        chromstart = 76173617,
+                        chromend = 76253817)
 
 # 2nd bio replicate smNPC
-bw.IDUA.smNPC_2 = readBigwig(file = paste0(bw.path, "BIGWIG/smNPC_II.bw"), chrom = "chr4",
-    chromstart = 947008, chromend = 1027208)
+bw.SCARB2.smNPC_2 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/smNPC_II.bw"),
+                        chrom = "chr4",
+                        chromstart = 76173617,
+                        chromend = 76253817)
 
 # 3rd bio replicate smNPC
-bw.IDUA.smNPC_3 = readBigwig(file = paste0(bw.path, "BIGWIG/smNPC_III.bw"), chrom = "chr4",
-    chromstart = 947008, chromend = 1027208)
+bw.SCARB2.smNPC_3 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/smNPC_III.bw"),
+                        chrom = "chr4",
+                        chromstart = 76173617,
+                        chromend = 76253817)
 
 # 1st bio replicate TH positive neurons D15
-bw.IDUA.TH.pos_D15_1 = readBigwig(file = paste0(bw.path, "BIGWIG/D15_POS_I.bw"),
-    chrom = "chr4", chromstart = 947008, chromend = 1027208)
+bw.SCARB2.TH.pos_D15_1 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/D15_POS_I.bw"),
+                        chrom = "chr4",
+                        chromstart = 76173617,
+                        chromend = 76253817)
 
 # 2nd bio replicate TH positive neurons D15
-bw.IDUA.TH.pos_D15_2 = readBigwig(file = paste0(bw.path, "BIGWIG/D15_POS_II.bw"),
-    chrom = "chr4", chromstart = 947008, chromend = 1027208)
+bw.SCARB2.TH.pos_D15_2 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/D15_POS_II.bw"),
+                        chrom = "chr4",
+                        chromstart = 76173617,
+                        chromend = 76253817)
 
 # 3rd bio replicate TH positive neurons D15
-bw.IDUA.TH.pos_D15_3 = readBigwig(file = paste0(bw.path, "BIGWIG/D15_POS_III.bw"),
-    chrom = "chr4", chromstart = 947008, chromend = 1027208)
+bw.SCARB2.TH.pos_D15_3 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/D15_POS_III.bw"),
+                        chrom = "chr4",
+                        chromstart = 76173617,
+                        chromend = 76253817)
 
 # 1st bio replicate TH positive neurons D30
-bw.IDUA.TH.pos_D30_1 = readBigwig(file = paste0(bw.path, "BIGWIG/D30_POS_I.bw"),
-    chrom = "chr4", chromstart = 947008, chromend = 1027208)
+bw.SCARB2.TH.pos_D30_1 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/D30_POS_I.bw"),
+                        chrom = "chr4",
+                        chromstart = 76173617,
+                        chromend = 76253817)
 
 # 2nd bio replicate TH positive neurons D30
-bw.IDUA.TH.pos_D30_2 = readBigwig(file = paste0(bw.path, "BIGWIG/D30_POS_II.bw"),
-    chrom = "chr4", chromstart = 947008, chromend = 1027208)
+bw.SCARB2.TH.pos_D30_2 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/D30_POS_II.bw"),
+                        chrom = "chr4",
+                        chromstart = 76173617,
+                        chromend = 76253817)
 
 # 3rd bio replicate TH positive neurons D30
-bw.IDUA.TH.pos_D30_3 = readBigwig(file = paste0(bw.path, "BIGWIG/D30_POS_III.bw"),
-    chrom = "chr4", chromstart = 947008, chromend = 1027208)
+bw.SCARB2.TH.pos_D30_3 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/D30_POS_III.bw"),
+                        chrom = "chr4",
+                        chromstart = 76173617,
+                        chromend = 76253817)
 
 # 1st bio replicate TH positive neurons D50
-bw.IDUA.TH.pos_D50_1 = readBigwig(file = paste0(bw.path, "BIGWIG/HFFTHmCherry_D50_possort_S1.bw"),
-    chrom = "chr4", chromstart = 947008, chromend = 1027208)
+bw.SCARB2.TH.pos_D50_1 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/HFFTHmCherry_D50_possort_S1.bw"),
+                        chrom = "chr4",
+                        chromstart = 76173617,
+                        chromend = 76253817)
 
 # 2nd bio replicate TH positive neurons D50
-bw.IDUA.TH.pos_D50_2 = readBigwig(file = paste0(bw.path, "BIGWIG/HFFTHmCherry_D50_possort_S3.bw"),
-    chrom = "chr4", chromstart = 947008, chromend = 1027208)
+bw.SCARB2.TH.pos_D50_2 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/HFFTHmCherry_D50_possort_S3.bw"),
+                        chrom = "chr4",
+                        chromstart = 76173617,
+                        chromend = 76253817)
 
 # 3rd bio replicate TH positive neurons D50
-bw.IDUA.TH.pos_D50_3 = readBigwig(file = paste0(bw.path, "BIGWIG/HFFTHmCherry_D50_possort_S4.bw"),
-    chrom = "chr4", chromstart = 947008, chromend = 1027208)
+bw.SCARB2.TH.pos_D50_3 = readBigwig(file = paste0(bw.path, 
+                                      "BIGWIG/HFFTHmCherry_D50_possort_S4.bw"),
+                        chrom = "chr4",
+                        chromstart = 76173617,
+                        chromend = 76253817)
 
 # Add a scale next to the bigwig files - check the maximum to choose
-scale.IDUA.max = max(c(bw.IDUA.smNPC_1$score, bw.IDUA.smNPC_2$score, bw.IDUA.smNPC_3$score,
-    bw.IDUA.TH.pos_D15_1$score, bw.IDUA.TH.pos_D15_2$score, bw.IDUA.TH.pos_D15_3$score,
-    bw.IDUA.TH.pos_D30_1$score, bw.IDUA.TH.pos_D30_2$score, bw.IDUA.TH.pos_D30_3$score,
-    bw.IDUA.TH.pos_D50_1$score, bw.IDUA.TH.pos_D50_2$score, bw.IDUA.TH.pos_D50_3$score))
-
-print(scale.IDUA.max)
-
-# Define parameters for the regions
-region.p.IDUA = pgParams(chrom = "chr4", chromstart = 947108, chromend = 1027108,
-    assembly = "hg38", range = c(0, scale.IDUA.max))
-
-# Add the genomic label
-plotGenomeLabel(chrom = "chr4", chromstart = 947108, chromend = 1027108, assembly = "hg38",
-    x = 0.75, y = 4.375, length = 4, default.units = "inches", scale = "Mb")
-
-# ATACseq signal smNPC_I
-ATAC_smNPC_I_IDUA = plotSignal(data = bw.IDUA.smNPC_1, params = region.p.IDUA, fill = "#D3D3D3",
-    alpha = 0.7, linecolor = NA, x = 0.75, y = 4.625, width = 4, height = 0.25, just = c("left",
-        "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_smNPC_I_IDUA, at = c(0, scale.IDUA.max), fontsize = 6)
-
-# ATACseq signal smNPC_II
-ATAC_smNPC_II_IDUA = plotSignal(data = bw.IDUA.smNPC_2, params = region.p.IDUA, fill = "#C0C0C0",
-    alpha = 0.7, linecolor = NA, x = 0.75, y = 4.625, width = 4, height = 0.25, just = c("left",
-        "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_smNPC_II_IDUA, at = c(0, scale.IDUA.max), fontsize = 6)
-
-# Add the SNP position that zoom in the TFBS
-SNP_param_IDUA = pgParams(chrom = "chr4", chromstart = 987108, chromend = 987108,
-    assembly = "hg38")
-
-annoHighlight(plot = ATAC_smNPC_I_IDUA, params = SNP_param_IDUA, fill = "#404788FF",
-    y = 4.75, height = 1.875, just = c("left", "top"), default.units = "inches")
-
-annoZoomLines(plot = ATAC_smNPC_I_IDUA, params = SNP_param_IDUA, y0 = 6.625, x1 = c(2.25,
-    3.25), y1 = 6.75, default.units = "inches")
-
-# ATACseq signal smNPC_III
-ATAC_smNPC_III_IDUA = plotSignal(data = bw.IDUA.smNPC_3, params = region.p.IDUA,
-    fill = "#A9A9A9", alpha = 0.7, linecolor = NA, x = 0.75, y = 4.625, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_smNPC_III_IDUA, at = c(0, scale.IDUA.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D15 I
-ATAC_TH.pos_D15_I_IDUA = plotSignal(data = bw.IDUA.TH.pos_D15_1, params = region.p.IDUA,
-    fill = "#B22222", alpha = 0.7, linecolor = NA, x = 0.75, y = 5, width = 4, height = 0.25,
-    just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D15_I_IDUA, at = c(0, scale.IDUA.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D15 II
-ATAC_TH.pos_D15_II_IDUA = plotSignal(data = bw.IDUA.TH.pos_D15_2, params = region.p.IDUA,
-    fill = "#A52A2A", alpha = 0.7, linecolor = NA, x = 0.75, y = 5, width = 4, height = 0.25,
-    just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D15_II_IDUA, at = c(0, scale.IDUA.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D15 III
-ATAC_TH.pos_D15_III_IDUA = plotSignal(data = bw.IDUA.TH.pos_D15_3, params = region.p.IDUA,
-    fill = "#8B0000", alpha = 0.7, linecolor = NA, x = 0.75, y = 5, width = 4, height = 0.25,
-    just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D15_III_IDUA, at = c(0, scale.IDUA.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D30 I
-ATAC_TH.pos_D30_I_IDUA = plotSignal(data = bw.IDUA.TH.pos_D30_1, params = region.p.IDUA,
-    fill = "#FF6347", alpha = 0.7, linecolor = NA, x = 0.75, y = 5.375, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D30_I_IDUA, at = c(0, scale.IDUA.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D30 II
-ATAC_TH.pos_D30_II_IDUA = plotSignal(data = bw.IDUA.TH.pos_D30_2, params = region.p.IDUA,
-    fill = "#FF0000", alpha = 0.7, linecolor = NA, x = 0.75, y = 5.375, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D30_II_IDUA, at = c(0, scale.IDUA.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D30 III
-ATAC_TH.pos_D30_III_IDUA = plotSignal(data = bw.IDUA.TH.pos_D30_3, params = region.p.IDUA,
-    fill = "#DC143C", alpha = 0.7, linecolor = NA, x = 0.75, y = 5.375, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D30_III_IDUA, at = c(0, scale.IDUA.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D50 I
-ATAC_TH.pos_D50_I_IDUA = plotSignal(data = bw.IDUA.TH.pos_D50_1, params = region.p.IDUA,
-    fill = "#FFA07A", alpha = 0.7, linecolor = NA, x = 0.75, y = 5.75, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D50_I_IDUA, at = c(0, scale.IDUA.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D50 II
-ATAC_TH.pos_D50_II_IDUA = plotSignal(data = bw.IDUA.TH.pos_D50_2, params = region.p.IDUA,
-    fill = "#FA8072", alpha = 0.7, linecolor = NA, x = 0.75, y = 5.75, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D50_II_IDUA, at = c(0, scale.IDUA.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D50 III
-ATAC_TH.pos_D50_III_IDUA = plotSignal(data = bw.IDUA.TH.pos_D50_3, params = region.p.IDUA,
-    fill = "#E9967A", alpha = 0.7, linecolor = NA, x = 0.75, y = 5.75, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D50_III_IDUA, at = c(0, scale.IDUA.max), fontsize = 6)
-
-# Gene track
-plotGenes(chrom = "chr4", chromstart = 947108, chromend = 1027108, assembly = assembly(Genome = "hg38refGene",
-    TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", OrgDb = "org.Hs.eg.db"), fontcolor = "black",
-    fill = "black", x = 0.75, y = 6.125, width = 4, height = 0.375, just = c("left",
-        "top"), default.units = "inches")
-
-# Add the samples name
-plotText(label = "smNPC", fontsize = 6, fontcolor = "#A9A9A9", fontfamily = "Helvetica",
-    x = 0.75, y = 4.625, just = c("left", "top"), default.units = "inches", fontface = "bold")
-
-plotText(label = "mDAN D15", fontsize = 6, fontcolor = "#B22222", fontfamily = "Helvetica",
-    x = 0.75, y = 5, just = c("left", "top"), default.units = "inches", fontface = "bold")
-
-plotText(label = "mDAN D30", fontsize = 6, fontcolor = "#DC143C", fontfamily = "Helvetica",
-    x = 0.75, y = 5.375, just = c("left", "top"), default.units = "inches", fontface = "bold")
-
-plotText(label = "mDAN D50", fontsize = 6, fontcolor = "#E9967A", fontfamily = "Helvetica",
-    x = 0.75, y = 5.75, just = c("left", "top"), default.units = "inches", fontface = "bold")
-
-#### PANEL D - IDUA and ZBTB14 expression (RNAseq) text D
-plotText(label = "D", fontsize = 12, fontfamily = "Helvetica", x = 5, y = 4.25, just = "left",
-    default.units = "inches", fontface = "bold")
-
-IDUA.ZBTB14.exp = ggboxplot(dat.RPKM.filt %>%
-    dplyr::filter(gene_name %in% c("IDUA", "ZBTB14", "SLC26A1")) %>%
-    mutate(gene_name = factor(gene_name, levels = c("IDUA", "ZBTB14", "SLC26A1"))),
-    x = "Cond", y = "RPKM", add = "jitter", fill = "Cond", palette = c("#A9A9A9",
-        "#B22222", "#DC143C", "#E9967A"), facet.by = "gene_name", xlab = "", ylab = "Reads Per Kilobase Million (RPKM)") +
-    scale_x_discrete(labels = c("smNPC", "mDAN D15", "mDAN D30", "mDAN D50")) + theme(legend.position = "none",
-    axis.text.x = element_text(angle = 90))
-
-
-# Place the plot
-plotGG(plot = IDUA.ZBTB14.exp, x = 5.25, y = 4.25, width = 3, height = 3.5, just = c("left",
-    "top"), default.units = "inches")
-
-# Add the transcription factor binding motif (TFBS) for ZBTB14
-pfm.ZBTB14 = getMatrixByID(JASPAR2020, ID = "MA1650.1")
-ZBTB14 = new.env()
-
-ZBTB14$ZBTB14 = pfm.ZBTB14@profileMatrix
-
-ZBTB14 = as.list(ZBTB14)
-
-# Remove the nucleotide position
-ZBTB14_TFBS = ggseqlogo(ZBTB14) + annotate("rect", xmin = 8.5, xmax = 9.5, ymin = -0.05,
-    ymax = 2.5, alpha = 0.1, col = "black", fill = "#404788FF") + theme(axis.text.x = element_blank())
-
-# Place the plot
-plotGG(plot = ZBTB14_TFBS, x = 1.6225, y = 6.625, width = 1.5, height = 1.5, just = c("left",
-    "top"), default.units = "inches")
-
-# text E
-plotText(label = "E", fontsize = 12, fontfamily = "Helvetica", x = 0.25, y = 8, just = "left",
-    default.units = "inches", fontface = "bold")
-
-# ATACseq signal SCARB2 1st bio replicate smNPC
-bw.SCARB2.smNPC_1 = readBigwig(file = paste0(bw.path, "BIGWIG/smNPC_I.bw"), chrom = "chr4",
-    chromstart = 76173617, chromend = 76253817)
-
-# 2nd bio replicate smNPC
-bw.SCARB2.smNPC_2 = readBigwig(file = paste0(bw.path, "BIGWIG/smNPC_II.bw"), chrom = "chr4",
-    chromstart = 76173617, chromend = 76253817)
-
-# 3rd bio replicate smNPC
-bw.SCARB2.smNPC_3 = readBigwig(file = paste0(bw.path, "BIGWIG/smNPC_III.bw"), chrom = "chr4",
-    chromstart = 76173617, chromend = 76253817)
-
-# 1st bio replicate TH positive neurons D15
-bw.SCARB2.TH.pos_D15_1 = readBigwig(file = paste0(bw.path, "BIGWIG/D15_POS_I.bw"),
-    chrom = "chr4", chromstart = 76173617, chromend = 76253817)
-
-# 2nd bio replicate TH positive neurons D15
-bw.SCARB2.TH.pos_D15_2 = readBigwig(file = paste0(bw.path, "BIGWIG/D15_POS_II.bw"),
-    chrom = "chr4", chromstart = 76173617, chromend = 76253817)
-
-# 3rd bio replicate TH positive neurons D15
-bw.SCARB2.TH.pos_D15_3 = readBigwig(file = paste0(bw.path, "BIGWIG/D15_POS_III.bw"),
-    chrom = "chr4", chromstart = 76173617, chromend = 76253817)
-
-# 1st bio replicate TH positive neurons D30
-bw.SCARB2.TH.pos_D30_1 = readBigwig(file = paste0(bw.path, "BIGWIG/D30_POS_I.bw"),
-    chrom = "chr4", chromstart = 76173617, chromend = 76253817)
-
-# 2nd bio replicate TH positive neurons D30
-bw.SCARB2.TH.pos_D30_2 = readBigwig(file = paste0(bw.path, "BIGWIG/D30_POS_II.bw"),
-    chrom = "chr4", chromstart = 76173617, chromend = 76253817)
-
-# 3rd bio replicate TH positive neurons D30
-bw.SCARB2.TH.pos_D30_3 = readBigwig(file = paste0(bw.path, "BIGWIG/D30_POS_III.bw"),
-    chrom = "chr4", chromstart = 76173617, chromend = 76253817)
-
-# 1st bio replicate TH positive neurons D50
-bw.SCARB2.TH.pos_D50_1 = readBigwig(file = paste0(bw.path, "BIGWIG/HFFTHmCherry_D50_possort_S1.bw"),
-    chrom = "chr4", chromstart = 76173617, chromend = 76253817)
-
-# 2nd bio replicate TH positive neurons D50
-bw.SCARB2.TH.pos_D50_2 = readBigwig(file = paste0(bw.path, "BIGWIG/HFFTHmCherry_D50_possort_S3.bw"),
-    chrom = "chr4", chromstart = 76173617, chromend = 76253817)
-
-# 3rd bio replicate TH positive neurons D50
-bw.SCARB2.TH.pos_D50_3 = readBigwig(file = paste0(bw.path, "BIGWIG/HFFTHmCherry_D50_possort_S4.bw"),
-    chrom = "chr4", chromstart = 76173617, chromend = 76253817)
-
-# Add a scale next to the bigwig files - check the maximum to choose
-scale.SCARB2.max = max(c(bw.SCARB2.smNPC_1$score, bw.SCARB2.smNPC_2$score, bw.SCARB2.smNPC_3$score,
-    bw.SCARB2.TH.pos_D15_1$score, bw.SCARB2.TH.pos_D15_2$score, bw.SCARB2.TH.pos_D15_3$score,
-    bw.SCARB2.TH.pos_D30_1$score, bw.SCARB2.TH.pos_D30_2$score, bw.SCARB2.TH.pos_D30_3$score,
-    bw.SCARB2.TH.pos_D50_1$score, bw.SCARB2.TH.pos_D50_2$score, bw.SCARB2.TH.pos_D50_3$score))
+scale.SCARB2.max = max(c(bw.SCARB2.smNPC_1$score,
+                       bw.SCARB2.smNPC_2$score,
+                       bw.SCARB2.smNPC_3$score,
+                       bw.SCARB2.TH.pos_D15_1$score,
+                       bw.SCARB2.TH.pos_D15_2$score,
+                       bw.SCARB2.TH.pos_D15_3$score,
+                       bw.SCARB2.TH.pos_D30_1$score,
+                       bw.SCARB2.TH.pos_D30_2$score,
+                       bw.SCARB2.TH.pos_D30_3$score,
+                       bw.SCARB2.TH.pos_D50_1$score,
+                       bw.SCARB2.TH.pos_D50_2$score,
+                       bw.SCARB2.TH.pos_D50_3$score))
 
 print(scale.SCARB2.max)
 
 # Define parameters for the regions
-region.p.SCARB2 = pgParams(chrom = "chr4", chromstart = 76173717, chromend = 76253717,
-    assembly = "hg38", range = c(0, scale.SCARB2.max))
+region.p.SCARB2 = pgParams(chrom = "chr4",
+                         chromstart = 76173717,
+                         chromend = 76253717,
+                         assembly = "hg38",
+                         range = c(0, scale.SCARB2.max))
 
 # Add the genomic label
-plotGenomeLabel(chrom = "chr4", chromstart = 76173717, chromend = 76253717, assembly = "hg38",
-    x = 0.75, y = 8.125, length = 4, default.units = "inches", scale = "Mb")
+plotGenomeLabel(
+  chrom = "chr4",
+  chromstart = 76173717,
+  chromend = 76253717,
+  assembly = "hg38",
+  x = 0.5,
+  y = 7.875,
+  length = 4.0,
+  default.units = "inches",
+  scale = "Mb")
 
 # ATACseq signal smNPC_I
-ATAC_smNPC_I_SCARB2 = plotSignal(data = bw.SCARB2.smNPC_1, params = region.p.SCARB2,
-    fill = "#D3D3D3", alpha = 0.7, linecolor = NA, x = 0.75, y = 8.375, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_smNPC_I_SCARB2, at = c(0, scale.SCARB2.max), fontsize = 6)
+ATAC_smNPC_I_SCARB2 = plotSignal(
+  data = bw.SCARB2.smNPC_1, 
+  params = region.p.SCARB2,
+  fill = "#D3D3D3", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 8.125, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
 
 # ATACseq signal smNPC_II
-ATAC_smNPC_II_SCARB2 = plotSignal(data = bw.SCARB2.smNPC_2, params = region.p.SCARB2,
-    fill = "#C0C0C0", alpha = 0.7, linecolor = NA, x = 0.75, y = 8.375, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_smNPC_II_SCARB2, at = c(0, scale.SCARB2.max), fontsize = 6)
+ATAC_smNPC_II_SCARB2 = plotSignal(
+  data = bw.SCARB2.smNPC_2, 
+  params = region.p.SCARB2,
+  fill = "#C0C0C0", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 8.125, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
 
 # ATACseq signal smNPC_III
-ATAC_smNPC_III_SCARB2 = plotSignal(data = bw.SCARB2.smNPC_3, params = region.p.SCARB2,
-    fill = "#A9A9A9", alpha = 0.7, linecolor = NA, x = 0.75, y = 8.375, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
+ATAC_smNPC_III_SCARB2 = plotSignal(
+  data = bw.SCARB2.smNPC_3, 
+  params = region.p.SCARB2,
+  fill = "#A9A9A9", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 8.125, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
 
-annoYaxis(plot = ATAC_smNPC_III_SCARB2, at = c(0, scale.SCARB2.max), fontsize = 6)
-
-# Add the SNP position that zoom in the TFBS
-SNP_param_SCARB2 = pgParams(chrom = "chr4", chromstart = 76213717, chromend = 76213717,
-    assembly = "hg38")
-
-annoHighlight(plot = ATAC_smNPC_I_SCARB2, params = SNP_param_SCARB2, fill = "#404788FF",
-    y = 8.375, height = 1.875, just = c("left", "top"), default.units = "inches")
-
-annoZoomLines(plot = ATAC_smNPC_I_SCARB2, params = SNP_param_SCARB2, y0 = 10.25,
-    x1 = c(2.25, 3.25), y1 = 10.5, default.units = "inches")
-
-# ATACseq signal TH positive neurons D15 I
-ATAC_TH.pos_D15_I_SCARB2 = plotSignal(data = bw.SCARB2.TH.pos_D15_1, params = region.p.SCARB2,
-    fill = "#B22222", alpha = 0.7, linecolor = NA, x = 0.75, y = 8.75, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D15_I_SCARB2, at = c(0, scale.SCARB2.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D15 II
-ATAC_TH.pos_D15_II_SCARB2 = plotSignal(data = bw.SCARB2.TH.pos_D15_2, params = region.p.SCARB2,
-    fill = "#A52A2A", alpha = 0.7, linecolor = NA, x = 0.75, y = 8.75, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D15_II_SCARB2, at = c(0, scale.SCARB2.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D15 III
-ATAC_TH.pos_D15_III_SCARB2 = plotSignal(data = bw.SCARB2.TH.pos_D15_3, params = region.p.SCARB2,
-    fill = "#8B0000", alpha = 0.7, linecolor = NA, x = 0.75, y = 8.75, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D15_III_SCARB2, at = c(0, scale.SCARB2.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D30 I
-ATAC_TH.pos_D30_I_SCARB2 = plotSignal(data = bw.SCARB2.TH.pos_D30_1, params = region.p.SCARB2,
-    fill = "#FF6347", alpha = 0.7, linecolor = NA, x = 0.75, y = 9.125, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D30_I_SCARB2, at = c(0, scale.SCARB2.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D30 II
-ATAC_TH.pos_D30_II_SCARB2 = plotSignal(data = bw.SCARB2.TH.pos_D30_2, params = region.p.SCARB2,
-    fill = "#FF0000", alpha = 0.7, linecolor = NA, x = 0.75, y = 9.125, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D30_II_SCARB2, at = c(0, scale.SCARB2.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D30 III
-ATAC_TH.pos_D30_III_SCARB2 = plotSignal(data = bw.SCARB2.TH.pos_D30_3, params = region.p.SCARB2,
-    fill = "#DC143C", alpha = 0.7, linecolor = NA, x = 0.75, y = 9.125, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D30_III_SCARB2, at = c(0, scale.SCARB2.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D50 I
-ATAC_TH.pos_D50_I_SCARB2 = plotSignal(data = bw.SCARB2.TH.pos_D50_1, params = region.p.SCARB2,
-    fill = "#FFA07A", alpha = 0.7, linecolor = NA, x = 0.75, y = 9.5, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D50_I_SCARB2, at = c(0, scale.SCARB2.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D50 II
-ATAC_TH.pos_D50_II_SCARB2 = plotSignal(data = bw.SCARB2.TH.pos_D50_2, params = region.p.SCARB2,
-    fill = "#FA8072", alpha = 0.7, linecolor = NA, x = 0.75, y = 9.5, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D50_II_SCARB2, at = c(0, scale.SCARB2.max), fontsize = 6)
-
-# ATACseq signal TH positive neurons D50 III
-ATAC_TH.pos_D50_III_SCARB2 = plotSignal(data = bw.SCARB2.TH.pos_D50_3, params = region.p.SCARB2,
-    fill = "#E9967A", alpha = 0.7, linecolor = NA, x = 0.75, y = 9.5, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = ATAC_TH.pos_D50_III_SCARB2, at = c(0, scale.SCARB2.max), fontsize = 6)
-
-# Gene track
-plotGenes(chrom = "chr4", chromstart = 76173717, chromend = 76253717, assembly = assembly(Genome = "hg38refGene",
-    TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", OrgDb = "org.Hs.eg.db"), fontcolor = "black",
-    fill = "black", x = 0.75, y = 9.875, width = 4, height = 0.375, just = c("left",
-        "top"), default.units = "inches")
+annoYaxis(plot = ATAC_smNPC_III_SCARB2, 
+          at = c(0, scale.SCARB2.max),
+          fontsize = 6)
 
 # Add the samples name
-plotText(label = "smNPC", fontsize = 6, fontcolor = "#A9A9A9", fontfamily = "Helvetica",
-    x = 0.75, y = 8.375, just = c("left", "top"), default.units = "inches", fontface = "bold")
+plotText(label = "smNPC", 
+         fontsize = 6, 
+         fontcolor = "#A9A9A9",
+         fontfamily = "Helvetica",
+         x = 0.25, 
+         y = 8.250, 
+         just = c("left", "top"),
+         default.units = "inches",
+         fontface = "bold")
 
-plotText(label = "mDAN D15", fontsize = 6, fontcolor = "#B22222", fontfamily = "Helvetica",
-    x = 0.75, y = 8.75, just = c("left", "top"), default.units = "inches", fontface = "bold")
+# ATACseq signal TH positive neurons D15 I
+ATAC_TH.pos_D15_I_SCARB2 = plotSignal(
+  data = bw.SCARB2.TH.pos_D15_1, 
+  params = region.p.SCARB2,
+  fill = "#B22222", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 8.4375, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
 
-plotText(label = "mDAN D30", fontsize = 6, fontcolor = "#DC143C", fontfamily = "Helvetica",
-    x = 0.75, y = 9.125, just = c("left", "top"), default.units = "inches", fontface = "bold")
+# ATACseq signal TH positive neurons D15 II
+ATAC_TH.pos_D15_II_SCARB2 = plotSignal(
+  data = bw.SCARB2.TH.pos_D15_2, 
+  params = region.p.SCARB2,
+  fill = "#A52A2A", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 8.4375, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
 
-plotText(label = "mDAN D50", fontsize = 6, fontcolor = "#E9967A", fontfamily = "Helvetica",
-    x = 0.75, y = 9.5, just = c("left", "top"), default.units = "inches", fontface = "bold")
+# ATACseq signal TH positive neurons D15 III
+ATAC_TH.pos_D15_III_SCARB2 = plotSignal(
+  data = bw.SCARB2.TH.pos_D15_3, 
+  params = region.p.SCARB2,
+  fill = "#8B0000", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 8.4375,  
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
 
-# text F
-plotText(label = "F", fontsize = 12, fontfamily = "Helvetica", x = 5, y = 8, just = "left",
-    default.units = "inches", fontface = "bold")
+annoYaxis(plot = ATAC_TH.pos_D15_III_SCARB2, 
+          at = c(0, scale.SCARB2.max),
+          fontsize = 6)
 
-SCARB2.NR2C2.exp = ggboxplot(dat.RPKM.filt %>%
-    dplyr::filter(gene_name %in% c("SCARB2", "NR2C2", "FAM47E")) %>%
-    mutate(gene_name = factor(gene_name, levels = c("SCARB2", "NR2C2", "FAM47E"))),
-    x = "Cond", y = "RPKM", add = "jitter", fill = "Cond", palette = c("#A9A9A9",
-        "#B22222", "#DC143C", "#E9967A"), facet.by = "gene_name", xlab = "", ylab = "Reads Per Kilobase Million (RPKM)") +
-    scale_x_discrete(labels = c("smNPC", "mDAN D15", "mDAN D30", "mDAN D50")) + theme(legend.position = "none",
-    axis.text.x = element_text(angle = 90))
+plotText(label = "mDAN D15", 
+         fontsize = 6, 
+         fontcolor = "#B22222",
+         fontfamily = "Helvetica",
+         x = 0.25, 
+         y = 8.5625, 
+         just = c("left", "top"),
+         default.units = "inches",
+         fontface = "bold")
 
+# ATACseq signal TH positive neurons D30 I
+ATAC_TH.pos_D30_I_SCARB2 = plotSignal(
+  data = bw.SCARB2.TH.pos_D30_1, 
+  params = region.p.SCARB2,
+  fill = "#FF6347", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 8.75, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
+
+# ATACseq signal TH positive neurons D30 II
+ATAC_TH.pos_D30_II_SCARB2 = plotSignal(
+  data = bw.SCARB2.TH.pos_D30_2, 
+  params = region.p.SCARB2,
+  fill = "#FF0000", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 8.75, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
+
+# ATACseq signal TH positive neurons D30 III
+ATAC_TH.pos_D30_III_SCARB2 = plotSignal(
+  data = bw.SCARB2.TH.pos_D30_3, 
+  params = region.p.SCARB2,
+  fill = "#DC143C", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 8.75, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
+
+annoYaxis(plot = ATAC_TH.pos_D30_III_SCARB2, 
+          at = c(0, scale.SCARB2.max),
+          fontsize = 6)
+
+plotText(label = "mDAN D30", 
+         fontsize = 6, 
+         fontcolor = "#DC143C",
+         fontfamily = "Helvetica",
+         x = 0.25, 
+         y = 8.875, 
+         just = c("left", "top"),
+         default.units = "inches",
+         fontface = "bold")
+
+# ATACseq signal TH positive neurons D50 I
+ATAC_TH.pos_D50_I_SCARB2 = plotSignal(
+  data = bw.SCARB2.TH.pos_D50_1, 
+  params = region.p.SCARB2,
+  fill = "#FFA07A", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 9.0625, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
+
+
+# ATACseq signal TH positive neurons D50 II
+ATAC_TH.pos_D50_II_SCARB2 = plotSignal(
+  data = bw.SCARB2.TH.pos_D50_2, 
+  params = region.p.SCARB2,
+  fill = "#FA8072", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 9.0625, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
+
+# ATACseq signal TH positive neurons D50 III
+ATAC_TH.pos_D50_III_SCARB2 = plotSignal(
+  data = bw.SCARB2.TH.pos_D50_3, 
+  params = region.p.SCARB2,
+  fill = "#E9967A", 
+  alpha = 0.7, 
+  linecolor = NA,
+  x = 0.5, 
+  y = 9.0625, 
+  width = 4.0, 
+  height = 0.25,
+  just = c("left", "top"), 
+  default.units = "inches")
+
+annoYaxis(plot = ATAC_TH.pos_D50_III_SCARB2, 
+          at = c(0, scale.SCARB2.max),
+          fontsize = 6)
+
+plotText(label = "mDAN D50", 
+         fontsize = 6, 
+         fontcolor = "#E9967A",
+         fontfamily = "Helvetica",
+         x = 0.25, 
+         y = 9.125, 
+         just = c("left", "top"),
+         default.units = "inches",
+         fontface = "bold")
+
+# Gene track
+plotGenes(
+  chrom = "chr4",
+  chromstart = 76173717,
+  chromend = 76253717,
+  assembly = assembly(Genome = "hg38refGene", 
+                      TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", 
+                      OrgDb = "org.Hs.eg.db"),
+  fontcolor = "black",
+  fill = "black",
+  x = 0.5,
+  y = 9.5,
+  width = 4.0,
+  height = 0.375,
+  just = c("left", "top"),
+  default.units = "inches")
+
+# Add the SNP position that zoom in the TFBS
+SNP_param_SCARB2 = pgParams(chrom = "chr4",
+                     chromstart = 76213717,
+                     chromend = 76213717,
+                     assembly = "hg38")
+
+annoHighlight(plot = ATAC_smNPC_I_SCARB2, 
+              params = SNP_param_SCARB2,
+              fill = "#404788FF",
+              y = 8.25, 
+              height = 1.75, 
+              just = c("left", "top"), 
+              default.units = "inches")
+
+annoZoomLines(plot = ATAC_smNPC_I_SCARB2, 
+              params = SNP_param_SCARB2,
+              y0 = 10.0, 
+              x1 = c(2.25, 2.75), 
+              y1 = 10.125, 
+              default.units = "inches")
+
+# text G
+plotText(label = "G", 
+         fontsize = 12,
+         fontfamily = "Helvetica",
+         x = 4.75, 
+         y = 7.75, 
+         just = "left", 
+         default.units = "inches",
+         fontface = "bold")
+
+SCARB2.NR2C2.exp = ggboxplot(dat.RPKM.filt %>% 
+                            dplyr::filter(gene_name %in% c("SCARB2", "NR2C2", "FAM47E")) %>% 
+                              mutate(gene_name = factor(gene_name,
+                                                        levels = c("SCARB2", "NR2C2", "FAM47E"))),
+                          x = "Cond", 
+                          y = "RPKM", 
+                          add = "jitter", 
+                          fill = "Cond", 
+                          palette = c("#A9A9A9", "#B22222", "#DC143C", "#E9967A"),
+                          facet.by = "gene_name",
+                          xlab = "", 
+                          ylab = "Reads Per Kilobase Million (RPKM)") +
+  scale_x_discrete(labels = c("smNPC",
+                              "mDAN D15",
+                              "mDAN D30",
+                              "mDAN D50")) +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 90))
+  
 
 # Place the plot
-plotGG(plot = SCARB2.NR2C2.exp, x = 5.25, y = 7.875, width = 3, height = 3.5, just = c("left",
-    "top"), default.units = "inches")
+plotGG(plot = SCARB2.NR2C2.exp, 
+       x = 5.0, 
+       y = 8.0, 
+       width = 3, 
+       height = 3.5,
+       just = c("left", "top"), 
+       default.units = "inches")
 
 # Add the transcription factor binding motif (TFBS) for NR2C2
-pfm.NR2C2 = getMatrixByID(JASPAR2020, ID = "MA1536.1")
+pfm.NR2C2 = getMatrixByID(JASPAR2020, 
+                         ID = "MA1536.1")
 
 # Reverse to position weight matrix as the SNP is on the reverse strand
 pfm.NR2C2 = reverseComplement(pfm.NR2C2)
@@ -1298,28 +3170,39 @@ NR2C2$NR2C2 = pfm.NR2C2@profileMatrix
 NR2C2 = as.list(NR2C2)
 
 # Remove nucleotide
-NR2C2_TFBS = ggseqlogo(NR2C2) + annotate("rect", xmin = 3.5, xmax = 4.5, ymin = -0.05,
-    ymax = 2, alpha = 0.1, col = "black", fill = "#404788FF") + theme(axis.text.x = element_blank())
+NR2C2_TFBS = ggseqlogo(NR2C2) +
+  annotate("rect", 
+           xmin = 3.5, 
+           xmax = 4.5, 
+           ymin = -0.05, 
+           ymax = 2.0, 
+           alpha = .1, 
+           col = "black", 
+           fill = "#404788FF") +
+  theme(axis.text.x = element_blank()) 
 
 # Place the plot
-plotGG(plot = NR2C2_TFBS, x = 1.8475, y = 10.375, width = 1.5, height = 1.5, just = c("left",
-    "top"), default.units = "inches")
+plotGG(plot = NR2C2_TFBS, 
+       x = 1.5975, 
+       y = 10.0, 
+       width = 1.5, 
+       height = 1.5,
+       just = c("left", "top"), 
+       default.units = "inches")
 
+pageGuideHide()
 dev.off()
 ```
 
 ### FIGURE 3
 
-```r
-########## FIGURE 3 ########## Save as a PDF and as TIF
-pdf("/home/vagrant/Manuscript_1/FIGURE3/FIGURE3.pdf", paper = "a4", family = "Helvetica")
-
-# Save as TIFF, 300 dpi
+``` r
+########## FIGURE 3 ##########
 tiff("/home/vagrant/Manuscript_1/FIGURE3/FIGURE3.tiff", width = 8.27, height = 11.67,
     units = "in", res = 300, compression = "lzw")
 
 # Create a A4 blank page
-pageCreate(width = 8.27, height = 11.67, default.units = "inches", showGuides = FALSE)
+pageCreate(width = 8.27, height = 11.67, default.units = "inches", showGuides = TRUE)
 
 # text Figure 3
 plotText(label = "Figure 3", fontsize = 14, fontface = "bold", fontfamily = "Helvetica",
@@ -1389,25 +3272,23 @@ GLUC_BAG3 = ggbarplot(Gluc_signal_ratio %>%
     y.position = 5.6, size = 3)
 
 # Place the plot
-plotGG(plot = GLUC_BAG3, x = 0.5, y = 2.25, width = 2, height = 4.25, just = c("left",
+plotGG(plot = GLUC_BAG3, x = 0.5, y = 2.25, width = 3.5, height = 4.25, just = c("left",
     "top"), default.units = "inches")
 
-# Plot for IDUA
-GLUC_IDUA = ggbarplot(Gluc_signal_ratio %>%
-    dplyr::filter(Sample %in% c("IDUA-WT", "IDUA-MUT", "miniCMV", "Neg_CTRL")), x = "Sample",
-    y = "value", width = 0.25, add = c("mean_se", "jitter"), fill = "grey", xlab = "",
-    ylab = "Ratio Gluc/SEAP", position = position_dodge(0.9)) + theme(legend.position = "none",
-    axis.text.x = element_text(angle = 90, hjust = 1, size = 9, face = "bold"), axis.text.y = element_text(size = 9,
-        face = "bold"), axis.title.y = element_text(size = 10, face = "bold")) +
-    scale_x_discrete(labels = c("IDUA other allele", "IDUA effect allele", "Positive control",
-        "Negative control")) + scale_y_continuous(expand = c(0, 0), limits = c(0,
-    6)) + stat_pvalue_manual(GLUC_stat %>%
-    dplyr::filter(group1 == "IDUA-WT", group2 == "IDUA-MUT"), label = "p = {p.format}",
-    y.position = 4, size = 3)
-
-# Place the plot
-plotGG(plot = GLUC_IDUA, x = 3, y = 2.25, width = 2, height = 4.25, just = c("left",
-    "top"), default.units = "inches")
+# Plot for IDUA GLUC_IDUA = ggbarplot(Gluc_signal_ratio %>%
+# dplyr::filter(Sample %in% c('IDUA-WT', 'IDUA-MUT', 'miniCMV', 'Neg_CTRL')), x
+# = 'Sample', y = 'value', width = 0.25, add = c('mean_se', 'jitter'), fill =
+# 'grey', xlab = '', ylab = 'Ratio Gluc/SEAP', position = position_dodge(0.9))
+# + theme(legend.position = 'none', axis.text.x = element_text(angle = 90,
+# hjust = 1.0, size = 9, face = 'bold'), axis.text.y = element_text(size = 9,
+# face = 'bold'), axis.title.y = element_text(size = 10, face = 'bold')) +
+# scale_x_discrete(labels = c('IDUA other allele', 'IDUA effect allele',
+# 'Positive control', 'Negative control')) + scale_y_continuous(expand = c(0,
+# 0), limits = c(0, 6.0)) + stat_pvalue_manual(GLUC_stat %>%
+# dplyr::filter(group1 == 'IDUA-WT', group2 == 'IDUA-MUT'), label = 'p =
+# {p.format}', y.position = 4.0, size = 3.0) # Place the plot plotGG(plot =
+# GLUC_IDUA, x = 3.0, y = 2.25, width = 2, height = 4.25, just = c('left',
+# 'top'), default.units = 'inches')
 
 # Plot for SCARB2
 GLUC_SCARB2 = ggbarplot(Gluc_signal_ratio %>%
@@ -1423,7 +3304,7 @@ GLUC_SCARB2 = ggbarplot(Gluc_signal_ratio %>%
     y.position = 4, size = 3)
 
 # Place the plot
-plotGG(plot = GLUC_SCARB2, x = 5.5, y = 2.25, width = 2, height = 4.25, just = c("left",
+plotGG(plot = GLUC_SCARB2, x = 4.5, y = 2.25, width = 3.5, height = 4.25, just = c("left",
     "top"), default.units = "inches")
 
 #### PANEL C - knockdown barplots with statistics text C
@@ -1457,40 +3338,33 @@ pl.KD_BAG3_LHX1 = KD.BAG3.LHX1.3days %>%
     stat_pvalue_manual(stat_LHX1.KD, label = "p = {p.format}", x = "Gene", y.position = c(0.5,
         1.2), size = 3, hide.ns = FALSE)
 
-plotGG(plot = pl.KD_BAG3_LHX1, x = 0.5, y = 7, width = 1.75, height = 4.25, just = c("left",
+plotGG(plot = pl.KD_BAG3_LHX1, x = 0.5, y = 7, width = 2, height = 4.25, just = c("left",
     "top"), default.units = "inches")
 
 # Knockdown of ZBTB14 and quantification of ZBTB14 and IDUA expression 3 days
-# post transduction
-KD.IDUA.ZBTB14.3days = tibble(Sple = rep("shZBTB14", 6), Gene = c(rep("ZBTB14", 3),
-    rep("IDUA", 3)), Exp = c(0.334134302, 0.316834205, 0.294206291, 0.663813558,
-    1.259979272, 1.774054093))
-
-# Stats
-KD.IDUA.ZBTB14.3days.stats = tibble(Sple = c(rep("shZBTB14", 6), rep("shCTRL", 6)),
-    Gene = rep(c(rep("ZBTB14", 3), rep("IDUA", 3)), 2), Exp = c(11.39125, 10.4813,
-        10.5062, 11.56275, 10.1455, 9.76485, 9.80975, 8.8231, 8.7411, 10.9716, 10.4789,
-        10.5919))
-
-stat_ZBTB14.KD = compare_means(Exp ~ Sple, data = KD.IDUA.ZBTB14.3days.stats, group.by = "Gene",
-    method = "t.test", paired = TRUE)
-
-# Plot
-pl.KD_IDUA_ZBTB14 = KD.IDUA.ZBTB14.3days %>%
-    mutate(Gene = factor(Gene, levels = c("ZBTB14", "IDUA"))) %>%
-    ggbarplot(., x = "Gene", y = "Exp", fill = c("Gene"), position = position_dodge(0.9),
-        palette = c("#440154FF", "#287C8EFF"), add = c("mean_se", "jitter"), xlab = "",
-        ylab = "Relative expression to shSCRAMBLE", title = "shZBTB14 - 3 days") +
-    geom_hline(yintercept = 1, lty = "dashed", color = "black") + theme(axis.title.y = element_text(face = "bold",
-    size = 10), axis.text.x = element_text(face = "bold.italic", size = 10, angle = 90,
-    family = "Helvetica"), axis.text.y = element_text(face = "bold", size = 10),
-    legend.position = "none", plot.title = element_text(face = "bold", size = 10,
-        hjust = 0.5)) + scale_y_continuous(expand = c(0, 0), limits = c(0, 1.9)) +
-    stat_pvalue_manual(stat_ZBTB14.KD, label = "p = {p.format}", x = "Gene", y.position = c(0.5,
-        1.6), size = 3, hide.ns = FALSE)
-
-plotGG(plot = pl.KD_IDUA_ZBTB14, x = 2.375, y = 7, width = 1.75, height = 4.25, just = c("left",
-    "top"), default.units = "inches")
+# post transduction KD.IDUA.ZBTB14.3days = tibble(Sple = rep('shZBTB14', 6),
+# Gene = c(rep('ZBTB14', 3), rep('IDUA', 3)), Exp = c(0.334134302, 0.316834205,
+# 0.294206291, 0.663813558, 1.259979272, 1.774054093)) # Stats
+# KD.IDUA.ZBTB14.3days.stats = tibble(Sple = c(rep('shZBTB14', 6),
+# rep('shCTRL', 6)), Gene = rep(c(rep('ZBTB14', 3), rep('IDUA', 3)), 2), Exp =
+# c(11.39125, 10.4813, 10.5062, 11.56275, 10.1455, 9.76485, 9.80975, 8.8231,
+# 8.7411, 10.9716, 10.4789, 10.5919)) stat_ZBTB14.KD = compare_means(Exp ~
+# Sple, data = KD.IDUA.ZBTB14.3days.stats, group.by = 'Gene', method =
+# 't.test', paired = TRUE) # Plot pl.KD_IDUA_ZBTB14 = KD.IDUA.ZBTB14.3days %>%
+# mutate(Gene = factor(Gene, levels = c('ZBTB14', 'IDUA'))) %>% ggbarplot(., x
+# = 'Gene', y = 'Exp', fill = c('Gene'), position = position_dodge(0.9),
+# palette = c('#440154FF', '#287C8EFF'), add = c('mean_se', 'jitter'), xlab =
+# '', ylab = 'Relative expression to shSCRAMBLE', title = 'shZBTB14 - 3 days')
+# + geom_hline(yintercept = 1.0, lty = 'dashed', color = 'black') +
+# theme(axis.title.y = element_text(face = 'bold', size = 10), axis.text.x =
+# element_text(face = 'bold.italic', size = 10, angle = 90, family =
+# 'Helvetica'), axis.text.y = element_text(face = 'bold', size = 10),
+# legend.position = 'none', plot.title = element_text(face = 'bold', size = 10,
+# hjust = 0.5)) + scale_y_continuous(expand = c(0, 0), limits = c(0, 1.9)) +
+# stat_pvalue_manual(stat_ZBTB14.KD, label = 'p = {p.format}', x = 'Gene',
+# y.position = c(0.5, 1.6), size = 3.0, hide.ns = FALSE) plotGG(plot =
+# pl.KD_IDUA_ZBTB14, x = 2.375, y = 7.0, width = 1.75, height = 4.25, just =
+# c('left', 'top'), default.units = 'inches')
 
 # Knockdown of NR2C2 and quantification of NR2C2 and SCARB2 expression 3 days
 # post transduction
@@ -1521,7 +3395,7 @@ pl.KD_SCARB2_NR2C2 = KD.SCARB2.NR2C2.3days %>%
     stat_pvalue_manual(stat_NR2C2.KD, label = "p = {p.format}", x = "Gene", y.position = c(0.65,
         1.5), size = 3, hide.ns = FALSE)
 
-plotGG(plot = pl.KD_SCARB2_NR2C2, x = 4.25, y = 7, width = 1.75, height = 4.25, just = c("left",
+plotGG(plot = pl.KD_SCARB2_NR2C2, x = 3, y = 7, width = 2, height = 4.25, just = c("left",
     "top"), default.units = "inches")
 
 # Knockdown of NR2C2 and quantification of NR2C2 and SCARB2 expression 6 days
@@ -1553,55 +3427,29 @@ pl.KD_SCARB2_NR2C2_6days = KD.SCARB2.NR2C2.6days %>%
     stat_pvalue_manual(stat_NR2C2.KD.6days, label = "p = {p.format}", x = "Gene",
         y.position = c(0.85, 1.5), size = 3, hide.ns = FALSE)
 
-plotGG(plot = pl.KD_SCARB2_NR2C2_6days, x = 6.125, y = 7, width = 1.75, height = 4.25,
+plotGG(plot = pl.KD_SCARB2_NR2C2_6days, x = 5.5, y = 7, width = 2, height = 4.25,
     just = c("left", "top"), default.units = "inches")
 
+pageGuideHide()
 dev.off()
 ```
 
 ### FIGURE 4
 Allelic imbalance at rs1465922 in ATACseq of differentiated TH REP1 cell line.  
 
-```bash
+``` bash
 # Copy the ATACseq BAM locally 
 rsync -avzPhu --no-p iris-cluster://work/projects/epifunc/merged_bam/ /Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE4/
 ```
 
-Within R
 
-```r
-# Since TH REP1 cell line is heterozygous for rs1465922 check around that
-# position for chromatin allelic imbalance in ATACseq data hg38
-searchArea = GRanges(seqnames = c("chr4"), ranges = IRanges(start = c(76213716),
-    end = c(76213726)))
-
-# Path where the ATACseq BAM files are
-pathToFiles = "/home/vagrant/Manuscript_1/FIGURE4/"
-
-# Import a specific region (10bp around rs1465922) from the BAM files
-reads = impBamGAL(pathToFiles, searchArea, verbose = TRUE)
-
-# Identify the position of rs1465922 in the BAM files
-heterozygotePositions = scanForHeterozygotes(reads, verbose = TRUE)
-
-# Count the number of reads for the 2 different alleles at that position
-countList = getAlleleCounts(reads, heterozygotePositions, verbose = FALSE)
-
-# Save as a rds file for loading later if necessary
-saveRDS(countList, file = "/home/vagrant/Manuscript_1/FIGURE4/SCARB2_het_counts_THREP1_ATACseq.rds")
-```
-
-
-```r
-########## FIGURE 4 ########## Save as a PDF
-pdf("/home/vagrant/Manuscript_1/FIGURE4/FIGURE4.pdf", width = 8.3, height = 11.7)
-
-# Save as TIFF, 300 dpi
+``` r
+########## FIGURE 4 ########## Save as TIFF, 300 dpi
 tiff("/home/vagrant/Manuscript_1/FIGURE4/FIGURE4.tiff", width = 8.27, height = 11.67,
     units = "in", res = 300, compression = "lzw")
 
 # Create a A4 blank page
-pageCreate(width = 8.27, height = 11.67, default.units = "inches", showGuides = FALSE)
+pageCreate(width = 8.27, height = 11.67, default.units = "inches", showGuides = TRUE)
 
 plotText(label = "Figure 4", fontsize = 14, fontface = "bold", fontfamily = "Helvetica",
     x = 0.25, y = 0.25, just = "left", default.units = "inches")
@@ -1629,68 +3477,16 @@ AI_ATAC = countList$chr4_76213717 %>%
     mutate(Sample.n = factor(Sample.n, levels = c("smNPCs", "mDAN D15", "mDAN D30",
         "mDAN D50", "Astrocytes")), Allele = case_when(Base == "A" ~ "PD allele",
         TRUE ~ "Other allele"))
-
 # Plot
-chrom_AI = ggplot(AI_ATAC, aes(Sample.n, Reads, fill = interaction(Sample.n, Base)),
-    alpha = Base) + geom_bar(stat = "identity", position = "dodge", width = 0.5,
-    colour = "black") + geom_text(aes(label = format(c(paste0("p = ", 0.3), "", paste0("p = ",
-    0.3), "", paste0("p = ", 0.003), "", paste0("p = ", 3e-07), "", paste0("p = ",
-    0.2), ""), scientific = TRUE), y = Reads + 100), vjust = 0) + scale_fill_manual(aesthetics = "fill",
-    values = c("#D3D3D3", "#B22222", "#FF6347", "#FFA07A", "#b8627db2", "#C0C0C0",
-        "#A52A2A", "#FF0000", "#FA8072", "#cc6a70b2")) + coord_flip() + theme_classic() +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 330)) + xlab("") + theme(axis.text = element_text(face = "bold",
-    colour = "black"), axis.title.x = element_text(face = "bold", colour = "black"),
-    legend.position = "none")
-#######################################################################
-
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + ggplot(AI_ATAC,
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + aes(Allele,
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + Reads,
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + fill
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + =
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + Sample.n,
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + alpha
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + =
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + Base))
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + +
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + #
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + geom_col(position
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + =
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + position_dodge(),
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + width
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + =
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + 1.0,
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + colour
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + =
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + 'black')
-ggplot(AI_ATAC, aes(Allele, Reads, fill = Sample.n, alpha = Base)) + # geom_col(position = position_dodge(),           width = 1.0,           colour = 'black') + +
-geom_bar(stat = "identity", position = "dodge", width = 0.5, colour = "black") +
-    facet_wrap(~Sample.n, strip.position = "bottom") + theme_classic() + theme(strip.placement = "outside") +
-    scale_fill_manual(values = c("#A9A9A9", "#B22222", "#DC143C", "#E9967A", "#CC6A70B2")) +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 330)) + theme(legend.position = "none") +
-    xlab("") + #coord_flip() xlab("") + #coord_flip()
-geom_text(aes(label = format(c(0.3, "", 0.3, "", 0.003, "", 3e-07, "", 0.2, ""),
-    scientific = TRUE), y = Reads + 100), vjust = 0) + scale_fill_manual(aesthetics = "fill",
-    values = c("#D3D3D3", "#B22222", "#FF6347", "#FFA07A", "#b8627db2", "#C0C0C0",
-        "#A52A2A", "#FF0000", "#FA8072", "#cc6a70b2")) + coord_flip() + theme_classic() +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 330)) + xlab("") + theme(axis.text = element_text(face = "bold",
-    colour = "black"), axis.title.x = element_text(face = "bold", colour = "black"),
-    legend.position = "none")
-
-
-AI_ATAC = AI_ATAC %>%
-    mutate(term.i = as.factor(paste(Sample.n, Base)))
-
 chrom_AI = ggbarplot(AI_ATAC, x = "Sample.n", y = "Reads", fill = "Allele", position = position_dodge(0.7),
-    xlab = "", ylab = "Reads", title = "Read at SCARB2 promoter overlapping rs1465922 (SCARB2)",
-    label = format(c(paste0("p = ", 0.3), "", paste0("p = ", 0.3), "", paste0("p = ",
-        0.003), "", paste0("p = ", 3e-07), "", paste0("p = ", 0.2), ""), scientific = TRUE),
-    label.pos = "out", lab.size = 3, lab.vjust = 0.5, lab.hjust = -0.5, orientation = "horiz") +
-    theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1,
-        face = "bold", size = 10), axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 10), axis.title.x = element_text(face = "bold",
-            size = 10), legend.text = element_text(face = "bold", size = 10), legend.title = element_text(face = "bold",
-            size = 10), plot.title = element_text(hjust = 0.5)) + scale_fill_manual(values = c("#80A44F",
+    xlab = "", ylab = "Reads", label = format(c(paste0("p = ", 0.3), "", paste0("p = ",
+        0.3), "", paste0("p = ", 0.003), "", paste0("p = ", 3e-07), "", paste0("p = ",
+        0.2), ""), scientific = TRUE), label.pos = "out", lab.size = 3, lab.vjust = 0.5,
+    lab.hjust = -0.5, orientation = "horiz") + theme(legend.position = "right", axis.text.x = element_text(angle = 45,
+    hjust = 1, face = "bold", size = 10), axis.text.y = element_text(face = "bold",
+    size = 10), axis.title.y = element_text(face = "bold", size = 10), axis.title.x = element_text(face = "bold",
+    size = 10), legend.text = element_text(face = "bold", size = 10), legend.title = element_text(face = "bold",
+    size = 10), plot.title = element_text(hjust = 0.5)) + scale_fill_manual(values = c("#80A44F",
     "#427F96")) + scale_y_continuous(expand = c(0, 0), limits = c(0, 330))
 
 # Place the plot
@@ -1725,12 +3521,14 @@ GTEX_eqtl = ggplot(data = GTEX_SNPs_SCARB2_brain, mapping = aes(x = SNP.Id, y = 
 plotGG(plot = GTEX_eqtl, x = 0.5, y = 5.25, width = 7, height = 6, just = c("left",
     "top"), default.units = "inches")
 
+
+pageGuideHide()
 dev.off()
 ```
 
 ### FIGURE 5
 
-```r
+``` r
 ########## FIGURE 5 ##########
 ##############################
 # Save as a PDF
@@ -1904,28 +3702,23 @@ dev.off()
 Plot genes of interest from the TH REP2 mCHERRY cell line RNAseq data to demonstrate that expression is similar.  
 In addition, do the same for FOUNDIN-PD.
 
-```r
+``` r
 ############################################
 ########## SUPPLEMENTARY FIGURE 1 ##########
 ############################################
-
-# Save as a PDF
-pdf("/home/vagrant/Manuscript_1/SUPPLEMENTARY_FIGURE1/SUPPLEMENTARY_FIGURE1.pdf",
-    width = 13, 
-    height = 15)
-
 # Save as TIFF, 300 dpi
 tiff("/home/vagrant/Manuscript_1/SUPPLEMENTARY_FIGURE1/SUPPLEMENTARY_FIGURE1.tiff",
      width = 8.27,
-     height = 11.67,
+     height = 9.0,
      units = "in",
-     res = 300)
+     res = 300,
+     compression = "lzw")
 
 # Create a A4 blank page
 pageCreate(width = 8.27, 
-           height = 11.67, 
+           height = 9.0, 
            default.units = "inches",
-           showGuides = FALSE)
+           showGuides = TRUE)
 
 #### PANEL A - 
 # text Supplementary Figure 1
@@ -1949,10 +3742,6 @@ plotText(label = "A",
 dat.THREP2.FPKM = read_delim("/home/vagrant/epifunc/RNAseq/TH_REP2_mCHERRY/180604_HT-Rep2_fpkm.tsv",
                       delim = "\t", 
                       col_names = TRUE)
-
-dat.THREP2.FPKM = read_delim("/Volumes/deborah.gerard/Documents/epifunc/RNAseq/TH_REP2_mCHERRY/180604_HT-Rep2_fpkm.tsv",
-                     delim = "\t",
-                     col_names = TRUE)
 
 # Filter for genes of interest - BAG3 and LHX1 - IDUA, ZBTB14, SLC26A1 - SCARB2, NR2C2, FAM47E
 BAG3.LHX1 = c("BAG3",
@@ -1984,45 +3773,13 @@ dat.THREP2.FPKM = dat.THREP2.FPKM %>%
                                   "Negatively sorted neurons D30",
                                   "Positively sorted neurons D30")))
 
-# GBA expression in TH REP2 cell line
-ggboxplot(dat.THREP2.FPKM %>% 
-                            dplyr::filter(str_detect(gene_id, "ENSG00000177628")),
-                          x = "Cond", 
-                          y = "FPKM", 
-                          add = "jitter", 
-                          fill = "Cond", 
-                          facet.by = "gene_name",
-                          xlab = "", 
-                          ylab = "Fragments Per Kilobase Million (FPKM)",
-          title = "GBA expression in TH REP2 cell line") +
-  scale_x_discrete(labels = c("smNPCs",
-                              "Negatively sorted neurons D15",
-                              "Positively sorted neurons D15",
-                              "Negatively sorted neurons D30",
-                              "Positively sorted neurons D30")) +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1.0))
+# Plot the expression of BAG3 and LHX1 in smNPC and mDAN
+cdt = c("smNPCs",
+        "Positively")
 
-ggboxplot(dat.RPKM.filt %>% 
-                            dplyr::filter(str_detect(gene_id, "ENSG00000177628")),
-                          x = "Cond", 
-                          y = "RPKM", 
-                          add = "jitter", 
-                          fill = "Cond", 
-                          palette = c("#A9A9A9", "#B22222", "#DC143C", "#E9967A"),
-                          facet.by = "gene_name",
-                          xlab = "", 
-                          ylab = "Reads Per Kilobase Million (RPKM)") +
-  scale_x_discrete(labels = c("smNPC",
-                              expression("mDAN D15"),
-                              expression("mDAN D30"),
-                              expression("mDAN D50"))) +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 90))
-
-# Plot the expression of BAG3 and LHX1
 TH.REP2_BAG3.LHX1.exp = ggboxplot(dat.THREP2.FPKM %>% 
-                            dplyr::filter(gene_name %in% BAG3.LHX1),
+                            dplyr::filter(gene_name %in% BAG3.LHX1,
+                                          str_detect(Cond, paste0(cdt, collapse = "|"))),
                           x = "Cond", 
                           y = "FPKM", 
                           add = "jitter", 
@@ -2039,44 +3796,45 @@ TH.REP2_BAG3.LHX1.exp = ggboxplot(dat.THREP2.FPKM %>%
 
 # Place the plot  
 plotGG(plot = TH.REP2_BAG3.LHX1.exp, 
-      x = 0.5, 
+       x = 0.5, 
        y = 0.625, 
-       width = 2, 
+       width = 3.5, 
        height = 3.5,
        just = c("left", "top"), 
        default.units = "inches")
 
 # Plot the expression of IDUA and ZBTB14
-TH.REP2_IDUA.ZBTB14.exp = ggboxplot(dat.THREP2.FPKM %>% 
-                            dplyr::filter(gene_name %in% IDUA.ZBTB14) %>% 
-                              mutate(gene_name = factor(gene_name,
-                                                        levels = c("IDUA", "ZBTB14", "SLC26A1"))),
-                          x = "Cond", 
-                          y = "FPKM", 
-                          add = "jitter", 
-                          fill = "Cond", 
-                          palette = c("#A9A9A9", "#B22222", "#DC143C"),
-                          facet.by = "gene_name",
-                          xlab = "", 
-                          ylab = "Fragments Per Kilobase Million (FPKM)") +
-  scale_x_discrete(labels = c("smNPC",
-                              expression("mDAN D15"),
-                              expression("mDAN D30"))) +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 90))
-
-# Place the plot  
-plotGG(plot = TH.REP2_IDUA.ZBTB14.exp, 
-       x = 2.75, 
-       y = 0.625, 
-       width = 2.5, 
-       height = 3.5,
-       just = c("left", "top"), 
-       default.units = "inches")
+# TH.REP2_IDUA.ZBTB14.exp = ggboxplot(dat.THREP2.FPKM %>% 
+#                             dplyr::filter(gene_name %in% IDUA.ZBTB14) %>% 
+#                               mutate(gene_name = factor(gene_name,
+#                                                         levels = c("IDUA", "ZBTB14", "SLC26A1"))),
+#                           x = "Cond", 
+#                           y = "FPKM", 
+#                           add = "jitter", 
+#                           fill = "Cond", 
+#                           palette = c("#A9A9A9", "#B22222", "#DC143C"),
+#                           facet.by = "gene_name",
+#                           xlab = "", 
+#                           ylab = "Fragments Per Kilobase Million (FPKM)") +
+#   scale_x_discrete(labels = c("smNPC",
+#                               expression("mDAN D15"),
+#                               expression("mDAN D30"))) +
+#   theme(legend.position = "none",
+#         axis.text.x = element_text(angle = 90))
+# 
+# # Place the plot  
+# plotGG(plot = TH.REP2_IDUA.ZBTB14.exp, 
+#        x = 2.75, 
+#        y = 0.625, 
+#        width = 2.5, 
+#        height = 3.5,
+#        just = c("left", "top"), 
+#        default.units = "inches")
 
 # Plot the expression of SCARB2 and NR2C2
 TH.REP2_SCARB2.NR2C2.exp = ggboxplot(dat.THREP2.FPKM %>% 
-                            dplyr::filter(gene_name %in% SCARB2.NR2C2) %>% 
+                            dplyr::filter(gene_name %in% SCARB2.NR2C2,
+                                          str_detect(Cond, paste0(cdt, collapse = "|"))) %>% 
                               mutate(gene_name = factor(gene_name,
                                                         levels = c("SCARB2", "NR2C2", "FAM47E"))),
                           x = "Cond", 
@@ -2095,9 +3853,9 @@ TH.REP2_SCARB2.NR2C2.exp = ggboxplot(dat.THREP2.FPKM %>%
 
 # Place the plot  
 plotGG(plot = TH.REP2_SCARB2.NR2C2.exp, 
-       x = 5.5, 
+       x = 4.5, 
        y = 0.625, 
-       width = 2.5, 
+       width = 3.5, 
        height = 3.5,
        just = c("left", "top"), 
        default.units = "inches")
@@ -2118,29 +3876,16 @@ FIPD = read_delim("/home/vagrant/epifunc/PPMI_data/FOUNDIN-PD_150.9_RNAB/aggrega
                   delim = "\t",
                   col_names = TRUE)
 
-FIPD = read_delim("/Volumes/deborah.gerard/Documents/epifunc/PPMI_data/FOUNDIN-PD_150.9_RNAB/aggregated_expression/cpmTable.tsv",
-                  delim = "\t",
-                  col_names = TRUE)
-
 # Filter for genes of interest and get the ensembl and gene names
-goi_ens = select(org.Hs.eg.db, 
+goi_ens = AnnotationDbi::select(org.Hs.eg.db, 
                  keys = c("BAG3",
                           "LHX1",
-                          "IDUA",
-                          "ZBTB14",
-                          "SLC26A1",
-                          "SCARB1",
+                          #"IDUA",
+                          #"ZBTB14",
+                          #"SLC26A1"
                           "SCARB2",
-                          "SCARB3",
-                          "CD36",
                           "NR2C2",
-                          "FAM47E",
-                          "TH",
-                          "GAPDH",
-                          "ACTB",
-                          "GBA1",
-                          "PSAP",
-                          "CTSD"), 
+                          "FAM47E"), 
                  columns = c("SYMBOL",
                              "ENSEMBL"), 
                  keytype = "SYMBOL")
@@ -2165,17 +3910,17 @@ FIPD.fin = FIPD %>%
   dplyr::select(SYMBOL, Day, CPM)
 
 # Anova
-BAG3.aov = FIPD.fin %>% 
-  dplyr::filter(SYMBOL %in% BAG3.LHX1) %>% 
-  group_by(SYMBOL) %>% 
-  anova_test(CPM ~ Day)
+# BAG3.aov = FIPD.fin %>% 
+#   dplyr::filter(SYMBOL %in% BAG3.LHX1) %>% 
+#   group_by(SYMBOL) %>% 
+#   anova_test(CPM ~ Day)
 
 # Tukey post-hoc test
-BAG3.ph = FIPD.fin %>% 
-  dplyr::filter(SYMBOL %in% BAG3.LHX1) %>% 
-  group_by(SYMBOL) %>% 
-  tukey_hsd(CPM ~ Day) %>% 
-  add_xy_position(x = "Day")
+# BAG3.ph = FIPD.fin %>% 
+#   dplyr::filter(SYMBOL %in% BAG3.LHX1) %>% 
+#   group_by(SYMBOL) %>% 
+#   tukey_hsd(CPM ~ Day) %>% 
+#   add_xy_position(x = "Day")
 
 # Plot expression of BAG3 and LHX1
 FIPD.exp_BAG3.LHX1 = ggboxplot(FIPD.fin %>% 
@@ -2205,42 +3950,29 @@ FIPD.exp_BAG3.LHX1 = ggboxplot(FIPD.fin %>%
 plotGG(plot = FIPD.exp_BAG3.LHX1, 
        x = 0.5, 
        y = 4.75 ,
-       width = 2.5, 
+       width = 3.5, 
        height = 3.5,
        just = c("left", "top"), 
        default.units = "inches")
 
-# Anova
-IDUA.aov = FIPD.fin %>% 
-  dplyr::filter(SYMBOL %in% IDUA.ZBTB14) %>% 
-  group_by(SYMBOL) %>% 
-  anova_test(CPM ~ Day)
-
-# Tukey post-hoc test
-IDUA.ph = FIPD.fin %>% 
-  dplyr::filter(SYMBOL %in% IDUA.ZBTB14) %>% 
-  group_by(SYMBOL) %>% 
-  tukey_hsd(CPM ~ Day) %>% 
-  add_xy_position(x = "Day")
-
 # Plot expression of IDUA and ZBTB14
-FIPD.exp_IDUA.ZBTB14 = ggboxplot(FIPD.fin %>% 
-                                   dplyr::filter(SYMBOL %in% IDUA.ZBTB14) %>% 
-                            mutate(SYMBOL = factor(SYMBOL, levels = c("IDUA", "ZBTB14", "SLC26A1"))),
-                     x = "Day", 
-                     y = "CPM", 
-                     add = "jitter", 
-                     fill = "Day", 
-                     palette = c("#482677FF", "#2D708EFF", "#29AF7FFF"),
-                     facet.by = "SYMBOL",
-                     xlab = "", 
-                     ylab = "Counts per Million (CPM)",
-                     add.params = list(size = 0.1)) +
-  scale_x_discrete(labels = c("Day 0",
-                              "Day 25",
-                              "Day 65")) +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 90))
+# FIPD.exp_IDUA.ZBTB14 = ggboxplot(FIPD.fin %>% 
+#                                    dplyr::filter(SYMBOL %in% IDUA.ZBTB14) %>% 
+#                             mutate(SYMBOL = factor(SYMBOL, levels = c("IDUA", "ZBTB14", "SLC26A1"))),
+#                      x = "Day", 
+#                      y = "CPM", 
+#                      add = "jitter", 
+#                      fill = "Day", 
+#                      palette = c("#482677FF", "#2D708EFF", "#29AF7FFF"),
+#                      facet.by = "SYMBOL",
+#                      xlab = "", 
+#                      ylab = "Counts per Million (CPM)",
+#                      add.params = list(size = 0.1)) +
+#   scale_x_discrete(labels = c("Day 0",
+#                               "Day 25",
+#                               "Day 65")) +
+#   theme(legend.position = "none",
+#         axis.text.x = element_text(angle = 90))
   # stat_pvalue_manual(IDUA.ph, 
   #                    hide.ns = TRUE,
   #                    label = "p.adj") +
@@ -2248,31 +3980,17 @@ FIPD.exp_IDUA.ZBTB14 = ggboxplot(FIPD.fin %>%
   #                                detailed = FALSE))
 
 # Place the plot  
-plotGG(plot = FIPD.exp_IDUA.ZBTB14, 
-       x = 3.125, 
-       y = 4.75 ,
-       width = 2.5, 
-       height = 3.5,
-       just = c("left", "top"), 
-       default.units = "inches")
+# plotGG(plot = FIPD.exp_IDUA.ZBTB14, 
+#        x = 3.125, 
+#        y = 4.75 ,
+#        width = 2.5, 
+#        height = 3.5,
+#        just = c("left", "top"), 
+#        default.units = "inches")
 
-# Anova
-SCARB2.aov = FIPD.fin %>% 
-  dplyr::filter(SYMBOL %in% SCARB2.NR2C2) %>% 
-  group_by(SYMBOL) %>% 
-  anova_test(CPM ~ Day)
-
-# Tukey post-hoc test
-SCARB2.ph = FIPD.fin %>% 
-  dplyr::filter(SYMBOL %in% SCARB2.NR2C2) %>% 
-  group_by(SYMBOL) %>% 
-  tukey_hsd(CPM ~ Day) %>% 
-  add_xy_position(x = "Day")
-
-# Plot expression of SCARB2 and NR2C2
-FIPD.exp_SCARB2.NR2C2 = ggboxplot(FIPD.fin %>% 
-                                   dplyr::filter(SYMBOL %in% SCARB2.NR2C2) %>% 
-                            mutate(SYMBOL = factor(SYMBOL, levels = c("SCARB2", "NR2C2", "FAM47E"))),
+# Plot expression of SCARB2 alone
+FIPD.exp_SCARB2 = ggboxplot(FIPD.fin %>% 
+                                   dplyr::filter(SYMBOL %in% "SCARB2"),
                      x = "Day", 
                      y = "CPM", 
                      add = "jitter", 
@@ -2294,19 +4012,18 @@ FIPD.exp_SCARB2.NR2C2 = ggboxplot(FIPD.fin %>%
   #                                detailed = FALSE))
 
 # Place the plot  
-plotGG(plot = FIPD.exp_SCARB2.NR2C2, 
-       x = 5.625, 
+plotGG(plot = FIPD.exp_SCARB2, 
+       x = 4.25, 
        y = 4.75 ,
-       width = 2.5, 
+       width = 1.5, 
        height = 3.5,
        just = c("left", "top"), 
        default.units = "inches")
 
-dev.off()
-
-## GBA expression in FOUNDIN-PD
-ggboxplot(FIPD.fin %>% 
-            dplyr::filter(SYMBOL == "GBA1"),
+# Plot expression of NR2C2 and FAM47E
+FIPD.exp_NR2C2.FAM47E = ggboxplot(FIPD.fin %>% 
+                                   dplyr::filter(SYMBOL %in% c("NR2C2", "FAM47E")) %>% 
+                            mutate(SYMBOL = factor(SYMBOL, levels = c("NR2C2", "FAM47E"))),
                      x = "Day", 
                      y = "CPM", 
                      add = "jitter", 
@@ -2315,36 +4032,37 @@ ggboxplot(FIPD.fin %>%
                      facet.by = "SYMBOL",
                      xlab = "", 
                      ylab = "Counts per Million (CPM)",
-                     add.params = list(size = 0.1),
-          title = "GBA expression in FOUNDIN-PD cell lines") +
+                     add.params = list(size = 0.1)) +
   scale_x_discrete(labels = c("Day 0",
                               "Day 25",
                               "Day 65")) +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 90))
 
-FIPD %>% 
-  dplyr::filter(str_detect(Geneid, "ENSG00000177628")) %>% 
-  pivot_longer(cols = starts_with("RNAB"), names_to = "Sample",
-               values_to = "CPM") %>% 
+# Place the plot  
+plotGG(plot = FIPD.exp_NR2C2.FAM47E, 
+       x = 6.0, 
+       y = 4.75 ,
+       width = 2.0, 
+       height = 3.5,
+       just = c("left", "top"), 
+       default.units = "inches")
+
+pageGuideHide()
+dev.off()
 ```
 
 ### SUPPLEMENTARY FIGURE 2
 IHEC consortium has one sample of substantia nigra for H3K27me3, H3K9me3, H3K4me1, H3K4me3 and H3K36me3 from a healthy brain for BAG3, IDUA and SCARB2 loci
 
-```r
+``` r
 ############################################ SUPPLEMENTARY FIGURE 2 ##########
-
-# Save as a PDF
-pdf("/home/vagrant/Manuscript_1/SUPPLEMENTARY_FIGURE2/SUPPLEMENTARY_FIGURE2.pdf",
-    width = 8.3, height = 11.7)
-
-# Save as TIFF, 300 dpi
+############################################ Save as TIFF, 300 dpi
 tiff("/home/vagrant/Manuscript_1/SUPPLEMENTARY_FIGURE2/SUPPLEMENTARY_FIGURE2.tiff",
-    width = 8.27, height = 11.67, units = "in", res = 300)
+    width = 8.27, height = 6.5, units = "in", res = 300, compression = "lzw")
 
 # Create a A4 blank page
-pageCreate(width = 8.27, height = 11.67, default.units = "inches", showGuides = FALSE)
+pageCreate(width = 8.27, height = 6.5, default.units = "inches", showGuides = TRUE)
 
 #### PANEL A - text Supplementary Figure 2
 plotText(label = "Supplementary Figure 2", fontsize = 14, x = 0.25, y = 0.25, just = "left",
@@ -2452,103 +4170,11 @@ plotText(label = "H3K9me3", fontsize = 6, fontcolor = "#3e4989", x = 0.75, y = 2
 plotText(label = "H3K27me3", fontsize = 6, fontcolor = "#440154", x = 0.75, y = 2.375,
     just = c("left", "top"), default.units = "inches")
 
-# Reads BIGWIG file at IDUA location - H3K4me1
-bw.IDUA.H3K4me1 = readBigwig(file = paste0(bw.IHEC.path, "ihec.chipseq.ihec-chipseq-containerv1.1.4.IHECRE00000986.6.6a1889bf-7312-4e41-b1cc-e2f3be7a8076.fc.signal.bigwig"),
-    chrom = "chr4", chromstart = 947008, chromend = 1027208)
+#### PANEL B - text B
+plotText(label = "B", fontsize = 12, x = 0.25, y = 3.25, just = "left", default.units = "inches",
+    fontface = "bold")
 
-# Reads BIGWIG file at IDUA location - H3K4me3
-bw.IDUA.H3K4me3 = readBigwig(file = paste0(bw.IHEC.path, "ihec.chipseq.ihec-chipseq-containerv1.1.4.IHECRE00000986.6.4cb9300f-9097-4374-8f2a-4afd8ff855fb.fc.signal.bigwig"),
-    chrom = "chr4", chromstart = 947008, chromend = 1027208)
-
-# Reads BIGWIG file at IDUA location - H3K36me3
-bw.IDUA.H3K36me3 = readBigwig(file = paste0(bw.IHEC.path, "ihec.chipseq.ihec-chipseq-containerv1.1.4.IHECRE00000986.6.6586e624-852f-4cac-83df-2325cee19699.fc.signal.bigwig"),
-    chrom = "chr4", chromstart = 947008, chromend = 1027208)
-
-# Reads BIGWIG file at IDUA location - H3K9me3
-bw.IDUA.H3K9me3 = readBigwig(file = paste0(bw.IHEC.path, "ihec.chipseq.ihec-chipseq-containerv1.1.4.IHECRE00000986.6.e8fe7664-906e-4d87-8f3a-6ce88dbeadc6.fc.signal.bigwig"),
-    chrom = "chr4", chromstart = 947008, chromend = 1027208)
-
-# Reads BIGWIG file at IDUA location - H3K27me3
-bw.IDUA.H3K27me3 = readBigwig(file = paste0(bw.IHEC.path, "ihec.chipseq.ihec-chipseq-containerv1.1.4.IHECRE00000986.6.5f5024a9-2e3f-4527-82ec-0ed04bf4a848.fc.signal.bigwig"),
-    chrom = "chr4", chromstart = 947008, chromend = 1027208)
-
-# Add a scale next to the bigwig files - check the maximum to choose
-scale.IHEC.IDUA.max = max(c(bw.IDUA.H3K4me1$score, bw.IDUA.H3K4me3$score, bw.IDUA.H3K36me3$score,
-    bw.IDUA.H3K9me3$score, bw.IDUA.H3K27me3$score)) %>%
-    round(., digits = 1)
-
-print(scale.IHEC.IDUA.max)
-
-# Define parameters for the regions
-region.p.IHEC.IDUA = pgParams(chrom = "chr4", chromstart = 947108, chromend = 1027108,
-    assembly = "hg38", range = c(0, scale.IHEC.IDUA.max))
-
-# Add the genomic label
-plotGenomeLabel(chrom = "chr4", chromstart = 947108, chromend = 1027108, assembly = "hg38",
-    x = 0.75, y = 3.5, length = 4, default.units = "inches", scale = "Mb")
-
-# ChIPseq signal H3K4me1
-H3K4me1_IDUA = plotSignal(data = bw.IDUA.H3K4me1, params = region.p.IHEC.IDUA, fill = "#b5de2b",
-    alpha = 0.7, linecolor = NA, x = 0.75, y = 3.75, width = 4, height = 0.25, just = c("left",
-        "top"), default.units = "inches")
-
-annoYaxis(plot = H3K4me1_IDUA, at = c(0, scale.IHEC.IDUA.max), fontsize = 6)
-
-# ChIPseq signal H3K4me3
-H3K4me3_IDUA = plotSignal(data = bw.IDUA.H3K4me3, params = region.p.IHEC.IDUA, fill = "#35b779",
-    alpha = 0.7, linecolor = NA, x = 0.75, y = 4.125, width = 4, height = 0.25, just = c("left",
-        "top"), default.units = "inches")
-
-annoYaxis(plot = H3K4me3_IDUA, at = c(0, scale.IHEC.IDUA.max), fontsize = 6)
-
-# ChIPseq signal H3K36me3
-H3K36me3_IDUA = plotSignal(data = bw.IDUA.H3K36me3, params = region.p.IHEC.IDUA,
-    fill = "#26828e", alpha = 0.7, linecolor = NA, x = 0.75, y = 4.5, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = H3K36me3_IDUA, at = c(0, scale.IHEC.IDUA.max), fontsize = 6)
-
-# ChIPseq signal H3K9me3
-H3K9me3_IDUA = plotSignal(data = bw.IDUA.H3K9me3, params = region.p.IHEC.IDUA, fill = "#3e4989",
-    alpha = 0.7, linecolor = NA, x = 0.75, y = 4.875, width = 4, height = 0.25, just = c("left",
-        "top"), default.units = "inches")
-
-annoYaxis(plot = H3K9me3_IDUA, at = c(0, scale.IHEC.IDUA.max), fontsize = 6)
-
-# ChIPseq signal H3K27me3
-H3K27me3_IDUA = plotSignal(data = bw.IDUA.H3K27me3, params = region.p.IHEC.IDUA,
-    fill = "#440154", alpha = 0.7, linecolor = NA, x = 0.75, y = 5.25, width = 4,
-    height = 0.25, just = c("left", "top"), default.units = "inches")
-
-annoYaxis(plot = H3K27me3_IDUA, at = c(0, scale.IHEC.IDUA.max), fontsize = 6)
-
-# Gene track
-plotGenes(chrom = "chr4", chromstart = 947108, chromend = 1027108, assembly = assembly(Genome = "hg38refGene",
-    TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", OrgDb = "org.Hs.eg.db"), fontcolor = "black",
-    fill = "black", x = 0.75, y = 5.625, width = 4, height = 0.375, just = c("left",
-        "top"), default.units = "inches")
-
-# Add the samples name
-plotText(label = "H3K4me1", fontsize = 6, fontcolor = "#b5de2b", x = 0.75, y = 3.75,
-    just = c("left", "top"), default.units = "inches")
-
-# Add the samples name
-plotText(label = "H3K4me3", fontsize = 6, fontcolor = "#35b779", x = 0.75, y = 4.125,
-    just = c("left", "top"), default.units = "inches")
-
-# Add the samples name
-plotText(label = "H3K36me3", fontsize = 6, fontcolor = "#26828e", x = 0.75, y = 4.5,
-    just = c("left", "top"), default.units = "inches")
-
-# Add the samples name
-plotText(label = "H3K9me3", fontsize = 6, fontcolor = "#3e4989", x = 0.75, y = 4.875,
-    just = c("left", "top"), default.units = "inches")
-
-# Add the samples name
-plotText(label = "H3K27me3", fontsize = 6, fontcolor = "#440154", x = 0.75, y = 5.25,
-    just = c("left", "top"), default.units = "inches")
-
-# ChIP-seq signal SCARB2 Reads BIGWIG file at SCARB2 location - H3K4me1
+# Reads BIGWIG file at SCARB2 location - H3K4me1
 bw.SCARB2.H3K4me1 = readBigwig(file = paste0(bw.IHEC.path, "ihec.chipseq.ihec-chipseq-containerv1.1.4.IHECRE00000986.6.6a1889bf-7312-4e41-b1cc-e2f3be7a8076.fc.signal.bigwig"),
     chrom = "chr4", chromstart = 76173617, chromend = 76253817)
 
@@ -2581,39 +4207,39 @@ region.p.IHEC.SCARB2 = pgParams(chrom = "chr4", chromstart = 76173717, chromend 
 
 # Add the genomic label
 plotGenomeLabel(chrom = "chr4", chromstart = 76173717, chromend = 76253717, assembly = "hg38",
-    x = 0.75, y = 6.5, length = 4, default.units = "inches", scale = "Mb")
+    x = 0.75, y = 3.5, length = 4, default.units = "inches", scale = "Mb")
 
 # ChIPseq signal H3K4me1
 H3K4me1_SCARB2 = plotSignal(data = bw.SCARB2.H3K4me1, params = region.p.IHEC.SCARB2,
-    fill = "#b5de2b", alpha = 0.7, linecolor = NA, x = 0.75, y = 6.75, width = 4,
+    fill = "#b5de2b", alpha = 0.7, linecolor = NA, x = 0.75, y = 3.75, width = 4,
     height = 0.25, just = c("left", "top"), default.units = "inches")
 
 annoYaxis(plot = H3K4me1_SCARB2, at = c(0, scale.IHEC.SCARB2.max), fontsize = 6)
 
 # ChIPseq signal H3K4me3
 H3K4me3_SCARB2 = plotSignal(data = bw.SCARB2.H3K4me3, params = region.p.IHEC.SCARB2,
-    fill = "#35b779", alpha = 0.7, linecolor = NA, x = 0.75, y = 7.125, width = 4,
+    fill = "#35b779", alpha = 0.7, linecolor = NA, x = 0.75, y = 4.125, width = 4,
     height = 0.25, just = c("left", "top"), default.units = "inches")
 
 annoYaxis(plot = H3K4me3_SCARB2, at = c(0, scale.IHEC.SCARB2.max), fontsize = 6)
 
 # ChIPseq signal H3K36me3
 H3K36me3_SCARB2 = plotSignal(data = bw.SCARB2.H3K36me3, params = region.p.IHEC.SCARB2,
-    fill = "#26828e", alpha = 0.7, linecolor = NA, x = 0.75, y = 7.5, width = 4,
+    fill = "#26828e", alpha = 0.7, linecolor = NA, x = 0.75, y = 4.5, width = 4,
     height = 0.25, just = c("left", "top"), default.units = "inches")
 
 annoYaxis(plot = H3K36me3_SCARB2, at = c(0, scale.IHEC.SCARB2.max), fontsize = 6)
 
 # ChIPseq signal H3K9me3
 H3K9me3_SCARB2 = plotSignal(data = bw.SCARB2.H3K9me3, params = region.p.IHEC.SCARB2,
-    fill = "#3e4989", alpha = 0.7, linecolor = NA, x = 0.75, y = 7.875, width = 4,
+    fill = "#3e4989", alpha = 0.7, linecolor = NA, x = 0.75, y = 4.875, width = 4,
     height = 0.25, just = c("left", "top"), default.units = "inches")
 
 annoYaxis(plot = H3K9me3_SCARB2, at = c(0, scale.IHEC.SCARB2.max), fontsize = 6)
 
 # ChIPseq signal H3K27me3
 H3K27me3_SCARB2 = plotSignal(data = bw.SCARB2.H3K27me3, params = region.p.IHEC.SCARB2,
-    fill = "#440154", alpha = 0.7, linecolor = NA, x = 0.75, y = 8.25, width = 4,
+    fill = "#440154", alpha = 0.7, linecolor = NA, x = 0.75, y = 5.25, width = 4,
     height = 0.25, just = c("left", "top"), default.units = "inches")
 
 annoYaxis(plot = H3K27me3_SCARB2, at = c(0, scale.IHEC.SCARB2.max), fontsize = 6)
@@ -2621,66 +4247,52 @@ annoYaxis(plot = H3K27me3_SCARB2, at = c(0, scale.IHEC.SCARB2.max), fontsize = 6
 # Gene track
 plotGenes(chrom = "chr4", chromstart = 76173717, chromend = 76253717, assembly = assembly(Genome = "hg38refGene",
     TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", OrgDb = "org.Hs.eg.db"), fontcolor = "black",
-    fill = "black", x = 0.75, y = 8.625, width = 4, height = 0.375, just = c("left",
+    fill = "black", x = 0.75, y = 5.625, width = 4, height = 0.375, just = c("left",
         "top"), default.units = "inches")
 
 # Add the samples name
-plotText(label = "H3K4me1", fontsize = 6, fontcolor = "#b5de2b", x = 0.75, y = 6.75,
+plotText(label = "H3K4me1", fontsize = 6, fontcolor = "#b5de2b", x = 0.75, y = 3.75,
     just = c("left", "top"), default.units = "inches")
 
 # Add the samples name
-plotText(label = "H3K4me3", fontsize = 6, fontcolor = "#35b779", x = 0.75, y = 7.125,
+plotText(label = "H3K4me3", fontsize = 6, fontcolor = "#35b779", x = 0.75, y = 4.125,
     just = c("left", "top"), default.units = "inches")
 
 # Add the samples name
-plotText(label = "H3K36me3", fontsize = 6, fontcolor = "#26828e", x = 0.75, y = 7.5,
+plotText(label = "H3K36me3", fontsize = 6, fontcolor = "#26828e", x = 0.75, y = 4.5,
     just = c("left", "top"), default.units = "inches")
 
 # Add the samples name
-plotText(label = "H3K9me3", fontsize = 6, fontcolor = "#3e4989", x = 0.75, y = 7.875,
+plotText(label = "H3K9me3", fontsize = 6, fontcolor = "#3e4989", x = 0.75, y = 4.875,
     just = c("left", "top"), default.units = "inches")
 
 # Add the samples name
-plotText(label = "H3K27me3", fontsize = 6, fontcolor = "#440154", x = 0.75, y = 8.25,
+plotText(label = "H3K27me3", fontsize = 6, fontcolor = "#440154", x = 0.75, y = 5.25,
     just = c("left", "top"), default.units = "inches")
 
-#### PANEL B - text Supplementary Figure 1 text B
-plotText(label = "B", fontsize = 12, x = 0.25, y = 8.5, just = "left", default.units = "inches",
-    fontface = "bold")
-
-# Load IHEC RNA-seq data (TPM)
-IHEC.exp = read_delim("/home/vagrant/Documents/IHEC/RNA_seq/genes_tpm.csv", delim = ",",
-    col_names = TRUE)
-
-# Genes of interest to be plotted
-goi_ens.filt = goi_ens %>%
-    as_tibble() %>%
-    dplyr::filter(ENSEMBL != "ENSG00000274577")
-
-IHEC.exp %>%
-    # Remove the dot and number in Ensembl IDS
-mutate(id_col = gsub("\\..*", "", id_col)) %>%
-    dplyr:::filter(id_col %in% goi_ens.filt$ENSEMBL) %>%
-    pivot_longer(cols = starts_with("IHEC"), names_to = "Sample", values_to = "TPM") %>%
-    mutate(Sample = gsub("", "", Sample))
-
-
+pageGuideHide()
 dev.off()
+```
+
+Synchronise the files between my personal ATLAS and the FSTC.SYSBIO ATLAS
+
+``` bash
+cd /Volumes/FSTC_SYSBIO/13-\ PAPERS/2025_Gerard_et_al_SCARB2
+rsync -avzPhu --no-p --chmod=ugo=rwx --delete /Volumes/deborah.gerard/Documents/Manuscript_1/ .
 ```
 
 ### SUPPLEMENTARY FIGURE 3
 Plot FACS results for experiments where knockdown were performed at day 9 and samples collected 3 and 6 days post-transduction
 
-```r
+``` r
 ############################################ SUPPLEMENTARY FIGURE 3 ##########
-
-# Save as a PDF
+############################################ Save as a PDF
 pdf("/home/vagrant/Manuscript_1/SUPPLEMENTARY_FIGURE3/SUPPLEMENTARY_FIGURE3.pdf",
     width = 13, height = 15)
 
 # Save as TIFF, 300 ppi
 tiff("/home/vagrant/Manuscript_1/SUPPLEMENTARY_FIGURE3/SUPPLEMENTARY_FIGURE3.tiff",
-    width = 8.27, height = 11.67, units = "in", res = 300)
+    width = 8.27, height = 11.67, units = "in", res = 300, compression = "lzw")
 
 # Create a A4 blank page
 pageCreate(width = 8.27, height = 11.67, default.units = "inches", showGuides = TRUE)
@@ -2732,7 +4344,7 @@ dev.off()
 
 SCARB2 snp (rs1465922) for samples with whole genome sequencing data (75 cases)
 
-```r
+``` r
 # Load data
 SCARB2.SNP.WGS.75 = read_excel("/Volumes/deborah.gerard/Documents/epifunc/Final.WGS.SCARB2.OK_from_Sinthu.xlsx")
 
@@ -2745,12 +4357,12 @@ SCARB2.SNP.WGS.75 %>%
 
 
 
-```r
+``` r
 sessionInfo()
 ```
 
 
-```r
+``` r
 library("tidyverse")
 library("readxl")
 library("AnnotationDbi")
@@ -2769,253 +4381,5 @@ TFlist.GN %>%
     distinct(GENENAME)
 write_delim(., "/Volumes/deborah.gerard/Documents/Elena/Human_TF_list_geneName.txt",
     col_names = TRUE, delim = "\t")
-```
-
-### TEST GBA and SNPs
-
-```r
-# Load the genotype of rs1465922 from the PPMI data
-GT_PPMI = read_delim("/Volumes/deborah.gerard/Documents/epifunc/PPMI_data/VCF/ppmi.july2018.chr4.vqsr_with_my_snps.vcf",
-    delim = "\t", comment = "##", col_names = TRUE)
-
-# Filter for rs1465922 only and assign genotype for that snp
-GT_PPMI.filt = GT_PPMI %>%
-    filter(ID == "rs1465922") %>%
-    dplyr::select(-QUAL:-FORMAT) %>%
-    pivot_longer(cols = starts_with("PPMI"), names_to = "Sample", values_to = "Genotype.plus") %>%
-    mutate(Genotype = gsub("\\:.*", "", Genotype.plus), Genotype.l = case_when(Genotype ==
-        "1/1" ~ "A/A", Genotype == "0/1" ~ "G/A", Genotype == "0/0" ~ "G/G"), Sample = gsub("SI",
-        "", Sample)) %>%
-    dplyr::select(ID, Sample, Genotype.l)
-
-
-# Expression for SCARB2, NR2C2, TH, GAPDH and ACTIN
-FIPD.fin2 = FIPD %>%
-    # dplyr::filter(str_detect(Geneid, paste(goi_ens$ENSEMBL.not.dot, collapse
-    # = '|'))) %>%
-dplyr::filter(str_detect(Geneid, paste(goi_ens$ENSEMBL.not.dot, collapse = "|"))) %>%
-    dplyr::rename(ENSEMBL = Geneid) %>%
-    mutate(ENSEMBL.not.dot = gsub("\\..*", "", ENSEMBL)) %>%
-    dplyr::select(ENSEMBL, ENSEMBL.not.dot, everything()) %>%
-    pivot_longer(cols = starts_with("RNAB"), names_to = "Samples", values_to = "CPM") %>%
-    mutate(Day = str_extract(Samples, "da+\\d+")) %>%
-    left_join(goi_ens, by = "ENSEMBL.not.dot") %>%
-    dplyr::select(SYMBOL, Samples, Day, CPM) %>%
-    # dplyr::filter(SYMBOL %in% c('SCARB2', 'NR2C2', 'TH', 'ACTB', 'GAPDH',
-    # 'FAM47E', 'GBA1')) %>%
-mutate(Sample = str_extract(Samples, "PPMI+\\d+")) %>%
-    left_join(GT_PPMI.filt, by = "Sample")
-
-# How many samples are heterozygous for rs1465922
-FIPD.fin2 %>%
-    dplyr::select(Sample:Genotype.l) %>%
-    filter(Genotype.l == "G/A") %>%
-    dplyr::select(Sample) %>%
-    distinct(Sample) %>%
-    summarise(count = n())
-
-# Number of samples
-FIPD.fin2 %>%
-    dplyr::select(Sample) %>%
-    distinct(Sample) %>%
-    summarise(count = n())
-
-# Plot for SCARB2
-ggboxplot(FIPD.fin2 %>%
-    dplyr::filter(SYMBOL == "SCARB2"), x = "Genotype.l", y = "CPM", facet.by = "Day",
-    title = "SCARB2 expression associated to rs1465922 genotype") + stat_compare_means(method = "anova",
-    label.y = 1500) + stat_compare_means(comparisons = list(c("A/A", "G/A"), c("A/A",
-    "G/G"), c("G/A", "G/G")))
-
-# Plot for NR2C2
-ggboxplot(FIPD.fin2 %>%
-    dplyr::filter(SYMBOL == "NR2C2"), x = "Genotype.l", y = "CPM", facet.by = "Day",
-    title = "NR2C2 expression associated to rs1465922 genotype") + stat_compare_means(method = "anova",
-    label.y = 100) + stat_compare_means(comparisons = list(c("A/A", "G/A"), c("A/A",
-    "G/G"), c("G/A", "G/G")))
-
-# Plot for TH
-ggboxplot(FIPD.fin2 %>%
-    dplyr::filter(SYMBOL == "TH"), x = "Genotype.l", y = "CPM", facet.by = "Day",
-    title = "TH expression associated to rs1465922 genotype") + stat_compare_means(method = "anova",
-    label.y = 100) + stat_compare_means(comparisons = list(c("A/A", "G/A"), c("A/A",
-    "G/G"), c("G/A", "G/G")))
-
-# Plot for FAM47E
-ggboxplot(FIPD.fin2 %>%
-    dplyr::filter(SYMBOL == "FAM47E"), x = "Genotype.l", y = "CPM", facet.by = "Day",
-    title = "FAM47E expression associated to rs1465922 genotype") + stat_compare_means(method = "anova",
-    label.y = 30) + stat_compare_means(comparisons = list(c("A/A", "G/A"), c("A/A",
-    "G/G"), c("G/A", "G/G")))
-
-# Plot for GAPDH
-ggboxplot(FIPD.fin2 %>%
-    dplyr::filter(SYMBOL == "GAPDH"), x = "Genotype.l", y = "CPM", facet.by = "Day",
-    title = "GAPDH expression associated to rs1465922 genotype") + stat_compare_means(method = "anova",
-    label.y = 4500) + stat_compare_means(comparisons = list(c("A/A", "G/A"), c("A/A",
-    "G/G"), c("G/A", "G/G")))
-
-# Plot for ACTB
-ggboxplot(FIPD.fin2 %>%
-    dplyr::filter(SYMBOL == "ACTB"), x = "Genotype.l", y = "CPM", facet.by = "Day",
-    title = "ACTB expression associated to rs1465922 genotype") + stat_compare_means(method = "anova",
-    label.y = 10000) + stat_compare_means(comparisons = list(c("A/A", "G/A"), c("A/A",
-    "G/G"), c("G/A", "G/G")))
-
-# Plot for GBA1
-ggboxplot(FIPD.fin2 %>%
-    dplyr::filter(SYMBOL == "GBA1"), x = "Genotype.l", y = "CPM", facet.by = "Day",
-    title = "GBA1 expression associated to rs1465922 genotype") + stat_compare_means(method = "anova",
-    label.y = 100) + stat_compare_means(comparisons = list(c("A/A", "G/A"), c("A/A",
-    "G/G"), c("G/A", "G/G")))
-
-# Plot for PSAP
-ggboxplot(FIPD.fin2 %>%
-    dplyr::filter(SYMBOL == "PSAP"), x = "Genotype.l", y = "CPM", facet.by = "Day",
-    title = "PSAP expression associated to rs1465922 genotype") + stat_compare_means(method = "anova",
-    label.y = 100) + stat_compare_means(comparisons = list(c("A/A", "G/A"), c("A/A",
-    "G/G"), c("G/A", "G/G")))
-
-
-# Scatterplot of GBA1 and SCARB2 independtly of the genotype
-FIPD.fin2 %>%
-    dplyr::filter(SYMBOL %in% c("GBA1", "SCARB2")) %>%
-    pivot_wider(names_from = SYMBOL, values_from = CPM) %>%
-    ggscatter(x = "SCARB2", y = "GBA1", color = "Genotype.l", facet.by = c("Day",
-        "Genotype.l"), add = "reg.line", cor.coef = TRUE, cor.coeff.args = list(method = "pearson",
-        label.x = 3, label.sep = "\n"), xlab = "SCARB2 expression (CPM)", ylab = "GBA1 expression (CPM)") +
-    theme(legend.position = "right")
-
-# Scatterplot of NR2C2 and SCARB2 independtly of the genotype
-FIPD.fin2 %>%
-    dplyr::filter(SYMBOL %in% c("NR2C2", "SCARB2")) %>%
-    pivot_wider(names_from = SYMBOL, values_from = CPM) %>%
-    ggscatter(x = "SCARB2", y = "NR2C2", color = "Genotype.l", facet.by = c("Day",
-        "Genotype.l"), add = "reg.line", cor.coef = TRUE, cor.coeff.args = list(method = "pearson",
-        label.x = 3, label.sep = "\n"), xlab = "SCARB2 expression (CPM)", ylab = "NR2C2 expression (CPM)") +
-    theme(legend.position = "right")
-
-
-dat.RPKM = read_delim("/Volumes/deborah.gerard/Documents/epifunc/RNAseq/RPKM_genename",
-    delim = "\t", col_names = TRUE)
-
-dat.RPKM %>%
-    # mutate(gene_id = gsub('\\..*', '', gene_id)) %>%
-dplyr::filter(str_detect(gene_id, "ENSG00000177628")) %>%
-    pivot_longer(cols = contains("reads"), names_to = "Sample", values_to = "RPKM") %>%
-    mutate(Cond = case_when(str_detect(Sample, "D15_possort") ~ "Positively sorted neurons D15",
-        str_detect(Sample, "D30_possort") ~ "Positively sorted neurons D30", str_detect(Sample,
-            "D50_possort") ~ "Positively sorted neurons D50", str_detect(Sample,
-            "D15_negsort") ~ "Negatively sorted neurons D15", str_detect(Sample,
-            "D50_negsort") ~ "Negatively sorted neurons D50", str_detect(Sample,
-            "ASTRO") ~ "Astrocytes D65", TRUE ~ "smNPCs"), Cond = factor(Cond, levels = c("smNPCs",
-        "Negatively sorted neurons D15", "Positively sorted neurons D15", "Positively sorted neurons D30",
-        "Negatively sorted neurons D50", "Positively sorted neurons D50", "Astrocytes D65"))) %>%
-    ggboxplot(., x = "Cond", y = "RPKM", fill = "Cond", facet.by = "gene_name", title = "GBA expression in TH REP1 cell line") +
-    theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1))
-
-## TH REP1 RNA feature counts
-THREP1.rawCount = read_rds("/Volumes/deborah.gerard/Documents/epifunc/RNAseq/fc_hs_q30RNA.rds")
-
-# TH REP1 reads assigned
-THREP1.seqDepth = THREP1.rawCount$stat %>%
-    dplyr::slice(1) %>%
-    as_tibble() %>%
-    pivot_longer(cols = contains("bam"), names_to = "Sample", values_to = "seqDepthInSple") %>%
-    # dplyr::filter(!str_detect(Sample, 'ASTRO')) %>%
-dplyr::select(-Status)
-
-# TH REP1 raw read counts
-THREP1.rawCount$counts %>%
-    as.data.frame() %>%
-    rownames_to_column(var = "gene_id") %>%
-    as_tibble() %>%
-    filter(str_detect(gene_id, "ENSG00000177628")) %>%
-    pivot_longer(cols = contains("bam"), names_to = "Sample", values_to = "rawCounts") %>%
-    # dplyr::filter(!str_detect(Sample, 'ASTRO')) %>%
-left_join(THREP1.seqDepth, by = "Sample") %>%
-    mutate(CPM = (rawCounts/seqDepthInSple) * 10^6) %>%
-    mutate(Cond = case_when(str_detect(Sample, "D15_pos") ~ "Positively sorted neurons D15",
-        str_detect(Sample, "D15_neg") ~ "Negatively sorted neurons D15", str_detect(Sample,
-            "D30_pos") ~ "Positively sorted neurons D30", str_detect(Sample, "D50_neg") ~
-            "Negatively sorted neurons D50", str_detect(Sample, "D50_pos") ~ "Positively sorted neurons D50",
-        str_detect(Sample, "ASTRO") ~ "Astrocytes D65", TRUE ~ "smNPCs"), Cond = factor(Cond,
-        levels = c("smNPCs", "Negatively sorted neurons D15", "Positively sorted neurons D15",
-            "Negatively sorted neurons D30", "Positively sorted neurons D30", "Negatively sorted neurons D50",
-            "Positively sorted neurons D50", "Astrocytes D65"))) %>%
-    ggboxplot(., x = "Cond", y = "CPM", facet.by = "gene_id", fill = "Cond", title = "GBA expression (as CPM) in TH REP1 cell line") +
-    theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1))
-
-
-# TEST IF GBA is mutated in TH REP1 from WGS
-THREP1.wgs = read_rds("/Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/E19D017a78.merge.qc.SNP_INDEL.hg19.annotated.rds")
-
-THREP1.wgs %>%
-    dplyr::filter(str_detect(Gene.refGene, "GBA"), CHR == 1) %>%
-    View()
-```
-
-##TEST 28 SNPs
-
-```bash
-# Concatenate all output files from Nina
-# smNPC
-awk 'BEGIN{ FS = OFS = "\t" } { print $0, (NR==1? "Sample" : "smNPC") }' /Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/PD_smNPC_0.01_0.5.txt > /Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/REPRO/PD_smNPC_0.01_0.5_SAMPLE_NAME.txt
-
-# mDAN D15
-awk 'BEGIN{ FS = OFS = "\t" } { print $0, (NR==1? "Sample" : "mDAN_D15") }' /Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/PD_D15_pos_0.01_0.5.txt > /Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/REPRO/PD_D15_pos_0.01_0.5_SAMPLE_NAME.txt
-
-# mDAN D30
-awk 'BEGIN{ FS = OFS = "\t" } { print $0, (NR==1? "Sample" : "mDAN_D30") }' /Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/PD_D30_pos_0.01_0.5_new_20210308.txt > /Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/REPRO/PD_D30_pos_0.01_0.5_new_20210308_SAMPLE_NAME.txt
-
-# mDAN D50
-awk 'BEGIN{ FS = OFS = "\t" } { print $0, (NR==1? "Sample" : "mDAN_D50") }' /Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/PD_D50_pos_0.01_0.5.txt > /Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/REPRO/PD_D50_pos_0.01_0.5_SAMPLE_NAME.txt
-
-# Astro
-awk 'BEGIN{ FS = OFS = "\t" } { print $0, (NR==1? "Sample" : "astro") }' /Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/PD_astro_0.01_0.5.txt > /Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/REPRO/PD_astro_0.01_0.5_SAMPLE_NAME.txt
-
-# Concatenate them all together
-cat /Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/REPRO/PD_smNPC_0.01_0.5_SAMPLE_NAME.txt \
-/Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/REPRO/PD_D15_pos_0.01_0.5_SAMPLE_NAME.txt \
-/Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/REPRO/PD_D30_pos_0.01_0.5_new_20210308_SAMPLE_NAME.txt \
-/Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/REPRO/PD_D50_pos_0.01_0.5_SAMPLE_NAME.txt \
-/Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/REPRO/PD_astro_0.01_0.5_SAMPLE_NAME.txt > /Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/REPRO/SNEEP_PD.txt
-```
-
-Load the PD GWAS data (hg38)
-
-```r
-nalls_allSNPs.HG38.GR = readRDS("/Volumes/deborah.gerard/Documents/Manuscript_1/FIGURE1/nalls_allSNPs.HG38.GR.rds")
-
-nalls_allSNPs.HG38.GR.pvalFilt = nalls_allSNPs.HG38.GR %>%
-    as_tibble() %>%
-    dplyr::select(seqnames:end, p, effect_allele:other_allele) %>%
-    unite(col = "tmp", c(seqnames, start), sep = ":", remove = FALSE) %>%
-    unite(col = "SNP_position", c(tmp, end), sep = "-", remove = TRUE) %>%
-    dplyr::filter(p < 5e-08)
-
-nalls_allSNPs.HG38.GR.pvalFilt106 = nalls_allSNPs.HG38.GR %>%
-    as_tibble() %>%
-    dplyr::select(seqnames:end, p, effect_allele:other_allele) %>%
-    unite(col = "tmp", c(seqnames, start), sep = ":", remove = FALSE) %>%
-    unite(col = "SNP_position", c(tmp, end), sep = "-", remove = TRUE) %>%
-    dplyr::filter(p < 5e-06)
-
-SNEEP_out_all = read_delim("/Volumes/deborah.gerard/Documents/epifunc/SNPs_overlap/Ninas_files/REPRO/SNEEP_PD.txt",
-    delim = "\t", col_names = TRUE)
-
-SNEEP_out_all %>%
-    dplyr::filter(SNP_position %in% nalls_allSNPs.HG38.GR.pvalFilt$SNP_position) %>%
-    distinct(SNP_position, .keep_all = TRUE) %>%
-    View()
-
-SNEEP_out_all %>%
-    dplyr::filter(SNP_position %in% nalls_allSNPs.HG38.GR.pvalFilt106$SNP_position) %>%
-    distinct(SNP_position, .keep_all = TRUE) %>%
-    View()
-
-
-
-strawr::readHicChroms("/Volumes/deborah.gerard/Documents/Wetlab/epifunc/LOW_C/LowCO/LowCO/FANC_output_mixedNeur/hic/binned/FANC_opti_mixed_neur_100kb.hic")
 ```
 
