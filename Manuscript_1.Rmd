@@ -450,7 +450,7 @@ domainAnno = annoDomains(plot = LowC_mDAND30.bottom,
 ###################################
 #### Figure 1D SNCA locus #########
 ###################################
-# Zoom on SNCA an add ATACseq dataof the locus
+# Zoom on SNCA an add ATACseq data of the locus
 # Define parameters for a small part of chr4 where SNCA is
 # Add ATACseq track of smNPC, mDAN D15, mDAN D30, mDAN D50
 # text D
