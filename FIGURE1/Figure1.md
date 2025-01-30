@@ -1,0 +1,376 @@
+---
+title: "FIGURE 1"
+author: Deborah Gérard^[University of Luxembourg - FSTM - DLSM - Systems Biology group - Epigenetics team]
+date: "30 January, 2025"
+output: 
+  html_document:
+    keep_md: true
+    df_print: paged
+    toc: true
+    toc_depth: 6
+  pdf_document: default
+editor_options:
+  chunk_output_type: console
+---
+
+
+
+Start R
+
+``` bash
+# Start R
+singularity exec Manuscript_1_singularity.sif R
+
+# Check R version
+R.Version()
+```
+**Note**: R version is 4.2.3 (2023-03-15)
+
+Load libraries and check their versions
+
+
+``` r
+# Load
+library("tidyverse")
+library("rstatix")
+library("ggpubr")
+library("plotgardener")
+# library('BSgenome.Hsapiens.UCSC.hg38')
+library("TxDb.Hsapiens.UCSC.hg38.knownGene")
+library("TxDb.Hsapiens.UCSC.hg38.refGene")
+library("org.Hs.eg.db")
+library("extrafont")
+library("showtext")
+library("JASPAR2020")
+library("TFBSTools")
+library("ggseqlogo")
+library("biomaRt")
+library("LDlinkR")
+library("AllelicImbalance")
+library("png")
+library("AnnotationDbi")
+library("scales")
+library("flowCore")
+library("ggcyto")
+library("ggmanh")
+library("rtracklayer")
+library("plyranges")
+library("RColorBrewer")
+
+# Check
+packageVersion("tidyverse")  #2.0.0
+packageVersion("rstatix")  #0.7.2
+packageVersion("ggpubr")  #0.6.0
+packageVersion("plotgardener")  #1.4.2
+# packageVersion('BSgenome.Hsapiens.UCSC.hg38') #1.4.5
+# packageVersion('TxDb.Hsapiens.UCSC.hg38.knownGene') #3.16.0
+packageVersion("TxDb.Hsapiens.UCSC.hg38.refGene")  #3.15.0
+packageVersion("org.Hs.eg.db")  #3.16.0
+packageVersion("extrafont")  #0.19
+packageVersion("showtext")  #0.9.7
+packageVersion("JASPAR2020")  #0.99.10
+packageVersion("TFBSTools")  #1.36.0
+packageVersion("ggseqlogo")  #0.2
+packageVersion("biomaRt")  #2.54.1
+packageVersion("LDlinkR")  #1.4.0
+packageVersion("AllelicImbalance")  #1.36.0
+packageVersion("png")  #0.1.8
+packageVersion("AnnotationDbi")  #1.60.2
+# packageVersion('dbplyr') #2.5.0
+packageVersion("scales")  #1.3.0
+packageVersion("flowCore")  #2.10.0
+packageVersion("ggcyto")  #1.26.4
+packageVersion("ggmanh")  #1.2.0
+packageVersion("rtracklayer")  #1.58.0
+packageVersion("plyranges")  #1.18.0
+packageVersion("RColorBrewer")  #1.1.3
+
+# Import all available fonts
+font_import()
+```
+
+### FIGURE 1
+
+``` r
+########## FIGURE 1 ########## Save as TIFF, 300 ppi
+tiff("/home/vagrant/Manuscript_1/FIGURE1/FIGURE1.tiff", width = 8.27, height = 9.5,
+    units = "in", res = 300, compression = "lzw")
+
+# Create a A4 blank page
+pageCreate(width = 8.27, height = 9.5, default.units = "inches", showGuides = TRUE)
+
+#### PANEL A - text Figure 1
+plotText(label = "Figure 1", fontsize = 14, fontfamily = "Helvetica", x = 0.25, y = 0.25,
+    just = "left", default.units = "inches", fontface = "bold")
+
+# text A
+plotText(label = "A", fontsize = 12, fontfamily = "Helvetica", x = 0.25, y = 0.5,
+    just = "left", default.units = "inches", fontface = "bold")
+
+########################################## Figure 1A Data generation scheme
+########################################## #### Figure 1A generated in
+########################################## Biorender
+fig1A = readPNG("/home/vagrant/Manuscript_1/FIGURE1/Fig1A_Biorender_vertical.png")
+
+plotRaster(image = fig1A, x = 0.5, y = 2.5, default.units = "inches", width = 2.5,
+    height = 3.75, just = "left", interpolate = TRUE)
+
+########################################## Figure 1B Odd ratio
+########################################## ################# text B
+plotText(label = "B", fontsize = 12, fontfamily = "Helvetica", x = 3, y = 0.5, just = "left",
+    default.units = "inches", fontface = "bold")
+
+# Load data obtained from Jochen
+RNAseq_odd = read_delim("/home/vagrant/Manuscript_1/FIGURE1/REFORMAT_tpm_gene_sets.gsa.txt",
+    delim = "\t", col_names = TRUE)
+
+# Calculate odd ratio
+RNAseq_odd = RNAseq_odd %>%
+    dplyr::filter(!VARIABLE %in% c("microglia")) %>%
+    mutate(odd_R = exp(BETA)) %>%
+    mutate(VARIABLE = factor(VARIABLE, levels = c("smNPC", "D15negsort", "D15possort",
+        "D30postsort", "D50negsort", "D50possort", "astrocytes")))
+
+# Plot
+fig1B = ggplot(RNAseq_odd, aes(x = odd_R, y = VARIABLE)) + geom_point(shape = 16,
+    size = 3) + geom_errorbarh(aes(xmin = odd_R - SE, xmax = odd_R + SE), height = 0.25) +
+    geom_vline(xintercept = 1, linetype = "dashed", color = "grey") + theme_classic() +
+    theme(axis.title = element_text(face = "bold"), axis.text = element_text(face = "bold")) +
+    scale_y_discrete(labels = c(smNPC = "smNPC", D15negsort = "non-mDAN D15", D15possort = "mDAN D15",
+        D30postsort = "mDAN D30", D50negsort = "non-mDAN D50", D50possort = "mDAN D50",
+        astrocytes = "Astrocytes")) + geom_text(label = round(RNAseq_odd$P, digits = 3),
+    nudge_y = 0.4) + xlab("Odds ratio \n(95% Confidence Interval)") + ylab("")
+
+# Place the plot
+plotGG(plot = fig1B, x = 3.25, y = 0.5, width = 4.5, height = 4.5, just = c("left",
+    "top"), default.units = "inches")
+
+#################################### Figure 1C LowC - Chr4 ######### text C
+plotText(label = "C", fontsize = 12, fontfamily = "Helvetica", x = 0.25, y = 5.25,
+    just = "left", default.units = "inches", fontface = "bold")
+
+# Load TH REP1 mCHERRY mDAN neurons D30 (N1) at 50kb resolution
+mDAN.D30.50kb = readHic(file = "/home/vagrant/epifunc/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30/hic/juicer_like/N1_mDAN_D30.juicer.50kb.hic",
+    chrom = "chr4", assembly = "hg38", resolution = 50000, res_scale = "BP", norm = "NONE",
+    matrix = "observed")
+
+# Load TH REP1 mCHERRY mDAN neurons D30 (N1) at 25kb resolution
+mDAN.D30.25kb = readHic(file = "/home/vagrant/epifunc/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30/hic/juicer_like/N1_mDAN_D30.juicer.25kb.hic",
+    chrom = "chr4", assembly = "hg38", resolution = 25000, res_scale = "BP", norm = "NONE",
+    matrix = "observed")
+
+# Load TH REP1 mCHERRY smNPCs (N1) at 50kb resolution
+smNPC.50kb = readHic(file = "/home/vagrant/epifunc/LowC_smNPC_THpos_neur/FANC_output_N1_smNPC/hic/juicer_like/N1_smNPC.juicer.50kb.hic",
+    chrom = "chr4", assembly = "hg38", resolution = 50000, res_scale = "BP", norm = "NONE",
+    matrix = "observed")
+
+# Full chr4 to display
+region.p.chr4 = pgParams(chrom = "chr4", assembly = assembly(Genome = "hg38refGene",
+    TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", OrgDb = "org.Hs.eg.db"), just = c("left",
+    "top"), width = 3.5, fontcolor = "black", fill = "black")
+
+# Plot full chr4 - smNPC on top of the diagonale and mDAN D30 at the bottom of
+# the diagonale
+LowC_smNPC.top = plotHicSquare(data = smNPC.50kb, params = region.p.chr4, zrange = c(0,
+    5), resolution = "auto", half = "top", x = 0.5, y = 5.5, height = 3.5)
+
+annoHeatmapLegend(plot = LowC_smNPC.top, fontsize = 7, x = 0.375, y = 6, width = 0.07,
+    height = 0.5, just = c("left", "top"), default.units = "inches")
+
+# smNPC
+plotText(label = "smNPC", fontsize = 12, fontfamily = "Helvetica", x = 0.5625, y = 5.625,
+    just = "left", default.units = "inches", fontface = "bold")
+
+LowC_mDAND30.bottom = plotHicSquare(data = mDAN.D30.50kb, params = region.p.chr4,
+    zrange = c(0, 5), resolution = "auto", half = "bottom", x = 0.5, y = 5.5, height = 3.5)
+
+annoHeatmapLegend(plot = LowC_mDAND30.bottom, fontsize = 7, x = 4.0625, y = 6, width = 0.07,
+    height = 0.5, just = c("left", "top"), default.units = "inches")
+
+# mDAN D30
+plotText(label = "mDAN D30", fontsize = 12, fontfamily = "Helvetica", x = 3, y = 8.9375,
+    just = "left", default.units = "inches", fontface = "bold")
+
+# Add genome label of chr4
+annoGenomeLabel(plot = LowC_mDAND30.bottom, scale = "Mb", axis = "x", x = 0.5, y = 9.0625,
+    just = c("left", "top"))
+
+# Annotate SNCA domain that will be zoomed in fid1D
+SNCA.TAD = GRanges("chr4", ranges = IRanges(start = 8.9e+07, end = 9.1e+07))
+
+domainAnno = annoDomains(plot = LowC_mDAND30.bottom, data = SNCA.TAD, half = "bottom",
+    linecolor = "red")
+
+################################### Figure 1D SNCA locus ######### Zoom on SNCA
+################################### an add ATACseq data of the locus Define
+################################### parameters for a small part of chr4 where
+################################### SNCA is Add ATACseq track of smNPC, mDAN
+################################### D15, mDAN D30, mDAN D50 text D
+plotText(label = "D", fontsize = 12, fontfamily = "Helvetica", x = 4.125, y = 5.25,
+    just = "left", default.units = "inches", fontface = "bold")
+
+bw.path = "/home/vagrant/epifunc/"
+
+# smNPC N1
+bw.SNCA.smNPC.1 = readBigwig(file = paste0(bw.path, "BIGWIG/smNPC_I.bw"), chrom = "chr4",
+    chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# smNPC N2
+bw.SNCA.smNPC.2 = readBigwig(file = paste0(bw.path, "BIGWIG/smNPC_II.bw"), chrom = "chr4",
+    chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# smNPC N3
+bw.SNCA.smNPC.3 = readBigwig(file = paste0(bw.path, "BIGWIG/smNPC_III.bw"), chrom = "chr4",
+    chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D15 N1
+bw.SNCA.mDAN.D15.1 = readBigwig(file = paste0(bw.path, "BIGWIG/D15_POS_I.bw"), chrom = "chr4",
+    chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D15 N2
+bw.SNCA.mDAN.D15.2 = readBigwig(file = paste0(bw.path, "BIGWIG/D15_POS_II.bw"), chrom = "chr4",
+    chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D15 N3
+bw.SNCA.mDAN.D15.3 = readBigwig(file = paste0(bw.path, "BIGWIG/D15_POS_III.bw"),
+    chrom = "chr4", chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D30 N1
+bw.SNCA.mDAN.D30.1 = readBigwig(file = paste0(bw.path, "BIGWIG/D30_POS_I.bw"), chrom = "chr4",
+    chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D30 N2
+bw.SNCA.mDAN.D30.2 = readBigwig(file = paste0(bw.path, "BIGWIG/D30_POS_II.bw"), chrom = "chr4",
+    chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D30 N3
+bw.SNCA.mDAN.D30.3 = readBigwig(file = paste0(bw.path, "BIGWIG/D30_POS_III.bw"),
+    chrom = "chr4", chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D50 N1
+bw.SNCA.mDAN.D50.1 = readBigwig(file = paste0(bw.path, "BIGWIG/HFFTHmCherry_D50_possort_S1.bw"),
+    chrom = "chr4", chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D50 N2
+bw.SNCA.mDAN.D50.2 = readBigwig(file = paste0(bw.path, "BIGWIG/HFFTHmCherry_D50_possort_S3.bw"),
+    chrom = "chr4", chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# mDAN D50 N3
+bw.SNCA.mDAN.D50.3 = readBigwig(file = paste0(bw.path, "BIGWIG/HFFTHmCherry_D50_possort_S4.bw"),
+    chrom = "chr4", chromstart = 8.9e+07, chromend = 9.1e+07)
+
+# Add a scale next to the bigwig files - check the maximum to choose
+scale.SNCA.max = max(c(bw.SNCA.smNPC.1$score, bw.SNCA.smNPC.2$score, bw.SNCA.smNPC.3$score,
+    bw.SNCA.mDAN.D15.1$score, bw.SNCA.mDAN.D15.2$score, bw.SNCA.mDAN.D15.3$score,
+    bw.SNCA.mDAN.D30.1$score, bw.SNCA.mDAN.D30.2$score, bw.SNCA.mDAN.D30.3$score,
+    bw.SNCA.mDAN.D50.1$score, bw.SNCA.mDAN.D50.2$score, bw.SNCA.mDAN.D50.3$score))
+
+print(scale.SNCA.max)
+
+# Define a small region of chr4
+region.p.chr4.small = pgParams(chrom = "chr4", chromstart = 8.9e+07, chromend = 9.1e+07,
+    assembly = assembly(Genome = "hg38refGene", TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene",
+        OrgDb = "org.Hs.eg.db"), just = c("left", "top"), width = 3.5, fontcolor = "black",
+    fill = "black", range = c(0, scale.SNCA.max))
+
+
+# Plot Low-C data SNCA in mDAN D30 (10kb resolution)
+chr4.SNCA.sq = plotHicTriangle(data = mDAN.D30.25kb, params = region.p.chr4.small,
+    height = 1.75, resolution = 25000, x = 4.5, y = 5.5, zrange = c(0, 5), just = c("left",
+        "top"), default.units = "inches", palette = colorRampPalette(brewer.pal(n = 9,
+        "YlGnBu")))
+
+
+# ATACseq signal smNPC_I and scale
+ATAC_smNPC_I = plotSignal(data = bw.SNCA.smNPC.1, params = region.p.chr4.small, fill = "#313695",
+    alpha = 0.7, linecolor = NA, x = 4.5, y = 7.25, height = 0.25, just = c("left",
+        "top"), default.units = "inches")
+
+# ATACseq signal smNPC_II and scale
+ATAC_smNPC_II = plotSignal(data = bw.SNCA.smNPC.2, params = region.p.chr4.small,
+    fill = "#313695", alpha = 0.6, linecolor = NA, x = 4.5, y = 7.25, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+# ATACseq signal smNPC_III and scale
+ATAC_smNPC_III = plotSignal(data = bw.SNCA.smNPC.3, params = region.p.chr4.small,
+    fill = "#313695", alpha = 0.5, linecolor = NA, x = 4.5, y = 7.25, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+annoYaxis(plot = ATAC_smNPC_III, at = c(0, scale.SNCA.max), fontsize = 6)
+
+plotText(label = "smNPC", fontsize = 6, fontcolor = "#313695", fontfamily = "Helvetica",
+    x = 4.125, y = 7.3125, just = c("left", "top"), default.units = "inches", fontface = "bold")
+
+# ATACseq signal mDAN D15 I and scale
+ATAC_mDAN.D15_I = plotSignal(data = bw.SNCA.mDAN.D15.1, params = region.p.chr4.small,
+    fill = "#053061", alpha = 0.7, linecolor = NA, x = 4.5, y = 7.625, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+# ATACseq signal mDAN D15 II and scale
+ATAC_mDAN.D15_II = plotSignal(data = bw.SNCA.mDAN.D15.2, params = region.p.chr4.small,
+    fill = "#053061", alpha = 0.6, linecolor = NA, x = 4.5, y = 7.625, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+# ATACseq signal mDAN D15 III and scale
+ATAC_mDAN.D15_III = plotSignal(data = bw.SNCA.mDAN.D15.3, params = region.p.chr4.small,
+    fill = "#053061", alpha = 0.5, linecolor = NA, x = 4.5, y = 7.625, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+annoYaxis(plot = ATAC_mDAN.D15_III, at = c(0, scale.SNCA.max), fontsize = 6)
+
+plotText(label = "mDAN D15", fontsize = 6, fontcolor = "#053061", fontfamily = "Helvetica",
+    x = 4.125, y = 7.6875, just = c("left", "top"), default.units = "inches", fontface = "bold")
+
+# ATACseq signal mDAN D30 I and scale
+ATAC_mDAN.D30_I = plotSignal(data = bw.SNCA.mDAN.D30.1, params = region.p.chr4.small,
+    fill = "#2D004B", alpha = 0.7, linecolor = NA, x = 4.5, y = 8, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+# ATACseq signal mDAN D30 II and scale
+ATAC_mDAN.D30_II = plotSignal(data = bw.SNCA.mDAN.D30.2, params = region.p.chr4.small,
+    fill = "#2D004B", alpha = 0.6, linecolor = NA, x = 4.5, y = 8, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+# ATACseq signal mDAN D30 III and scale
+ATAC_mDAN.D30_III = plotSignal(data = bw.SNCA.mDAN.D30.3, params = region.p.chr4.small,
+    fill = "#2D004B", alpha = 0.5, linecolor = NA, x = 4.5, y = 8, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+annoYaxis(plot = ATAC_mDAN.D30_III, at = c(0, scale.SNCA.max), fontsize = 6)
+
+plotText(label = "mDAN D30", fontsize = 6, fontcolor = "#2D004B", fontfamily = "Helvetica",
+    x = 4.125, y = 8.125, just = c("left", "top"), default.units = "inches", fontface = "bold")
+
+# ATACseq signal mDAN D50 I and scale
+ATAC_mDAN.D50_I = plotSignal(data = bw.SNCA.mDAN.D50.1, params = region.p.chr4.small,
+    fill = "#003C30", alpha = 0.7, linecolor = NA, x = 4.5, y = 87.375, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+# ATACseq signal mDAN D50 II and scale
+ATAC_mDAN.D50_II = plotSignal(data = bw.SNCA.mDAN.D50.2, params = region.p.chr4.small,
+    fill = "#003C30", alpha = 0.6, linecolor = NA, x = 4.5, y = 8.375, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+# ATACseq signal mDAN D50 III and scale
+ATAC_mDAN.D50_III = plotSignal(data = bw.SNCA.mDAN.D50.3, params = region.p.chr4.small,
+    fill = "#003C30", alpha = 0.5, linecolor = NA, x = 4.5, y = 8.375, height = 0.25,
+    just = c("left", "top"), default.units = "inches")
+
+annoYaxis(plot = ATAC_mDAN.D50_III, at = c(0, scale.SNCA.max), fontsize = 6)
+
+plotText(label = "mDAN D50", fontsize = 6, fontcolor = "#003C30", fontfamily = "Helvetica",
+    x = 4.125, y = 8.5, just = c("left", "top"), default.units = "inches", fontface = "bold")
+
+# Add gene name and genome labels for the chr4 Add gene name
+SNCA_g = plotGenes(params = region.p.chr4.small, x = 4.5, y = 8.8125, height = 0.5,
+    geneHighlights = data.frame(gene = c("SNCA"), color = "red"), assembly = assembly(Genome = "hg38refGene",
+        TxDb = "TxDb.Hsapiens.UCSC.hg38.refGene", OrgDb = "org.Hs.eg.db"), geneBackground = "black")
+
+
+# Add genome label
+annoGenomeLabel(plot = SNCA_g, scale = "Mb", axis = "x", x = 4.5, y = 8.6875, just = c("left",
+    "top"))
+
+pageGuideHide()
+dev.off()
+```
