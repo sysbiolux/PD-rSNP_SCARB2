@@ -1,1 +1,2 @@
-Here are the code used for this manuscript
+# Identification of Parkinson’s disease-associated regulatory variants in human dopaminergic neurons reveals modulators of SCARB2 and BAG3 expression
+This repository contains the code and data to reproduce the figures of the manuscript.
