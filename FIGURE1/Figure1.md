@@ -294,6 +294,613 @@ $SCRATCH/FANC_hg38.p1.cano.chr.bed
 deactivate
 ```
 
+#### *2. Run FAN-C in auto mode to do the mapping, normalisation and generating hic matrices*
+Process each of the biological replicates separately as suggested by [the FAN-C authors](https://github.com/vaquerizaslab/fanc/issues/24).  
+
+Run the script for the 1st biological replicate (smNPC and mDAN D30).
+
+``` bash
+sbatch $SCRATCH/LowC_smNPC_THpos_neur/scripts/FANC_launcher_N1.sh
+```
+
+Display the script
+
+``` bash
+cat ~/Desktop/Manuscript_1/FIGURE1/scripts/FANC_launcher_N1.sh
+```
+
+```
+#!/bin/bash -l
+#SBATCH -J FANC_N2_smNPC_N1_mDAN_smNPC_Op
+#SBATCH --mail-type=begin,end,fail
+#SBATCH --mail-user=deborah.gerard@uni.lu
+#SBATCH -N 1
+#SBATCH --exclusive
+#SBATCH --time=96:00:00
+#SBATCH -p batch
+#SBATCH --qos=long
+
+# Load modlue containing python3
+module load lang/Python/3.8.6-GCCcore-10.2.0
+
+# Activate the python environment for FAN-C
+source ~/Environment/FANC/bin/activate
+
+# Check FAN-C version
+fanc --version
+
+# As FAN-C needs bwa for the mapping step, load the module containing bwa
+module load bio/BWA/0.7.17-GCC-10.2.0
+
+# And check version
+bwa
+
+# Set a TMPDIR variable
+export TMPDIR=$SCRATCH/tempfiles/
+echo $TMPDIR
+
+echo "Remove first temporary files previously written"
+rm -rf $SCRATCH/tempfiles/*
+
+# Run FAN-C in automatic mode smNPC - Biological replicate 1 - Normalisation method is Knight-Ruiz
+fanc auto $SCRATCH/LowC_smNPC_THpos_neur/fastq/N1_TH_REP1_mCHERRY_smNPC_LOW_C_LowTH_SB_S2_R1_001.fastq.gz \
+$SCRATCH/LowC_smNPC_THpos_neur/fastq/N1_TH_REP1_mCHERRY_smNPC_LOW_C_LowTH_SB_S2_R2_001.fastq.gz \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_smNPC \
+-g $SCRATCH/FANC_hg38.p1.cano.chr.bed \
+-i $SCRATCH/bwa_index/GRCh38.genome.fa.gz \
+-r MboI \
+-n N1_smNPC \
+-t 14 \
+--le-inward-cutoff 5000 \
+--le-outward-cutoff 5000 \
+--fanc-parallel \
+--norm-method KR \
+--iterative \
+--split-ligation-junction \
+-q 3 \
+-tmp
+
+echo "Remove first temporary files previously written"
+rm -rf $SCRATCH/tempfiles/*
+
+deactivate
+```
+
+The run is done for N1_smNPC but not for N1_TH^+^ day 30 neurons (max 48 hours on qos batch on iris).  
+
+Run the script for the 1st biological replicate of neurons, the 2nd biological replicate of smNPC and the smNPC sample that has been generated during the optimisation 
+
+``` bash
+sbatch $SCRATCH/LowC_smNPC_THpos_neur/scripts/FANC_launcher_N1_TH_N2_smNPC.sh
+```
+
+Display the script
+
+``` bash
+cat ~/Desktop/Manuscript_1/FIGURE1/scripts/FANC_launcher_N1_TH_N2_smNPC.sh
+```
+
+```
+#!/bin/bash -l
+#SBATCH -J FANC_N2_smNPC_N1_mDAN_smNPC_Op
+#SBATCH --mail-type=begin,end,fail
+#SBATCH --mail-user=deborah.gerard@uni.lu
+#SBATCH -N 1
+#SBATCH --exclusive
+#SBATCH --time=96:00:00
+#SBATCH -p batch
+#SBATCH --qos=long
+
+# Load modlue containing python3
+module load lang/Python/3.8.6-GCCcore-10.2.0
+
+# Activate the python environment for FAN-C
+source ~/Environment/FANC/bin/activate
+
+# Check FAN-C version
+fanc --version
+
+# As FAN-C needs bwa for the mapping step, load the module containing bwa
+module load bio/BWA/0.7.17-GCC-10.2.0
+
+# And check version
+bwa
+
+# Set a TMPDIR variable
+export TMPDIR=$SCRATCH/tempfiles/
+echo $TMPDIR
+
+echo "Remove first temporary files previously written"
+rm -rf $SCRATCH/tempfiles/*
+
+# Run FAN-C in automatic mode for mDAN neurons day 30 - Biological replicate 1 - Normalisation method is Knight-Ruiz
+fanc auto $SCRATCH/LowC_smNPC_THpos_neur/fastq/N1_TH_REP1_mCHERRY_TH_Neur_day30_LOW_C_LowTH_SB_S1_R1_001.fastq.gz \
+$SCRATCH/LowC_smNPC_THpos_neur/fastq/N1_TH_REP1_mCHERRY_TH_Neur_day30_LOW_C_LowTH_SB_S1_R2_001.fastq.gz \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30 \
+-g $SCRATCH/FANC_hg38.p1.cano.chr.bed \
+-i $SCRATCH/bwa_index/GRCh38.genome.fa.gz \
+-r MboI \
+-n N1_mDAN_D30 \
+-t 14 \
+--le-inward-cutoff 5000 \
+--le-outward-cutoff 5000 \
+--fanc-parallel \
+--norm-method KR \
+--iterative \
+--split-ligation-junction \
+-q 3 \
+-tmp
+
+echo "Remove first temporary files previously written"
+rm -rf $SCRATCH/tempfiles/*
+
+# Run FAN-C in automatic mode for smNPC - Biological replicate 2 - Normalisation method is Knight-Ruiz
+fanc auto $SCRATCH/LowC_smNPC_THpos_neur/fastq/N2_TH_REP1_mCHERRY_smNPC_LOW_C_LowTH_SB_S3_R1_001.fastq.gz \
+$SCRATCH/LowC_smNPC_THpos_neur/fastq/N2_TH_REP1_mCHERRY_smNPC_LOW_C_LowTH_SB_S3_R2_001.fastq.gz \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N2_smNPC \
+-g $SCRATCH/FANC_hg38.p1.cano.chr.bed \
+-i $SCRATCH/bwa_index/GRCh38.genome.fa.gz \
+-r MboI \
+-n N2_smNPC \
+-t 14 \
+--le-inward-cutoff 5000 \
+--le-outward-cutoff 5000 \
+--fanc-parallel \
+--norm-method KR \
+--iterative \
+--split-ligation-junction \
+-q 3 \
+-tmp
+
+echo "Remove first temporary files previously written"
+rm -rf $SCRATCH/tempfiles/*
+
+# Run FAN-C in automatic mode for smNPC - Sample used for the optimisation - Normalisation method is Knight-Ruiz
+fanc auto $SCRATCH/LowCO/LowCO/fastq/Optimisation_LowC_TH_REP1_mCHERRY_smNPC_lowC_LowCO_SB_S2_R1_001.fastq.gz \
+$SCRATCH/LowCO/LowCO/fastq/Optimisation_LowC_TH_REP1_mCHERRY_smNPC_lowC_LowCO_SB_S2_R2_001.fastq.gz \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_opti_smNPC \
+-g $SCRATCH/FANC_hg38.p1.cano.chr.bed \
+-i $SCRATCH/bwa_index/GRCh38.genome.fa.gz \
+-r MboI \
+-n opti_smNPC \
+-t 14 \
+--le-inward-cutoff 5000 \
+--le-outward-cutoff 5000 \
+--fanc-parallel \
+--norm-method KR \
+--iterative \
+--split-ligation-junction \
+-q 3 \
+-tmp
+
+deactivate
+```
+
+Run `fanc expected` command which calculates the expected values of the contact matrix
+
+``` bash
+sbatch $SCRATCH/LowC_smNPC_THpos_neur/scripts/FANC_hic_expected.sh    # Needs 5 minutes using ine full node on iris
+```
+
+Display the script
+
+``` bash
+cat ~/Desktop/Manuscript_1/FIGURE1/scripts/FANC_hic_expected.sh
+```
+
+```
+#!/bin/bash -l
+#SBATCH -J FANC_hic_O/E
+#SBATCH --mail-type=begin,end,fail
+#SBATCH --mail-user=deborah.gerard@uni.lu
+#SBATCH -N 1
+#SBATCH --exclusive
+#SBATCH --time=60:00:00
+#SBATCH -p batch
+#SBATCH --qos=long
+
+# Load module containing python3
+module load lang/Python/3.8.6-GCCcore-10.2.0
+
+# Activate the python environment for FAN-C
+source ~/Environment/FANC/bin/activate
+
+# Check FAN-C version
+fanc --version
+
+# As FAN-C needs bwa for the mapping step, load the module containing bwa
+module load bio/BWA/0.7.17-GCC-10.2.0
+
+# And check version
+bwa
+
+# Remove tempfiles and set a TMPDIR variable
+rm -rf $SCRATCH/tempfiles/*
+export TMPDIR=$SCRATCH/tempfiles/
+echo $TMPDIR
+
+# Run fan-c expected command for every hic files and resolutions
+## N1-smNPC and N1-mDAN D30
+### 1 mb resolution
+echo "Calculating expected values for the 1mb resolution on N1-smNPCs and N1-mDAN D30"
+fanc expected -l "N1-smNPCs_1mb" "N1-mDAN D30_1mb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/1mb_N1-smNPC_N1-mDAN-D30_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_smNPC/hic/binned/N1_smNPC_1mb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30/hic/binned/N1_mDAN_D30_1mb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/1mb_N1-smNPC_N1-mDAN-D30_OE.txt
+
+### 2 mb resolution
+echo "Calculating expected values for the 2mb resolution on N1-smNPCs and N1-mDAN D30"
+fanc expected -l "N1-smNPCs_2mb" "N1-mDAN D30_2mb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/2mb_N1-smNPC_N1-mDAN-D30_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_smNPC/hic/binned/N1_smNPC_2mb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30/hic/binned/N1_mDAN_D30_2mb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/2mb_N1-smNPC_N1-mDAN-D30_OE.txt
+
+### 5 mb resolution
+echo "Calculating expected values for the 5mb resolution on N1-smNPCs and N1-mDAN D30"
+fanc expected -l "N1-smNPCs_5mb" "N1-mDAN D30_5mb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/5mb_N1-smNPC_N1-mDAN-D30_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_smNPC/hic/binned/N1_smNPC_5mb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30/hic/binned/N1_mDAN_D30_5mb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/5mb_N1-smNPC_N1-mDAN-D30_OE.txt
+
+### 5 kb resolution
+echo "Calculating expected values for the 5kb resolution on N1-smNPCs and N1-mDAN D30"
+fanc expected -l "N1-smNPCs_5kb" "N1-mDAN D30_5kb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/5kb_N1-smNPC_N1-mDAN-D30_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_smNPC/hic/binned/N1_smNPC_5kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30/hic/binned/N1_mDAN_D30_5kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/5kb_N1-smNPC_N1-mDAN-D30_OE.txt
+
+### 10 kb resolution
+echo "Calculating expected values for the 10kb resolution on N1-smNPCs and N1-mDAN D30"
+fanc expected -l "N1-smNPCs_10kb" "N1-mDAN D30_10kb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/10kb_N1-smNPC_N1-mDAN-D30_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_smNPC/hic/binned/N1_smNPC_10kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30/hic/binned/N1_mDAN_D30_10kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/10kb_N1-smNPC_N1-mDAN-D30_OE.txt
+
+### 25 kb resolution
+echo "Calculating expected values for the 25kb resolution on N1-smNPCs and N1-mDAN D30"
+fanc expected -l "N1-smNPCs_25kb" "N1-mDAN D30_25kb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/25kb_N1-smNPC_N1-mDAN-D30_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_smNPC/hic/binned/N1_smNPC_25kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30/hic/binned/N1_mDAN_D30_25kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/25kb_N1-smNPC_N1-mDAN-D30_OE.txt
+
+### 50 kb resolution
+echo "Calculating expected values for the 50kb resolution on N1-smNPCs and N1-mDAN D30"
+fanc expected -l "N1-smNPCs_50kb" "N1-mDAN D30_50kb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/50kb_N1-smNPC_N1-mDAN-D30_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_smNPC/hic/binned/N1_smNPC_50kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30/hic/binned/N1_mDAN_D30_50kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/50kb_N1-smNPC_N1-mDAN-D30_OE.txt
+
+### 100 kb resolution
+echo "Calculating expected values for the 100kb resolution on N1-smNPCs and N1-mDAN D30"
+fanc expected -l "N1-smNPCs_100kb" "N1-mDAN D30_100kb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/100kb_N1-smNPC_N1-mDAN-D30_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_smNPC/hic/binned/N1_smNPC_100kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30/hic/binned/N1_mDAN_D30_100kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/100kb_N1-smNPC_N1-mDAN-D30_OE.txt
+
+### 250 kb resolution
+echo "Calculating expected values for the 250kb resolution on N1-smNPCs and N1-mDAN D30"
+fanc expected -l "N1-smNPCs_250kb" "N1-mDAN D30_250kb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/250kb_N1-smNPC_N1-mDAN-D30_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_smNPC/hic/binned/N1_smNPC_250kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30/hic/binned/N1_mDAN_D30_250kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/250kb_N1-smNPC_N1-mDAN-D30_OE.txt
+
+### 500 kb resolution
+echo "Calculating expected values for the 500kb resolution on N1-smNPCs and N1-mDAN D30"
+fanc expected -l "N1-smNPCs_500kb" "N1-mDAN D30_500kb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/500kb_N1-smNPC_N1-mDAN-D30_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_smNPC/hic/binned/N1_smNPC_500kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30/hic/binned/N1_mDAN_D30_500kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/500kb_N1-smNPC_N1-mDAN-D30_OE.txt
+
+# Run fan-c expected command for every hic files and resolutions
+## N2-smNPC and opt-smNPC
+### 1 mb resolution
+echo "Calculating expected values for the 1mb resolution on N2-smNPC and opt-smNPC"
+fanc expected -l "N2-smNPC_1mb" "opt-smNPC_1mb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/1mb_N2-smNPC_opt-smNPC_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N2_smNPC/hic/binned/N2_smNPC_1mb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_opti_smNPC/hic/binned/opti_smNPC_1mb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/1mb_N2-smNPC_N1-opt-smNPC_OE.txt
+
+### 2 mb resolution
+echo "Calculating expected values for the 2mb resolution on N2-smNPC and opt-smNPC"
+fanc expected -l "N2-smNPC_2mb" "opt-smNPC_2mb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/2mb_N2-smNPC_opt-smNPC_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N2_smNPC/hic/binned/N2_smNPC_2mb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_opti_smNPC/hic/binned/opti_smNPC_2mb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/2mb_N2-smNPC_N1-opt-smNPC_OE.txt
+
+### 5 mb resolution
+echo "Calculating expected values for the 5mb resolution on N2-smNPC and opt-smNPC"
+fanc expected -l "N2-smNPC_5mb" "opt-smNPC_5mb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/5mb_N2-smNPC_opt-smNPC_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N2_smNPC/hic/binned/N2_smNPC_5mb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_opti_smNPC/hic/binned/opti_smNPC_5mb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/5mb_N2-smNPC_N1-opt-smNPC_OE.txt
+
+### 5 kb resolution
+echo "Calculating expected values for the 5kb resolution on N2-smNPC and opt-smNPC"
+fanc expected -l "N2-smNPC_5kb" "opt-smNPC_5kb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/5kb_N2-smNPC_opt-smNPC_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N2_smNPC/hic/binned/N2_smNPC_5kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_opti_smNPC/hic/binned/opti_smNPC_5kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/5kb_N2-smNPC_N1-opt-smNPC_OE.txt
+
+### 10 kb resolution
+echo "Calculating expected values for the 10kb resolution on N2-smNPC and opt-smNPC"
+fanc expected -l "N2-smNPC_10kb" "opt-smNPC_10kb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/10kb_N2-smNPC_opt-smNPC_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N2_smNPC/hic/binned/N2_smNPC_10kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_opti_smNPC/hic/binned/opti_smNPC_10kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/10kb_N2-smNPC_N1-opt-smNPC_OE.txt
+
+### 25 kb resolution
+echo "Calculating expected values for the 25kb resolution on N2-smNPC and opt-smNPC"
+fanc expected -l "N2-smNPC_25kb" "opt-smNPC_25kb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/25kb_N2-smNPC_opt-smNPC_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N2_smNPC/hic/binned/N2_smNPC_25kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_opti_smNPC/hic/binned/opti_smNPC_25kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/25kb_N2-smNPC_N1-opt-smNPC_OE.txt
+
+### 50 kb resolution
+echo "Calculating expected values for the 50kb resolution on N2-smNPC and opt-smNPC"
+fanc expected -l "N2-smNPC_50kb" "opt-smNPC_50kb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/50kb_N2-smNPC_opt-smNPC_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N2_smNPC/hic/binned/N2_smNPC_50kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_opti_smNPC/hic/binned/opti_smNPC_50kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/50kb_N2-smNPC_N1-opt-smNPC_OE.txt
+
+### 100 kb resolution
+echo "Calculating expected values for the 100kb resolution on N2-smNPC and opt-smNPC"
+fanc expected -l "N2-smNPC_100kb" "opt-smNPC_100kb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/100kb_N2-smNPC_opt-smNPC_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N2_smNPC/hic/binned/N2_smNPC_100kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_opti_smNPC/hic/binned/opti_smNPC_100kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/100kb_N2-smNPC_N1-opt-smNPC_OE.txt
+
+### 250 kb resolution
+echo "Calculating expected values for the 250kb resolution on N2-smNPC and opt-smNPC"
+fanc expected -l "N2-smNPC_250kb" "opt-smNPC_250kb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/250kb_N2-smNPC_opt-smNPC_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N2_smNPC/hic/binned/N2_smNPC_250kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_opti_smNPC/hic/binned/opti_smNPC_250kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/250kb_N2-smNPC_N1-opt-smNPC_OE.txt
+
+### 500 kb resolution
+echo "Calculating expected values for the 500kb resolution on N2-smNPC and opt-smNPC"
+fanc expected -l "N2-smNPC_500kb" "opt-smNPC_500kb" \
+-p $SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/500kb_N2-smNPC_opt-smNPC_OE.pdf \
+-tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N2_smNPC/hic/binned/N2_smNPC_500kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_opti_smNPC/hic/binned/opti_smNPC_500kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/Obs_Expected_res/500kb_N2-smNPC_N1-opt-smNPC_OE.txt
+
+echo "Remove first temporary files previously written"
+rm -rf $SCRATCH/tempfiles/*
+
+deactivate
+```
+
+Convert newly created pairs files into hic files readable by other tools (like Juicer)
+
+``` bash
+# Copy the pairs files to be able to work on parallel with them
+cp $SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_smNPC/pairs/N1_smNPC.pairs $SCRATCH/
+cp $SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_mDAN_D30/pairs/N1_mDAN_D30.pairs $SCRATCH/
+cp $SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N2_smNPC/pairs/N2_smNPC.pairs $SCRATCH/
+cp $SCRATCH/LowC_smNPC_THpos_neur/FANC_output_opti_smNPC/pairs/opti_smNPC.pairs $SCRATCH/
+
+# And run
+sbatch $SCRATCH/LowC_smNPC_THpos_neur/scripts/FANC_hic_to_juicer.sh
+```
+
+Display the script
+
+``` bash
+cat ~/Desktop/Manuscript_1/FIGURE1/scripts/FANC_hic_to_juicer.sh
+```
+
+```
+#!/bin/bash -l
+#SBATCH -J FANC_hic_to_juicer
+#SBATCH --mail-type=begin,end,fail
+#SBATCH --mail-user=deborah.gerard@uni.lu
+#SBATCH -N 1
+#SBATCH --exclusive
+#SBATCH --time=03:00:00
+#SBATCH -p batch
+#SBATCH --qos=long
+
+# Load module containing python3
+module load lang/Python/3.8.6-GCCcore-10.2.0
+
+# Activate the python environment for FAN-C
+source ~/Environment/FANC/bin/activate
+
+# Check FAN-C version
+fanc --version
+
+# As FAN-C needs bwa for the mapping step, load the module containing bwa
+module load bio/BWA/0.7.17-GCC-10.2.0
+
+# And check version
+bwa
+
+# Remove tempfiles and set a TMPDIR variable
+rm -rf $SCRATCH/tempfiles/*
+export TMPDIR=$SCRATCH/tempfiles/
+echo $TMPDIR
+
+# Pairs files are in SCRATCH
+cd $SCRATCH
+
+# 5kb resolution
+#parallel -j 4 "fanc to-juicer {} {.}.juicer.5kb.hic --juicer-tools-jar $HOME/juicer_tools.2.20.00.jar -tmp -r 5000" ::: *.pairs
+
+# 10kb resolution
+#parallel -j 4 "fanc to-juicer {} {.}.juicer.10kb.hic --juicer-tools-jar $HOME/juicer_tools.2.20.00.jar -tmp -r 10000" ::: *.pairs
+
+# 25kb resolution
+#parallel -j 4 "fanc to-juicer {} {.}.juicer.25kb.hic --juicer-tools-jar $HOME/juicer_tools.2.20.00.jar -tmp -r 25000" ::: *.pairs
+
+# 50kb resolution
+parallel -j 4 "fanc to-juicer {} {.}.juicer.50kb.hic --juicer-tools-jar $HOME/juicer_tools.2.20.00.jar -tmp -r 50000" ::: *.pairs
+
+echo "Remove first temporary files previously written"
+rm -rf $SCRATCH/tempfiles/*
+
+deactivate
+```
+
+#### *3. hic files are now available per replicate. Merge them*
+
+``` bash
+# And run
+sbatch $SCRATCH/LowC_smNPC_THpos_neur/scripts/FANC_replicate_merge_smNPC.sh
+```
+
+Display the script
+
+``` bash
+cat ~/Desktop/Manuscript_1/FIGURE1/scripts/FANC_replicate_merge_smNPC.sh
+```
+
+```
+#!/bin/bash -l
+#SBATCH -J FANC_merge_replicate_smNPC
+#SBATCH --mail-type=begin,end,fail
+#SBATCH --mail-user=deborah.gerard@uni.lu
+#SBATCH -N 1
+#SBATCH --exclusive
+#SBATCH --time=96:00:00
+#SBATCH -p batch
+#SBATCH --qos=long
+
+# Load modlue containing python3
+module load lang/Python/3.8.6-GCCcore-10.2.0
+
+# Activate the python environment for FAN-C
+source ~/Environment/FANC/bin/activate
+
+# Check FAN-C version
+fanc --version
+
+# As FAN-C needs bwa for the mapping step, load the module containing bwa
+module load bio/BWA/0.7.17-GCC-10.2.0
+
+# And check version
+bwa
+
+# Set a TMPDIR variable
+export TMPDIR=$SCRATCH/tempfiles/
+echo $TMPDIR
+
+echo "Remove first temporary files previously written"
+rm -rf $SCRATCH/tempfiles/*
+
+# Run FAN-C in automatic mode for merging hic files for smNPCs (3 biological replicates)
+fanc auto $SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N1_smNPC/hic/N1_smNPC.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_N2_smNPC/hic/N2_smNPC.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_output_opti_smNPC/hic/opti_smNPC.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_merged_smNPC \
+-n merged_smNPC \
+-t 14
+
+echo "Remove first temporary files previously written"
+rm -rf $SCRATCH/tempfiles/*
+
+deactivate
+```
+
+#### *4. hic files input for SNEEP*
+It is better to run SNEEP on the hic files from smNPC that have been merged. The command `fanc to-juicer` works using `.pairs` files. Using the merge smNPC file, convert it to a text file using `fanc dump`
+It works but Dennis needs the 5kb and 10kb matrix with bins. Rerun.
+
+``` bash
+sbatch $SCRATCH/LowC_smNPC_THpos_neur/scripts/FANC_hic_to_txt_and_bin_nolog.sh
+```
+
+Display the script
+
+``` bash
+cat ~/Desktop/Manuscript_1/FIGURE1/scripts/FANC_hic_to_txt_and_bin_nolog.sh
+```
+
+```
+#!/bin/bash -l
+#SBATCH -J FANC_from_hic_to_txt_and_bin_nolog
+#SBATCH --mail-type=begin,end,fail
+#SBATCH --mail-user=deborah.gerard@uni.lu
+#SBATCH -N 1
+#SBATCH --exclusive
+#SBATCH -p batch
+#SBATCH --qos=normal
+#SBATCH --time=02:00:00
+
+# This script is for converting a hic file from 3 hic files into a text file#
+# Load modlue containing python3
+module load lang/Python/3.8.6-GCCcore-10.2.0
+
+# Activate the python environment for FAN-C
+source ~/Environment/FANC/bin/activate
+
+# Check FAN-C version
+fanc --version
+
+# Set a TMPDIR variable
+export TMPDIR=$SCRATCH/tempfiles/
+echo $TMPDIR
+
+echo "Remove first temporary files previously written"
+rm -rf $SCRATCH/tempfiles/*
+
+# Run the fan dump command using the 5kb and 10 kb bins for Dennis
+# 5kb
+fanc dump -tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_merged_smNPC/hic/binned/merged_smNPC_5kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_merged_smNPC/hic/binned/merged_smNPC_5kb_matrix_noOE_nolog.txt \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_merged_smNPC/hic/binned/merged_smNPC_5kb_bins_noOE_nolog.txt
+
+echo "Remove first temporary files previously written"
+rm -rf $SCRATCH/tempfiles/*
+
+# 10kb
+fanc dump -tmp \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_merged_smNPC/hic/binned/merged_smNPC_10kb.hic \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_merged_smNPC/hic/binned/merged_smNPC_10kb_matrix_noOE_nolog.txt \
+$SCRATCH/LowC_smNPC_THpos_neur/FANC_merged_smNPC/hic/binned/merged_smNPC_10kb_bins_noOE_nolog.txt
+
+deactivate
+```
+
 
 ``` r
 #################################### Figure 1C LowC - Chr4 ######### text C
