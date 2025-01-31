@@ -151,7 +151,7 @@ plotGG(plot = fig1B, x = 3.25, y = 0.5, width = 4.5, height = 4.5, just = c("lef
 
 Low-C technique have been applied to 110K TH REP1 mCHERRY smNPC (3 biological replicates), 110K TH REP1 mCHERRY mDANs differentiated for 30 days (1 biological replicate) using [Reinhardt differentiation protocol](https://doi.org/10.1371/journal.pone.0059252).
 
-A Python environment has been set up to run the [FAN-C software](https://github.com/vaquerizaslab/fanc).  
+A Python environment has been set up to run the [FAN-C software](https://github.com/vaquerizaslab/fanc).\
 FAN-C requires the installation of HDF5
 
 
@@ -215,11 +215,83 @@ fanc --version
 
 **Conclusion** : FAN-C version 0.9.27 has been successfully installed!
 
-\#### *3. Run fastqc on the samples to check their quality* Run the script for the 1st biological replicate (smNPC (N1 + N2) and mDAN D30 (N1))
+#### *1. Run fastqc on the samples to check their quality*
+
+Run the script for the 1st biological replicate (smNPC (N1 + N2) and mDAN D30 (N1))
 
 
 ``` bash
 sbatch $SCRATCH/LowC_smNPC_THpos_neur/scripts/fastqc.sh
+```
+
+Display the script
+
+
+``` bash
+cat ~/Desktop/Manuscript_1/FIGURE1/scripts/fastqc.sh
+```
+
+```
+#!/bin/bash -l
+#SBATCH -J N1_smNPC_mDAN_fastqc
+#SBATCH --mail-type=begin,end,fail
+#SBATCH --mail-user=deborah.gerard@uni.lu
+#SBATCH -N 1
+#SBATCH --time=08:00:00
+#SBATCH -p batch
+#SBATCH --qos=normal
+
+# Load module containing fastqc
+module load bio/FastQC/0.11.9-Java-11
+
+# Check fastqc version
+fastqc --v
+
+# Perform quality control using fastqc module.
+for i in $SCRATCH/LowC_smNPC_THpos_neur/fastq/*.gz
+do
+	fastqc -o $SCRATCH/LowC_smNPC_THpos_neur/FASTQC_res/ $i
+done
+```
+Since I have to use the same genome version as the one used for the ATACseq data and as it contains a lot of contigs that are irrelevant for downstream Hi-C analysis, limit the analysis to the canonical chromosomes and use the `fanc fragments` command first to generate a "map" of canonical chromosomes that will be passed to `fanc auto` using the `-g` parameter.
+
+``` bash
+sbatch $SCRATCH/LowC_smNPC_THpos_neur/scripts/FANC_in_silico_digestion.sh   # Takes 5 minutes booking a full node on iris
+```
+Display the script
+
+``` bash
+cat ~/Desktop/Manuscript_1/FIGURE1/scripts/FANC_in_silico_digestion.sh
+```
+
+```
+#!/bin/bash -l
+#SBATCH -J N1_smNPC_mDAN_in_silico_digestion
+#SBATCH --mail-type=begin,end,fail
+#SBATCH --mail-user=deborah.gerard@uni.lu
+#SBATCH -N 1
+#SBATCH --exclusive
+#SBATCH -p batch
+#SBATCH --qos=normal
+#SBATCH --time=06:00:00
+
+# This script is for performing in silico digestion of the genome using the restriction enzyme MboI (the same enzyme that been used for the wetlab experiment) #
+# Load modlue containing python3
+module load lang/Python/3.8.6-GCCcore-10.2.0
+
+# Activate the python environment for FAN-C
+source ~/Environment/FANC/bin/activate
+
+# Check FAN-C version
+fanc --version
+
+# Run in-silico genome digestion
+fanc fragments -c 'chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY' \
+$SCRATCH/bwa_index/GRCh38.genome.fa.gz \
+'MboI' \
+$SCRATCH/FANC_hg38.p1.cano.chr.bed
+
+deactivate
 ```
 
 
