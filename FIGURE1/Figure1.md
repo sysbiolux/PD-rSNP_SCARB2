@@ -151,7 +151,8 @@ plotGG(plot = fig1B, x = 3.25, y = 0.5, width = 4.5, height = 4.5, just = c("lef
 
 Low-C technique have been applied to 110K TH REP1 mCHERRY smNPC (3 biological replicates), 110K TH REP1 mCHERRY mDANs differentiated for 30 days (1 biological replicate) using [Reinhardt differentiation protocol](https://doi.org/10.1371/journal.pone.0059252).
 
-A Python environment has been set up to run the [FAN-C software](https://github.com/vaquerizaslab/fanc) FAN-C requires the installation of HDF5
+A Python environment has been set up to run the [FAN-C software](https://github.com/vaquerizaslab/fanc).  
+FAN-C requires the installation of HDF5
 
 
 ``` bash
