@@ -1,7 +1,7 @@
 ---
 title: "FIGURE 1"
 author: Deborah Gérard^[University of Luxembourg - FSTM - DLSM - Systems Biology group - Epigenetics team]
-date: "30 January, 2025"
+date: "31 January, 2025"
 output: 
   html_document:
     keep_md: true
@@ -17,6 +17,7 @@ editor_options:
 
 Start R
 
+
 ``` bash
 # Start R
 singularity exec Manuscript_1_singularity.sif R
@@ -24,6 +25,7 @@ singularity exec Manuscript_1_singularity.sif R
 # Check R version
 R.Version()
 ```
+
 **Note**: R version is 4.2.3 (2023-03-15)
 
 Load libraries and check their versions
@@ -91,6 +93,7 @@ font_import()
 
 ### FIGURE 1
 
+
 ``` r
 ########## FIGURE 1 ########## Save as TIFF, 300 ppi
 tiff("/home/vagrant/Manuscript_1/FIGURE1/FIGURE1.tiff", width = 8.27, height = 9.5,
@@ -144,7 +147,82 @@ fig1B = ggplot(RNAseq_odd, aes(x = odd_R, y = VARIABLE)) + geom_point(shape = 16
 # Place the plot
 plotGG(plot = fig1B, x = 3.25, y = 0.5, width = 4.5, height = 4.5, just = c("left",
     "top"), default.units = "inches")
+```
 
+Low-C technique have been applied to 110K TH REP1 mCHERRY smNPC (3 biological replicates), 110K TH REP1 mCHERRY mDANs differentiated for 30 days (1 biological replicate) using [Reinhardt differentiation protocol](https://doi.org/10.1371/journal.pone.0059252).
+
+A Python environment has been set up to run the [FAN-C software](https://github.com/vaquerizaslab/fanc) FAN-C requires the installation of HDF5
+
+
+``` bash
+# In a specific directory
+cd $HOME/Tools
+mkdir hdf5-build
+cd hdf5-build
+
+# Download version 1.10.5
+wget https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.10.5.tar.gz
+
+# Unpack
+tar xzf hdf5-1.10.5.tar.gz
+rm hdf5-1.10.5.tar.gz
+cd hdf5-1.10.5
+
+# Install 
+./configure --prefix=$HOME
+make
+make install
+```
+
+Create the virtual Python environment
+
+
+``` bash
+# Load modules to use Python3
+module load lang/Python/3.8.6-GCCcore-10.2.0
+
+# Create the environment in my home directory with ther other environments
+python3 -m venv ~/Environment/FANC
+
+# Activate the newly created environment
+source ~/Environment/FANC/bin/activate
+
+# And install FAN-C
+pip3 install fanc
+
+# Check that FAN-C version
+fanc --version
+```
+
+There is an error "ImportError: cannot import name 'GC' from 'Bio.SeqUtils'. The version of biopython is 1.83 and the GC function is still present in the 1.75 version but I cannot find it in the 1.83 version. Remove the 1.83 version and install the 1.75.
+
+
+``` bash
+# Uninstall the 1.83 version
+pip uninstall biopython
+
+# And install the 1.75
+pip install biopython==1.75
+```
+
+Check FAN-C now
+
+
+``` bash
+fanc --version
+```
+
+**Conclusion** : FAN-C version 0.9.27 has been successfully installed!
+
+\#### *3. Run fastqc on the samples to check their quality* Run the script for the 1st biological replicate (smNPC (N1 + N2) and mDAN D30 (N1))
+
+
+``` bash
+sbatch $SCRATCH/LowC_smNPC_THpos_neur/scripts/fastqc.sh
+```
+
+
+``` r
 #################################### Figure 1C LowC - Chr4 ######### text C
 plotText(label = "C", fontsize = 12, fontfamily = "Helvetica", x = 0.25, y = 5.25,
     just = "left", default.units = "inches", fontface = "bold")
