@@ -1,0 +1,9 @@
+Bootstrap: docker
+From: rocker/tidyverse:4.2.0
+
+%environment
+
+%files
+
+%post
+   R --slave -e 'install.packages("BiocManager")'
