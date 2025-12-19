@@ -570,7 +570,7 @@ plotGG(
 )
 
 #### PANEL E - ##################################################
-# text C
+
 plotText(
   label = "E",
   fontsize = 12,
@@ -649,61 +649,76 @@ plotText(
   fontface = "bold"
 )
 
-# GTEX_SNPs_interest <- read_csv2(
-#   "/home/vagrant/epifunc/eQTpLot/20230117_GTEX_data.csv"
-# )
-#
-# # Take the SNPs of interest
-# GTEX_SNPs_SCARB2_brain = GTEX_SNPs_interest %>%
-#   mutate(GTEX_sig = if_else(P.Value < 0.05, "*", "")) %>%
-#   dplyr::filter(str_detect(Tissue, "Brain"), Gene.Symbol == "SCARB2") %>%
-#   mutate(
-#     SNP.Id = factor(
-#       SNP.Id,
-#       levels = c(
-#         "rs6825004",
-#         "rs7697073",
-#         "rs11547135",
-#         "rs6812193",
-#         "rs1465922"
-#       )
-#     )
-#   )
-#
-# # Plot
-# GTEX_eqtl = ggplot(
-#   data = GTEX_SNPs_SCARB2_brain,
-#   mapping = aes(x = SNP.Id, y = Tissue, fill = NES)
-# ) +
-#   geom_tile() +
-#   theme_classic() +
-#   theme(
-#     axis.text.x = element_text(angle = 60, hjust = 1, face = "bold", size = 10),
-#     axis.title.x = element_blank(),
-#     axis.text.y = element_text(face = "bold", size = 10),
-#     axis.title.y = element_blank(),
-#     legend.text = element_text(face = "bold", size = 10),
-#     legend.title = element_text(face = "bold", size = 10)
-#   ) +
-#   scale_fill_gradient2(
-#     low = muted("blue"),
-#     mid = "white",
-#     high = muted("red"),
-#     midpoint = 0,
-#     name = "eQTL \neffect size"
-#   ) +
-#   geom_text(aes(label = GTEX_sig))
-#
-# # Palce the plot
-# plotGG(
-#   plot = GTEX_eqtl,
-#   x = 0.5,
-#   y = 5.25,
-#   width = 7,
-#   height = 6,
-#   just = c("left", "top"),
-#   default.units = "inches"
-# )
+GTEX_SNPs_interest <- read_csv(
+  "20251219_GTEX_data.csv",
+  show_col_types = FALSE
+) |>
+  mutate(
+    GTEX_sig = if_else(
+      P.Value < 0.05,
+      "*",
+      ""
+    ),
+    Tissue = str_remove(Tissue, "Brain_") |>
+      str_replace_all('_', ' ') |>
+      str_wrap(20)
+  )
 
-#pageGuideHide()
+
+GTEX_eqtl <- ggplot(
+  data = GTEX_SNPs_interest,
+  mapping = aes(
+    x = factor(
+      SNP.Id,
+      levels = c(
+        "rs6825004",
+        "rs7697073",
+        "rs11547135",
+        "rs6812193",
+        "rs1465922"
+      )
+    ),
+    y = Tissue,
+    fill = NES
+  )
+) +
+  geom_tile() +
+  theme_classic() +
+  theme(
+    axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1, size = 7),
+    axis.title.x = element_blank(),
+    axis.text.y = element_text(size = 7),
+    axis.title.y = element_blank(),
+    legend.text = element_text(size = 7),
+    legend.title = element_text(size = 8)
+  ) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  scale_fill_gradient2(
+    low = "blue",
+    mid = "white",
+    high = "red",
+    midpoint = 0,
+    name = "eQTL \neffect size"
+  ) +
+  geom_text(aes(label = GTEX_sig), size = 6) +
+  guides(
+    fill = guide_colourbar(
+      title.hjust = .5,
+      barwidth = unit(.7, "lines"),
+      barheight = unit(12, "lines")
+    )
+  )
+
+
+plotGG(
+  plot = GTEX_eqtl,
+  x = 5.3,
+  y = 7.6,
+  width = 3,
+  height = 4,
+  just = c("left", "top"),
+  default.units = "inches"
+)
+
 dev.off()
