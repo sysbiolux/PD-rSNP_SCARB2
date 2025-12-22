@@ -260,7 +260,24 @@ rsync -avzP --no-p --no-g --chmod=ug=rwX $SCRATCH/LowC_mDAN.D30_03/aligned $SCRA
 
 #### *3. Merge 3 biological replicates of smNPC into a mega map. Do the same for the mDAN D30*
 
-``` bash
+Create a juicer apptainer image following https://github.com/aidenlab/juicer/tree/main/Docker:
 
+don't mount home but bind the current project folder in the container
+
+``` bash
+module load tools/Apptainer
+singularity pull juicer.sif docker://aidenlab/juicer:v2.0.1
+cd /mnt/aiongpfs/projects/lowc_mdan
+apptainer exec --no-home juicer.sif ls -l
 ```
 
+All those steps are in the `launcher_merge_mDAN.sh` (copy over for `smNPC`) that call for the container `run_merge_juicer.sh`
+
+Output files were renamed before sending to Dennis as they have identical names in the their sub-folders:
+
+``` bash
+4bc93055d922c0591740db908d6127c5  mega_mDAN.D30_inter_q1.hic (4.2GB)
+cd2f7547ec62ad6f66445135363e8802  mega_mDAN.D30_inter_q30.hic (3.2GB)
+4c2c5d4eddf31c9fd89ac2bf6cc1e5e2  mega_smNPC_inter_q1.hic (7.8GB)
+5908d20f63151318cd52ef01292a830f  mega_smNPC_inter_q30.hic (7.2GB)
+```
