@@ -41,3 +41,49 @@ done
 ```
 
 Send over the `.h5` files to Jafar Sharif for downstream analysis.
+
+
+### RNA-seq signal 
+
+500kb bins needed for correlation with Hi-C data
+
+- Convert to `saf` format
+
+``` bash
+module load bio/R-bundle-Bioconductor/3.20-foss-2024a-R-4.4.2
+awk 'BEGIN{OFS="\t"}{print $1"_"$2"_"$3, $1, $2, $3, "."}' 500kb_bins.bed > 500kb_bins.saf
+```
+
+Count reads in each bin with `Rsubread`
+
+``` bash
+library(Rsubread)
+
+bam <- c("20190712_RNA_seq_Samples_NESC_D15_D30_D50_ASTRO/STAR/q30/smNPC_20190312_reads.Aligned.sortedByCoord.out.q30.bam",
+         "20190712_RNA_seq_Samples_NESC_D15_D30_D50_ASTRO/STAR/q30/D30_possort_20190228_reads.Aligned.sortedByCoord.out.q30.bam",
+         "20190712_RNA_seq_Samples_NESC_D15_D30_D50_ASTRO/STAR/q30/smNPC_20190319_reads.Aligned.sortedByCoord.out.q30.bam",
+         "20190712_RNA_seq_Samples_NESC_D15_D30_D50_ASTRO/STAR/q30/D30_possort_20190328_reads.Aligned.sortedByCoord.out.q30.bam",
+         "20190712_RNA_seq_Samples_NESC_D15_D30_D50_ASTRO/STAR/q30/smNPC_20190322_reads.Aligned.sortedByCoord.out.q30.bam",
+         "20190712_RNA_seq_Samples_NESC_D15_D30_D50_ASTRO/STAR/q30/D30_possort_20190321_reads.Aligned.sortedByCoord.out.q30.bam")
+
+
+message("BAMS: ", head(bam), length(bam))
+
+ref <- "500kb_bins.saf"
+
+fc <- featureCounts(
+  as.character(bam), isPairedEnd = FALSE,
+  annot.ext = ref,
+  isGTFAnnotationFile = FALSE,
+  minMQS = 15,
+  strandSpecific = 2,
+  nthreads = 8,
+  useMetaFeatures = FALSE, allowMultiOverlap = FALSE)
+
+colnames(fc$counts) <- sub("_reads.Aligned.sortedByCoord.out.q30.bam", "",  colnames(fc$counts))
+
+head(fc$stat)
+
+saveRDS(fc, "rna_seq_500k_bins_fc.rds")
+
+```
