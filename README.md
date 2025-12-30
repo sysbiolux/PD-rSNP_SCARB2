@@ -21,8 +21,10 @@ Sequencing of epigenetics data can be found at [EGA-archive](https://ega-archive
 
 ## Acknowledgements
 
+- The sequencing was performed at the Genomics Platform of Luxembourg Centre for System Biomedicine.
+- The computational analysis presented in this paper were carried out using the HPC facilities of the University of Luxembourg https://hpc.uni.lu. 
 - Figures created with the [plotgardener R package](https://phanstiellab.github.io/plotgardener/index.html). 
-- Figure 1A was created with [BioRender](https://www.biorender.com/).
+- Figure 1A was created with [BioRender](https://www.biorender.com/)  using license Catillon, M. (2025) https://BioRender.com/5kzs36o.
 
 ## References
 
