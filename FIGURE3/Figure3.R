@@ -442,7 +442,7 @@ pl.KD_SCARB2_NR2C2 <- KD.SCARB2.NR2C2.3days |>
     fill = c("Gene"),
     width = 0.4,
     palette = c("#440154FF", "#287C8EFF"),
-    add = c("mean_se", "jitter"),
+    add = c("mean_sd", "jitter"),
     xlab = "",
     ylab = "Relative expression to shSCRAMBLE",
     title = "shNR2C2 - 3 days"
@@ -531,7 +531,7 @@ pl.KD_SCARB2_NR2C2_6days <- KD.SCARB2.NR2C2.6days |>
     fill = c("Gene"),
     width = 0.4,
     palette = c("#440154FF", "#287C8EFF"),
-    add = c("mean_se", "jitter"),
+    add = c("mean_sd", "jitter"),
     xlab = "",
     ylab = "Relative expression to shSCRAMBLE",
     title = "shNR2C2 - 6 days"
@@ -594,7 +594,7 @@ scarb2_degrouped |>
     aes(color = nucl, shape = "replicates")
   ) +
   stat_summary(
-    fun.data = "mean_se",
+    fun.data = "mean_sd",
     aes(color = nucl, shape = "mean + std error"),
     alpha = 0.6,
     position = position_dodge(width = 0.45)
@@ -699,7 +699,7 @@ GTEX_eqtl <- ggplot(
     mid = "white",
     high = "red",
     midpoint = 0,
-    name = "eQTL \neffect size"
+    name = "eQTL\neffect size"
   ) +
   geom_text(aes(label = GTEX_sig), size = 6) +
   guides(

@@ -374,7 +374,6 @@ plotText(
 
 #### PANEL G ###################################################################
 
-# text G
 plotText(
   label = "G",
   fontsize = 12,
@@ -386,6 +385,52 @@ plotText(
   fontface = "bold"
 )
 
+#### PANEL H ###################################################################
+
+plotText(
+  label = "H",
+  fontsize = 12,
+  fontfamily = "Helvetica",
+  x = 2,
+  y = 7.75,
+  just = "left",
+  default.units = "inches",
+  fontface = "bold"
+)
+PDrSNPs_54_het.ASE.chisq <- read_tsv(
+  "PDrSNPs_54_het.ASE.chisq.tsv",
+  show_col_types = FALSE
+)
+
+PDrSNPs_54_het.ASE.chisq |>
+  pivot_longer(cols = -Sample, names_to = "snp", values_to = "p.value") |>
+  slice_min(n = 1, order_by = p.value, by = snp) |>
+  arrange(p.value) |>
+  mutate(cum_dist = cume_dist(p.value), p.value = p.adjust(p.value)) |>
+  ggplot(aes(x = p.value, y = cum_dist, colour = p.value < 0.05)) +
+  scale_color_manual(values = c("black", "red")) +
+  geom_point() +
+  annotate(geom = "text", label = "74%", x = 0.03, y = 0.95, colour = "red") +
+  geom_vline(xintercept = 0.05, linetype = "dashed", colour = "red") +
+  guides(colour = guide_legend(position = "inside")) +
+  theme_classic(7) +
+  theme(legend.position.inside = c(0.5, 0.4)) +
+  labs(
+    x = "Chi-square adjusted p-values",
+    y = "Cumulative distribution",
+    colour = "padj < 0.05",
+    title = "Allelic imbalance\nof the 54 PD-SNPs"
+  ) -> snp_imbalance
+
+plotGG(
+  plot = snp_imbalance,
+  x = 1.95,
+  y = 8,
+  width = 2.3,
+  height = 2.4,
+  just = c("left", "top"),
+  default.units = "inches"
+)
 
 #### PANEL I ###################################################################
 
@@ -393,7 +438,7 @@ plotText(
   label = "I",
   fontsize = 12,
   fontfamily = "Helvetica",
-  x = 4,
+  x = 4.2,
   y = 7.75,
   just = "left",
   default.units = "inches",

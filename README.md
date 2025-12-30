@@ -19,7 +19,19 @@ Once in the container, for Figure3 for example: `cd /mnt/FIGURE3 ;  Rscript --va
 
 Sequencing of epigenetics data can be found at [EGA-archive](https://ega-archive.org/datasets/EGAD00001009288) under controlled access.
 
-## Acjnowledgements
+## Acknowledgements
 
 - Figures created with the [plotgardener R package](https://phanstiellab.github.io/plotgardener/index.html). 
-- Figure 1A and Figure 2E were created with [BioRender](https://www.biorender.com/).
+- Figure 1A was created with [BioRender](https://www.biorender.com/).
+
+## References
+
+
+- R Core Team (2025). _R: A Language and Environment for Statistical Computing_. R Foundation for Statistical Computing,
+  Vienna, Austria. https://www.R-project.org.
+- Wickham H, Averick M, Bryan J, Chang W, McGowan LD, François R, Grolemund G, Hayes A, Henry L, Hester J, Kuhn M, Pedersen
+  TL, Miller E, Bache SM, Müller K, Ooms J, Robinson D, Seidel DP, Spinu V, Takahashi K, Vaughan D, Wilke C, Woo K, Yutani H
+  (2019). "Welcome to the tidyverse." _Journal of Open Source Software_, *4*(43), 1686. doi:10.21105/joss.01686 https://doi.org/10.21105/joss.01686.
+- Nicole E Kramer, Eric S Davis, Craig D Wenger, Erika M Deoudes, Sarah M Parker, Michael I Love, Douglas H Phanstiel, Plotgardener: cultivating precise multi-panel figures in R, _Bioinformatics_, 2022.
+- Jesper R Gådin, Ferdinand van't Hooft, Per Eriksson and Lasse Folkersen (2015): AllelicImbalance: an R/bioconductor package
+  for detecting, managing, and visualizing allele expression imbalance data from RNA sequencing. BMC _Bioinformatics_.
