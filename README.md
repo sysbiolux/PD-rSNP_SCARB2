@@ -35,3 +35,5 @@ Sequencing of epigenetics data can be found at [EGA-archive](https://ega-archive
 - Nicole E Kramer, Eric S Davis, Craig D Wenger, Erika M Deoudes, Sarah M Parker, Michael I Love, Douglas H Phanstiel, Plotgardener: cultivating precise multi-panel figures in R, _Bioinformatics_, 2022.
 - Jesper R Gådin, Ferdinand van't Hooft, Per Eriksson and Lasse Folkersen (2015): AllelicImbalance: an R/bioconductor package
   for detecting, managing, and visualizing allele expression imbalance data from RNA sequencing. BMC _Bioinformatics_.
+- Kassambara A (2025). _ggpubr: 'ggplot2' Based Publication Ready Plots_. R package version 0.6.2,
+  https://rpkgs.datanovia.com/ggpubr.
