@@ -166,6 +166,7 @@ $ python src/plot_pentad.py corrected_merged_500kb_distance.json --title correct
 RStudio, R version 4.2.1
 
 ``` r
+PC1_group_dotplot <- read_csv("PC1_group_dotplot.csv")
 sp <- ggplot(PC1_group_dotplot, aes(x = PC1_NPC, y = PC1_DAN, color = group)) +
   geom_point(aes(color = Group), alpha = 0.6) +
   scale_color_manual(values = c('Blue', 'gray', 'Red')) +
@@ -188,6 +189,8 @@ RStudio, R version 4.2.1
 
 ``` r
 library(gplots)
+intra_comp_matrix <- read_csv("R_heatmap_DAN_01_intra_A.csv")
+
 data_matrix <- data.matrix(intra_comp_matrix, rownames.force = NA)
 heatmap.2(
   data_matrix,
