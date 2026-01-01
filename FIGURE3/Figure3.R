@@ -259,12 +259,12 @@ plotGG(
 
 
 #### PANEL B ###################################################################
-# text B
+
 plotText(
   label = "B",
   fontsize = 12,
   fontfamily = "Helvetica",
-  x = 4.75,
+  x = 4.65,
   y = 0.5,
   just = "left",
   default.units = "inches",
@@ -273,22 +273,41 @@ plotText(
 
 dat.RPKM.filt <- read_rds("mat_RPKM.rds")
 
-SCARB2.NR2C2.exp <- ggboxplot(
-  dat.RPKM.filt |>
-    dplyr::filter(gene_name %in% c("SCARB2", "NR2C2", "FAM47E")) |>
-    mutate(
-      gene_name = factor(gene_name, levels = c("SCARB2", "NR2C2", "FAM47E"))
-    ),
-  x = "Cond",
-  y = "RPKM",
-  add = "jitter",
-  fill = "Cond",
-  palette = c("#A9A9A9", "#B22222", "#DC143C", "#E9967A"),
-  facet.by = "gene_name",
-  xlab = "",
-  ylab = "Reads Per Kilobase Million (RPKM)"
-) +
-  scale_x_discrete(labels = c("smNPC", "mDAN D15", "mDAN D30", "mDAN D50")) +
+SCARB2.NR2C2.exp <- dat.RPKM.filt |>
+  dplyr::filter(gene_name %in% c("SCARB2", "NR2C2", "FAM47E")) |>
+  mutate(
+    gene_name = factor(gene_name, levels = c("SCARB2", "NR2C2", "FAM47E")),
+    Cond = forcats::fct_recode(
+      Cond,
+      "smNPC" = "smNPCs",
+      "mDAN D15" = "Positively sorted neurons D15",
+      "mDAN D30" = "Positively sorted neurons D30",
+      "mDAN D50" = "Positively sorted neurons D50"
+    )
+  ) |>
+  ggboxplot(
+    x = "Cond",
+    y = "RPKM",
+    add = "jitter",
+    fill = "Cond",
+    palette = c("#A9A9A9", "#B22222", "#DC143C", "#E9967A"),
+    facet.by = "gene_name",
+    xlab = "",
+    ylab = "Reads Per Kilobase Million (RPKM)"
+  ) +
+  # add stat with correction for multiple testing
+  geom_pwc(
+    aes(group = Cond),
+    tip.length = 0.01,
+    label.size = 2.8,
+    ref.group = "smNPC",
+    hide.ns = FALSE,
+    method = "t_test",
+    label = "p.adj.format",
+    p.adjust.method = "BH",
+    bracket.nudge.y = -0.08
+  ) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
   theme(
     legend.position = "none",
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
@@ -298,9 +317,9 @@ SCARB2.NR2C2.exp <- ggboxplot(
 # Place the plot
 plotGG(
   plot = SCARB2.NR2C2.exp,
-  x = 5.0,
+  x = 4.8,
   y = 0.5,
-  width = 3,
+  width = 3.4,
   height = 3.5,
   just = c("left", "top"),
   default.units = "inches"

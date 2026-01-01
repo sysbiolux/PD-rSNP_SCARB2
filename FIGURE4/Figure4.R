@@ -255,7 +255,7 @@ plotText(
   label = "B",
   fontsize = 12,
   fontfamily = "Helvetica",
-  x = 4.75,
+  x = 4.65,
   y = 0.5,
   just = "left",
   default.units = "inches",
@@ -265,26 +265,41 @@ plotText(
 dat.RPKM.filt <- read_rds("../FIGURE3/mat_RPKM.rds")
 
 # Expression for BAG3 and LHX1
-BAG3.LHX1.exp <- ggboxplot(
-  dat.RPKM.filt |>
-    dplyr::filter(gene_name %in% c("BAG3", "LHX1")),
-  x = "Cond",
-  y = "RPKM",
-  add = "jitter",
-  fill = "Cond",
-  palette = c("#A9A9A9", "#B22222", "#DC143C", "#E9967A"),
-  facet.by = "gene_name",
-  xlab = "",
-  ylab = "Reads Per Kilobase Million (RPKM)"
-) +
-  scale_x_discrete(
-    labels = c(
-      "smNPC",
-      expression("mDAN D15"),
-      expression("mDAN D30"),
-      expression("mDAN D50")
+
+BAG3.LHX1.exp <- dat.RPKM.filt |>
+  dplyr::filter(gene_name %in% c("BAG3", "LHX1")) |>
+  mutate(
+    Cond = forcats::fct_recode(
+      Cond,
+      "smNPC" = "smNPCs",
+      "mDAN D15" = "Positively sorted neurons D15",
+      "mDAN D30" = "Positively sorted neurons D30",
+      "mDAN D50" = "Positively sorted neurons D50"
     )
+  ) |>
+  ggboxplot(
+    x = "Cond",
+    y = "RPKM",
+    add = "jitter",
+    fill = "Cond",
+    palette = c("#A9A9A9", "#B22222", "#DC143C", "#E9967A"),
+    facet.by = "gene_name",
+    xlab = "",
+    ylab = "Reads Per Kilobase Million (RPKM)"
   ) +
+  # add stat with correction for multiple testing
+  geom_pwc(
+    aes(group = Cond),
+    tip.length = 0.01,
+    label.size = 2.8,
+    ref.group = "smNPC",
+    hide.ns = FALSE,
+    method = "t_test",
+    label = "p.adj.format",
+    p.adjust.method = "BH",
+    bracket.nudge.y = 0.1
+  ) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
   theme(
     legend.position = "none",
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
@@ -294,10 +309,10 @@ BAG3.LHX1.exp <- ggboxplot(
 # Place the plot
 plotGG(
   plot = BAG3.LHX1.exp,
-  x = 5.0,
+  x = 4.8,
   y = 0.5,
-  width = 3,
-  height = 3.5,
+  width = 3.2,
+  height = 3.6,
   just = c("left", "top"),
   default.units = "inches"
 )
