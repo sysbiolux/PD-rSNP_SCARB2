@@ -266,7 +266,7 @@ dat.RPKM.filt <- read_rds("../FIGURE3/mat_RPKM.rds")
 
 # Expression for BAG3 and LHX1
 
-BAG3.LHX1.exp <- dat.RPKM.filt |>
+RPKM <- dat.RPKM.filt |>
   dplyr::filter(gene_name %in% c("BAG3", "LHX1")) |>
   mutate(
     Cond = forcats::fct_recode(
@@ -276,28 +276,44 @@ BAG3.LHX1.exp <- dat.RPKM.filt |>
       "mDAN D30" = "Positively sorted neurons D30",
       "mDAN D50" = "Positively sorted neurons D50"
     )
+  )
+# perform pairwise t test with FDR correction for each gene
+RPKM_stats <- RPKM |>
+  select(gene_name, RPKM, Cond) |>
+  nest(.by = c(gene_name)) |>
+  mutate(
+    .y. = "RPKM",
+    t_test = purrr::map(data, \(x) {
+      pairwise.t.test(
+        x$RPKM,
+        x$Cond,
+        p.adjust.method = "BH"
+      ) |>
+        broom::tidy()
+    })
   ) |>
-  ggboxplot(
-    x = "Cond",
-    y = "RPKM",
-    add = "jitter",
-    fill = "Cond",
-    palette = c("#A9A9A9", "#B22222", "#DC143C", "#E9967A"),
-    facet.by = "gene_name",
-    xlab = "",
-    ylab = "Reads Per Kilobase Million (RPKM)"
-  ) +
+  select(-data) |>
+  unnest(t_test) |>
+  filter(group2 == "smNPC") |>
+  mutate(y.position = rep(c(13, 15, 17), 2), p.value = round(p.value, 4))
+BAG3.LHX1.exp <- ggboxplot(
+  RPKM,
+  x = "Cond",
+  y = "RPKM",
+  add = "jitter",
+  fill = "Cond",
+  palette = c("#A9A9A9", "#B22222", "#DC143C", "#E9967A"),
+  facet.by = "gene_name",
+  xlab = "",
+  ylab = "Reads Per Kilobase Million (RPKM)"
+) +
   # add stat with correction for multiple testing
-  geom_pwc(
-    aes(group = Cond),
+  stat_pvalue_manual(
+    RPKM_stats,
     tip.length = 0.01,
     label.size = 2.8,
-    ref.group = "smNPC",
-    hide.ns = FALSE,
-    method = "t_test",
-    label = "p.adj.format",
-    p.adjust.method = "BH",
-    bracket.nudge.y = 0.1
+    bracket.nudge.y = 0.1,
+    label = "p.value"
   ) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
   theme(

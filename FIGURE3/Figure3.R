@@ -273,7 +273,7 @@ plotText(
 
 dat.RPKM.filt <- read_rds("mat_RPKM.rds")
 
-SCARB2.NR2C2.exp <- dat.RPKM.filt |>
+RPKM <- dat.RPKM.filt |>
   dplyr::filter(gene_name %in% c("SCARB2", "NR2C2", "FAM47E")) |>
   mutate(
     gene_name = factor(gene_name, levels = c("SCARB2", "NR2C2", "FAM47E")),
@@ -284,30 +284,41 @@ SCARB2.NR2C2.exp <- dat.RPKM.filt |>
       "mDAN D30" = "Positively sorted neurons D30",
       "mDAN D50" = "Positively sorted neurons D50"
     )
+  )
+# perform pairwise t test with FDR correction for each gene
+RPKM_stats <- RPKM |>
+  select(gene_name, RPKM, Cond) |>
+  nest(.by = c(gene_name)) |>
+  mutate(
+    .y. = "RPKM",
+    t_test = purrr::map(data, \(x) {
+      pairwise.t.test(x$RPKM, x$Cond, p.adjust.method = "BH") |> broom::tidy()
+    })
   ) |>
-  ggboxplot(
-    x = "Cond",
-    y = "RPKM",
-    add = "jitter",
-    fill = "Cond",
-    palette = c("#A9A9A9", "#B22222", "#DC143C", "#E9967A"),
-    facet.by = "gene_name",
-    xlab = "",
-    ylab = "Reads Per Kilobase Million (RPKM)"
-  ) +
+  select(-data) |>
+  unnest(t_test) |>
+  filter(group2 == "smNPC") |>
+  mutate(y.position = rep(c(21, 24, 27), 3), p.value = round(p.value, 4))
+SCARB2.NR2C2.exp <- ggboxplot(
+  RPKM,
+  x = "Cond",
+  y = "RPKM",
+  add = "jitter",
+  fill = "Cond",
+  palette = c("#A9A9A9", "#B22222", "#DC143C", "#E9967A"),
+  facet.by = "gene_name",
+  xlab = "",
+  ylab = "Reads Per Kilobase Million (RPKM)"
+) +
   # add stat with correction for multiple testing
-  geom_pwc(
-    aes(group = Cond),
+  stat_pvalue_manual(
+    RPKM_stats,
     tip.length = 0.01,
     label.size = 2.8,
-    ref.group = "smNPC",
-    hide.ns = FALSE,
-    method = "t_test",
-    label = "p.adj.format",
-    p.adjust.method = "BH",
-    bracket.nudge.y = -0.08
+    bracket.nudge.y = 0.1,
+    label = "p.value"
   ) +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.08))) +
   theme(
     legend.position = "none",
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
