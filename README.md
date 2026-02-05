@@ -17,7 +17,14 @@ Once in the container, for Figure3 for example: `cd /mnt/FIGURE3 ;  Rscript --va
 
 ## Data availability
 
-Sequencing of epigenetics data can be found at [EGA-archive](https://ega-archive.org/datasets/EGAD00001009288) under controlled access.
+Sequencing of epigenetics data can be found at [EGA-archive](https://ega-archive.org) under controlled access.
+
+- [EGAD00001009288](https://ega-archive.org/datasets/EGAD00001009288), associated [publication](https://europepmc.org/abstract/MED/38177910).
+    + ATAC/ChIP
+    + RNA-seq
+- [EGAD50000002258](https://ega-archive.org/datasets/EGAD50000002258) which contains new sequencing data:
+    + 3D chromatin contact using LowC, 6 samples. 3 replicates for each condition: smNPC (controls) cells and differentiated neurons after 30 days. Resulting paired-end are provided as BAM files.
+    + In order to confirm the predicted impact of the PD-associated allele of rs144814361 on BAG3 promoter, we proceeded with genome editing of the TH-REP1 cell line by using prime editing to insert the “T” allele at the position chr10:119651405 in the BAG3 promoter. Chromatin accessibility using ATAC-seq, 9 samples of derived cell line TH-REP1. 3 replicates for each condition: 1) iPSC Wild Type 2) SNP-BAG3 variant in iPSC 3) SNP-BAG3 variant in smNPC. BAG3 variant: heterozygous for the SNP variant: rs144814361 (chr10 119651405). Resulting sequencing are provided as paired-end FASTQ files.
 
 ## Acknowledgements
 
